@@ -29,7 +29,7 @@ void	Particle::SetGraphic( const char* szSpriteTextureName, float fGridScale, BO
 	mnParticleGraphicsNum = ParticleGraphicsCreate( szSpriteTextureName, fGridScale, bUseRotation, renderFlags );
 }
 	
-void	Particle::Init( int typeID, const VECT* pxPos, const VECT* pxVel, uint32 ulCol, float fLongevity, int nInitParam, uint32 ulInitParamChannel )
+void	Particle::Init( int typeID, const VECT* pxPos, const VECT* pxVel, uint32 ulCol, float fLongevity, int nInitParam, uint32 ulInitParamChannel, void* pUserObject )
 {
 	mType = typeID;
 	if ( pxPos )
@@ -43,7 +43,7 @@ void	Particle::Init( int typeID, const VECT* pxPos, const VECT* pxVel, uint32 ul
 	mulCol = ulCol;
 	mulParamChannel = ulInitParamChannel;
 	mfLongevity = fLongevity;
-	OnInit(nInitParam);
+	OnInit(nInitParam, pUserObject);
 }
 
 

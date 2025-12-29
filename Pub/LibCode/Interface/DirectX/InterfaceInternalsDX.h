@@ -70,7 +70,11 @@ public:
 	LPGRAPHICSTEXTURE	LoadTextureDX( const char* szFilename, int boReduceFilter, int boMipFilter, BOOL bReadable );
 	LPGRAPHICSTEXTURE	LoadTextureFromArchive( const char* szFilename, int boReduceFilter, int boMipFilter, int nArchiveHandle );
 
-	BOOL				GetDXDeviceCreateParams( HWND hWindow, BOOL boMinPageSize,  D3DPRESENT_PARAMETERS* pD3Dpp );
+	BOOL				GetDXDeviceCreateParams( HWND hWindow, BOOL boMinPageSize, D3DPRESENT_PARAMETERS* pD3Dpp, int nBackBufferMinW = 0, int nBackBufferMinH = 0 );
+
+	void		SetViewport( int X, int Y, int W, int H );
+	void		SetRenderCanvas();
+	void		CopyRenderCanvasToBackBuffer( int X, int Y, int W, int H );
 
 };
 

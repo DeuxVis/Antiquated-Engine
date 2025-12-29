@@ -5,28 +5,37 @@
 #include "UIXCollapsableSection.h"
 
 
-void	UIXCollapsableSection::Initialise( int mode, const char* szTitle, BOOL bStartCollapsed )
+void	UIXCollapsableSection::Initialise( int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType )
 {
 	mTitle = szTitle;	
 	mbIsCollapsed = bStartCollapsed;
 	mMode = mode;
+	mDragItemType = draggableType;
 }
+
 
 void	UIXCollapsableSection::ToggleCollapsed()
 {
 	mbIsCollapsed = !mbIsCollapsed;
 }
+	
+void	UIXCollapsableSection::UpdateUIStateData( UIStateData* pData )
+{
+	pData->mbTabOpened = !mbIsCollapsed;
+}
 
 
 UIXRECT		UIXCollapsableSection::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
-int	X = displayRect.x + GetDisplayRect().x;
-int	Y = displayRect.y + GetDisplayRect().y;
-int	W = displayRect.w;
-int	H = displayRect.h;
+UIXRECT		renderRect = GetActualRenderRect( displayRect );
+int	X = renderRect.x;
+int	Y = renderRect.y;
+int	W = renderRect.w;
+int	H = renderRect.h;
 uint32		ulCol = 0x90303030;
 int		headerH = 20;
 int		nHeaderOffsetX = 0;
+BOOL	bMouseIsOverSectionHeader = FALSE;
 
 	switch( mMode )
 	{
@@ -38,9 +47,22 @@ int		nHeaderOffsetX = 0;
 		break;
 	}
 
+	mLastRender = UIXRECT( X,Y,W, headerH );
 	pInterface->Rect( 0, X, Y, W, headerH, ulCol );
-				
-	UIButtonRegion( UIX_COLLAPSABLE_SECTION_HEADER, X, Y, W, H, GetID() );
+		
+	if ( UIHoverItem( X, Y, W, headerH ) == TRUE )
+	{
+		UIHoverIDSet( UIX_COLLAPSABLE_SECTION_HEADER, GetID(), 0 );
+		bMouseIsOverSectionHeader = TRUE;
+	}
+
+//	UIButtonRegion( UIX_COLLAPSABLE_SECTION_HEADER, X, Y, W, headerH, GetID() );
+
+	if ( CheckDragHoverRegion( UIXRECT( X, Y, W, headerH ) ) )
+	{
+		pInterface->Rect( 0, X, Y + headerH, W, 2, 0xd08080c0 );	
+		UIX::HoverAcceptDragItem( this );
+	}
 
 	pInterface->Text( 1, X + 20 + nHeaderOffsetX, Y + 4, 0xd0d0d0d0, 3, mTitle.c_str() );
 
@@ -56,5 +78,73 @@ int		nHeaderOffsetX = 0;
 	displayRect.h = headerH + 1;
 	displayRect.y = headerH + 1;		// displayRect.y returns the lowest point we drew to
 
+	if ( ( UIX::GetDragItemType() != 0 ) &&
+		 ( UIX::GetDragItemType() == mDragItemType ) &&
+		 ( UIX::GetDragItemSourceParam() == GetID() ) )
+	{
+	UIXRECT		xCurrMouse;
+
+		UIGetCurrentCursorPosition( &xCurrMouse.x, &xCurrMouse.y );
+		UIXRECT	xGrabOffset( xCurrMouse.x - mDragRectMouseOriginal.x, xCurrMouse.y - mDragRectMouseOriginal.y, 0, 0 );
+
+		// Don't show the drag image if we're still hovering over the original section header
+		if ( bMouseIsOverSectionHeader == FALSE )
+		{
+		UIXRECT xNewRect = mDragRectOriginal;
+
+			xNewRect.x += xGrabOffset.x;
+			xNewRect.y += xGrabOffset.y;
+
+			pInterface->Rect( 1, xNewRect.x, xNewRect.y, xNewRect.w, xNewRect.h, 0x40303030 );
+			pInterface->Text( 2, xNewRect.x + 5, xNewRect.y + 2, 0x80a0a0a0, 0, mTitle.c_str() );
+		}
+	
+	}
 	return displayRect;
+}
+
+void	UIXCollapsableSection::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress )
+{
+	if ( bFirstPress )
+	{
+		mDragRectOriginal = GetLastRenderRect();
+		UIX::SetDragItemType( mDragItemType, this, GetID() );
+		UIGetCurrentCursorPosition( &mDragRectMouseOriginal.x, &mDragRectMouseOriginal.y );
+	}
+	else if ( bIsHeld ) 
+	{
+		
+	}
+	else  // Just released
+	{
+	int		mouseX, mouseY;
+
+		UIX::EndDragItemType( mDragItemType );
+
+		// If cursor has remained within the original section rect, treat it as a press (collapse the tab)
+		UIGetCurrentCursorPosition( &mouseX, &mouseY );
+		if ( UIHoverItem( mLastRender.x, mLastRender.y, mLastRender.w, mLastRender.h ) == TRUE )
+		{
+			UIPressIDSet( UIX_COLLAPSABLE_SECTION_HEADER, GetID(), 0 );
+		}
+	}
+
+}
+
+
+void	UIXCollapsableSection::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress )
+{
+UIXCollapsableSection*		pSection = (UIXCollapsableSection*)UIX::GetUIXObjectByID( ulParam );
+
+	if ( pSection )
+	{
+		pSection->HoldHandler( ulIndex, bIsHeld, bFirstPress );
+	}
+}
+
+
+void		UIXCollapsableSection::RegisterControlHandlers()
+{
+	UIRegisterHoldHandler( UIX_COLLAPSABLE_SECTION_HEADER, HoldHandlerStatic );
+
 }

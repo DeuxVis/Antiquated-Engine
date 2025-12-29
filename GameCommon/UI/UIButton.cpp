@@ -182,7 +182,7 @@ void		UIButtonsShutdown( void )
 	msButtonStyle.Free();
 }
 
-void		UIButtonDrawBasic( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, float fAlpha )
+void		UIButtonDrawBasic( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, uint32 ulIDParam, float fAlpha )
 {
 InterfaceInstance* pInterface = UIInterfaceInstance();
 uint32	ulButtonMainCol = 0xB0707070;
@@ -213,7 +213,7 @@ int		nTextOffsetY = 2;
 }
 
 
-void		UIButtonDrawAlpha( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, float fAlpha )
+void		UIButtonDrawAlpha( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, uint32 ulIDParam, float fAlpha )
 {
 InterfaceInstance*		pInterfaceInstance = UIInterfaceInstance();
 BOOL	bEnabled = TRUE;
@@ -228,7 +228,7 @@ BOOL	bEnabled = TRUE;
 
 	if ( nMode > 2 )
 	{
-		UIButtonDrawBasic( nButtonID, nX, nY, nWidth, nHeight, szText, nMode, ulParam, fAlpha );	
+		UIButtonDrawBasic( nButtonID, nX, nY, nWidth, nHeight, szText, nMode, ulParam, ulIDParam, fAlpha );	
 	}
 	else
 	{
@@ -239,26 +239,26 @@ BOOL	bEnabled = TRUE;
 	{
 		if ( UIIsPressed( nX, nY, nWidth, nHeight ) == TRUE )
 		{
-			UIPressIDSet( nButtonID, ulParam );
+			UIPressIDSet( nButtonID, ulParam, ulIDParam );
 		}
 	}
 
 }
 
 
-void		UIButtonDraw( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam )
+void		UIButtonDraw( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, uint32 ulIDParam  )
 {
-	UIButtonDrawAlpha( nButtonID, nX, nY, nWidth, nHeight, szText, nMode, ulParam, 1.0f );
+	UIButtonDrawAlpha( nButtonID, nX, nY, nWidth, nHeight, szText, nMode, ulParam, ulIDParam, 1.0f );
 }
 
 
-BOOL		UIButtonRegion( int nButtonID, int nX, int nY, int nWidth, int nHeight, uint32 ulParam )
+BOOL		UIButtonRegion( int nButtonID, int nX, int nY, int nWidth, int nHeight, uint32 ulParam, uint32 ulIDParam )
 {
 BOOL	bIsHovered = UIHoverItem( nX, nY, nWidth, nHeight );
 
 	if ( UIIsPressed( nX, nY, nWidth, nHeight ) == TRUE )
 	{
-		UIPressIDSet( nButtonID, ulParam );
+		UIPressIDSet( nButtonID, ulParam, ulIDParam );
 	}
 	return( bIsHovered );
 }

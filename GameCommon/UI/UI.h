@@ -10,8 +10,8 @@ enum
 	UIRESERVEDBUTTONID_STANDARDLOGININTERFACE = -3,
 };
 
-typedef	void(*UIButtonHandler)( int nButtonID, uint32 ulParam );
-typedef	void(*UIHoldHandler)( int nButtonID, uint32 ulParam, BOOL bIsHeld, BOOL bFirstPress );
+typedef	void(*UIButtonHandler)( int nButtonID, uint32 ulParam, uint32 ulIDParam );
+typedef	void(*UIHoldHandler)( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
 
 typedef	void(*fnValueChangeCallback)( int hDropdownHandle, int nNewSelectedParam, void* pUserParam );
 
@@ -21,9 +21,9 @@ typedef	void(*fnValueChangeCallback)( int hDropdownHandle, int nNewSelectedParam
 extern void		UIRegisterButtonPressHandler( int nButtonID, UIButtonHandler fnButtonHandler );
 extern void		UIRegisterHoldHandler( int nButtonID, UIHoldHandler fnHoldHandler );
 
-extern void		UIButtonDraw( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam );
-extern BOOL		UIButtonRegion( int nButtonID, int nX, int nY, int nWidth, int nHeight, uint32 ulParam );
-extern void		UIButtonDrawAlpha( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, float fAlpha );
+extern void		UIButtonDraw( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, uint32 ulIDParam = 0 );
+extern BOOL		UIButtonRegion( int nButtonID, int nX, int nY, int nWidth, int nHeight, uint32 ulParam, uint32 ulIDParam = 0  );
+extern void		UIButtonDrawAlpha( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, uint32 ulIDParam = 0,  float fAlpha = 0.5f );
 
 
 //---------------------------------------- UISlider
@@ -87,8 +87,8 @@ extern void		UIOnInterfaceDraw( void );
 //-----------------------------------------------------------------
 // UI Internal
 
-extern void		UIHoverIDSet( int nButtonID, uint32 ulParam );
-extern void		UIPressIDSet( int nButtonID, uint32 ulParam );
+extern void		UIHoverIDSet( int nButtonID, uint32 ulParam, uint32 ulIndex = 0 );
+extern void		UIPressIDSet( int nButtonID, uint32 ulParam, uint32 ulIndex = 0 );
 extern BOOL		UIIsPressed( int X, int Y, int W, int H );
 extern BOOL		UIHoverItem( int X, int Y, int W, int H );
 

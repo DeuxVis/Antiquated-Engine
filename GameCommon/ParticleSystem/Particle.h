@@ -11,14 +11,14 @@ public:
 	Particle();
 	virtual ~Particle();
 
-	virtual void		OnInit( int nInitParam ) {}
+	virtual void		OnInit( int nInitParam, void* pUserObject ) {}
 	virtual void		OnUpdate( float delta ) {}
 	virtual void		OnRender( void ) {}
 
 	virtual BOOL		UseDefaultRender( void ) { return( TRUE ); }
 	virtual float		GetAlphaOverride( void ) { return -1.0f; }
 
-	void	Init( int typeID, const VECT* pxPos, const VECT* pxVel, uint32 ulCol, float fLongevity, int nInitParm = 0, uint32 ulInitParamChannel = 0 );
+	void	Init( int typeID, const VECT* pxPos, const VECT* pxVel, uint32 ulCol, float fLongevity, int nInitParm = 0, uint32 ulInitParamChannel = 0, void* pUserObject = NULL );
 	void	Update( float fDelta );
 	virtual void	Render( void );
 	

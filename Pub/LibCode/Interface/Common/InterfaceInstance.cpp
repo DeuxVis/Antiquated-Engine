@@ -106,6 +106,23 @@ uint32*		pArgs;
 	mpFontSystem->TextRight( nLayer, nX, nY, acString, ulCol, nFont );
 }
 
+
+void	InterfaceInstance::SetRenderCanvas()
+{
+	mpInterfaceInternals->SetRenderCanvas();
+}
+
+void	InterfaceInstance::CopyRenderCanvasToBackBuffer( int X, int Y, int W, int H )
+{
+	mpInterfaceInternals->CopyRenderCanvasToBackBuffer( X, Y, W, H );
+}
+
+void	InterfaceInstance::SetViewport( int X, int Y, int nWidth, int nHeight )
+{
+	mpInterfaceInternals->SetViewport( X, Y, nWidth, nHeight );
+
+}
+
 int		InterfaceInstance::GetStringWidth( const char* pcString, int nFont )
 {
 	return( mpFontSystem->GetStringWidth( pcString, nFont ) );
@@ -114,6 +131,11 @@ int		InterfaceInstance::GetStringWidth( const char* pcString, int nFont )
 int		InterfaceInstance::GetStringHeight( const char* pcString, int nFont )
 {
 	return( mpFontSystem->GetStringHeight( pcString, nFont ) );
+}
+
+void	InterfaceInstance::OutlineBox( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol)
+{
+	mpOverlays->OutlineBox( nLayer, nX, nY, nWidth, nHeight, ulCol );
 }
 
 void	InterfaceInstance::Rect( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol)

@@ -54,7 +54,7 @@ typedef unsigned int			uint;
 extern INTERFACE_API void	InterfaceInitWindow( const char* pcWindowTitle, void* pWinClass, BOOL bAllowResize  );
 
 // First initialisation call - intialises the display device (e.g. Direct3d)
-extern INTERFACE_API void	InterfaceInitDisplayDevice( BOOL boMinRenderPageSize );
+extern INTERFACE_API void	InterfaceInitDisplayDevice( BOOL boMinRenderPageSize, int nBackBufferMinW = 0, int nBackBufferMinH = 0 );
 
 
 extern INTERFACE_API void	InterfaceSetInitialSize( BOOL bFullscreen, int windowedWidth, int windowedHeight, BOOL bSmallFlag );

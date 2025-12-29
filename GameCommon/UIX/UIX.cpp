@@ -9,16 +9,23 @@
 #include "UIXListBox.h"
 #include "UIXPage.h"
 #include "UIXSlider.h"
+#include "UIXDropdown.h"
 #include "UIXShape.h"
 #include "UIXTextBox.h"
 #include "UIXText.h"
 #include "UIXCustomRender.h"
 #include "UIXCollapsableSection.h"
+#include "UIXScrollableSection.h"
 
 uint32						UIX::msulNextObjectID = 2001;
 std::vector<UIXObject*>		UIX::msPagesList;
 std::map<uint32, UIXObject*>	UIX::msComponentIDMap;
+int							UIX::msDragItemType = 0;
+UIXObject*					UIX::mspDragDestinationHover = NULL;
+UIXObject*					UIX::mspDragSource = NULL;
+UIXObject*					UIX::mspMousewheelHoverObject = NULL;
 
+uint32						UIX::msDragSourceParam = 0;
 //--------------------------------------------------------------------------------------
 UIXObject::UIXObject( uint32 uID, UIXRECT rect )
 {
@@ -31,12 +38,39 @@ UIXObject::UIXObject( uint32 uID, UIXRECT rect )
 
 void	UIXObject::Update( float delta )
 {
+
 	OnUpdate( delta );
 
 	for ( UIXObject* pContainedObject : mContainsList )
 	{
 		pContainedObject->Update( delta );
 	}
+}
+
+UIXRECT		UIXObject::GetActualRenderRect( UIXRECT parentRect )
+{
+UIXRECT		renderRect = GetDisplayRect();		// This is our local position, relative to 0,0 within whatever container we're in
+
+	if ( renderRect.x < 0 )
+	{
+		renderRect.x = parentRect.w + renderRect.x;	
+	}
+	else
+	{
+		renderRect.x += parentRect.x;
+	}
+	renderRect.y += parentRect.y;
+
+	if ( renderRect.w < 0 )
+	{
+		renderRect.w = (parentRect.w + renderRect.w) - renderRect.x;
+	}
+
+	if ( renderRect.x + renderRect.w > parentRect.x + parentRect.w )
+	{
+		renderRect.w = (parentRect.w - parentRect.x) - renderRect.x;
+	}
+	return renderRect;
 }
 
 UIXRECT	UIXObject::Render( InterfaceInstance* pInterface, UIXRECT displayRect )
@@ -49,6 +83,7 @@ UIXRECT		xMaxRect;
 	xUsedRect.h = 0;
 
 	xRect = OnRender( pInterface, displayRect );
+	xUsedRect.w = xRect.w;		// w is reduced by things like scrollbars occupying space within the page
 	xUsedRect.h = xRect.h;
 	xUsedRect.y = xRect.y;
 	
@@ -57,8 +92,10 @@ UIXRECT		xMaxRect;
 	UIXRECT		xChildDisplayRect = displayRect;
 	int			nCursRelY = 0;
 		
+		xChildDisplayRect.w = xUsedRect.w;
 		xChildDisplayRect.y += xUsedRect.h;
 		xChildDisplayRect.h -= xUsedRect.h;
+		xChildDisplayRect.y -= GetScrollPosition();
 
 		for ( UIXObject* pContainedObject : mContainsList )
 		{
@@ -73,6 +110,8 @@ UIXRECT		xMaxRect;
 			xChildDisplayRect.y += xRect.h;
 			xChildDisplayRect.h -= xRect.h;
 		}
+
+		OnPostChildrenRender( pInterface );
 
 		int presetChildBlockSize = GetDisplayRect().h;
 
@@ -95,8 +134,25 @@ UIXRECT		xMaxRect;
 		{
 //			xUsedRect.h = fPresetChildBlockSize;
 		}
+		mChildContentsHeight = xUsedRect.h;
 	}
 	return( xUsedRect );
+}
+
+BOOL	UIXObject::CheckDragHoverRegion( UIXRECT dragReceiveRegion )
+{
+int	type = UIX::GetDragItemType();
+
+	if ( ( type != 0 ) &&
+		 ( CanReceiveDragItem(type) ) )
+	{
+		if ( UIHoverItem( dragReceiveRegion.x, dragReceiveRegion.y, dragReceiveRegion.w, dragReceiveRegion.h) )
+		{
+			OnHoverDragItem(type);
+			return( TRUE );
+		}
+	}
+	return( FALSE );
 }
 
 void	UIXObject::Shutdown()
@@ -109,10 +165,25 @@ void	UIXObject::Shutdown()
 	}
 }
 
+void		UIXObject::OnReceiveDragItem( int dragType, UIXObject* pxSourceObject, uint32 ulDragParam )
+{
+	if ( mDragMap[dragType] )
+	{
+		mDragMap[dragType](pxSourceObject, ulDragParam, this, mDragMapParams[dragType] );
+	}
+}
+
+
+void		UIXObject::SetDragReceiveCallback( int dragType, fnDragReceiveCallback func, uint32 ulDragDestParam )
+{
+	mDragMap[dragType] = func;
+	mDragMapParams[dragType] = ulDragDestParam;
+}
+
 //--------------------------------------------------------------------------------------------------
 
 
-void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam )
+void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam )
 {
 	switch( nButtonID )
 	{
@@ -123,24 +194,63 @@ void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam )
 			{
 				pCollapsableSection->ToggleCollapsed();
 			}
-		}
-		
+		}	
 		break;
+	case UIX_DROPDOWN_ENTRY:
+		{
+		UIXDropdown*		pDropdown = (UIXDropdown*)msComponentIDMap[ulParam];
+			if ( pDropdown )
+			{
+				pDropdown->SetSelectedElementIndex( ulIDParam );
+				pDropdown->ToggleExpanded();
+			}
+		}	
+		break;
+	case UIX_DROPDOWN_HEADER:
+		{
+		UIXDropdown*		pDropdown = (UIXDropdown*)msComponentIDMap[ulParam];
+			if ( pDropdown )
+			{
+				pDropdown->ToggleExpanded();
+			}
+		}	
+		break;
+	}
+}
 	
+void		UIX::OnMouseWheel( float fOffset )
+{
+	if ( mspMousewheelHoverObject )
+	{
+		mspMousewheelHoverObject->OnMouseWheel( fOffset );
 	}
 }
 
-void		UIX::SliderHoldHandler( int nButtonID, uint32 ulParam, BOOL bIsHeld, BOOL bFirstPress  )
+void		UIX::SliderHoldHandler( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress  )
 {
+UIXSlider*		pSlider;
+
 	switch( nButtonID )
 	{
-	case UIX_SLIDER_BAR:
+	case UIX_SLIDER_BAR_MAXRANGE:
+		pSlider = (UIXSlider*)msComponentIDMap[ulParam];
+		if ( pSlider )
 		{
-			UIXSlider*		pSlider = (UIXSlider*)msComponentIDMap[ulParam];
-			if ( pSlider )
-			{
-				pSlider->OnHeldUpdate( bIsHeld, bFirstPress );
-			}
+			pSlider->OnMaxRangeHeldUpdate( bIsHeld, bFirstPress );
+		}
+		break;
+	case UIX_SLIDER_BAR_MINRANGE:
+		pSlider = (UIXSlider*)msComponentIDMap[ulParam];
+		if ( pSlider )
+		{
+			pSlider->OnMinRangeHeldUpdate( bIsHeld, bFirstPress );
+		}
+		break;
+	case UIX_SLIDER_BAR:
+		pSlider = (UIXSlider*)msComponentIDMap[ulParam];
+		if ( pSlider )
+		{
+			pSlider->OnHeldUpdate( bIsHeld, bFirstPress );
 		}
 		break;
 	default:
@@ -151,8 +261,15 @@ void		UIX::SliderHoldHandler( int nButtonID, uint32 ulParam, BOOL bIsHeld, BOOL 
 void		UIX::Initialise( int mode )
 {
 	UIRegisterButtonPressHandler( UIX_COLLAPSABLE_SECTION_HEADER, ButtonPressHandler );
+	UIRegisterButtonPressHandler( UIX_DROPDOWN_HEADER, ButtonPressHandler );
+	UIRegisterButtonPressHandler( UIX_DROPDOWN_ENTRY, ButtonPressHandler );
+		
 	UIRegisterHoldHandler( UIX_SLIDER_BAR, SliderHoldHandler );
-
+	UIRegisterHoldHandler( UIX_SLIDER_BAR_MINRANGE, SliderHoldHandler );
+	UIRegisterHoldHandler( UIX_SLIDER_BAR_MAXRANGE, SliderHoldHandler );
+	UIXListBox::RegisterControlHandlers();
+	UIXCollapsableSection::RegisterControlHandlers();
+	UIXScrollableSection::RegisterControlHandlers();
 }
 
 void		UIX::Update( float delta )
@@ -197,11 +314,11 @@ void		UIX::DeleteObject( UIXObject* pObject )
 	delete pObject;
 }
 
-UIXObject*		UIX::AddPage( UIXRECT rect, const char* szTitle  )
+UIXObject*		UIX::AddPage( UIXRECT rect, const char* szTitle, BOOL bUseClipping  )
 {
 UIXPage*		pNewPage = new UIXPage( msulNextObjectID++, rect );
 
-	pNewPage->Initialise( szTitle );
+	pNewPage->Initialise( szTitle, bUseClipping );
 	msPagesList.push_back( pNewPage );
 	return( pNewPage );
 }
@@ -224,20 +341,29 @@ uint32*		pArgs;
 	return( pNewText );
 }
 
-UIXCollapsableSection*		UIX::AddCollapsableSection( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szTitle, BOOL bStartCollapsed )
+UIXScrollableSection*		UIX::AddScrollableSection( UIXObject* pxContainer, UIXRECT rect )
+{
+UIXScrollableSection*		pNewScrollableSection = new UIXScrollableSection( msulNextObjectID++, rect );
+
+	pNewScrollableSection->Initialise();
+	pxContainer->mContainsList.push_back( pNewScrollableSection );
+	return( pNewScrollableSection );
+}
+
+UIXCollapsableSection*		UIX::AddCollapsableSection( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType )
 {
 UIXCollapsableSection*		pNewCollapsableSection = new UIXCollapsableSection( msulNextObjectID++, rect );
 
-	pNewCollapsableSection->Initialise( mode, szTitle, bStartCollapsed );
+	pNewCollapsableSection->Initialise( mode, szTitle, bStartCollapsed, draggableType );
 	pxContainer->mContainsList.push_back( pNewCollapsableSection );
 	return( pNewCollapsableSection );
 }
 
-UIXButton*			UIX::AddButton( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam  )
+UIXButton*			UIX::AddButton( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL bIsBlocking  )
 {
 UIXButton*		pNewButton = new UIXButton( msulNextObjectID++, rect );
 
-	pNewButton->Initialise( mode, szTitle, ulButtonID, ulButtonParam );
+	pNewButton->Initialise( mode, szTitle, ulButtonID, ulButtonParam, bIsBlocking );
 	pxContainer->mContainsList.push_back( pNewButton );
 	return( pNewButton );
 }
@@ -251,11 +377,11 @@ UIXCustomRender*		pNewCustomRender = new UIXCustomRender( msulNextObjectID++, re
 	return( pNewCustomRender );
 }
 
-UIXShape*			UIX::AddShape( UIXObject* pxContainer, UIXRECT rect, int mode, BOOL bBlocks, uint32 ulCol1, uint32 ulCol2 )
+UIXShape*			UIX::AddShape( UIXObject* pxContainer, UIXRECT rect, int mode, BOOL bBlocks, uint32 ulCol1, uint32 ulCol2, uint32 ulButtonID, uint32 ulButtonParam )
 {
 UIXShape*		pNewShape = new UIXShape( msulNextObjectID++, rect );
 
-	pNewShape->Initialise( mode, bBlocks, ulCol1, ulCol2 );
+	pNewShape->Initialise( mode, bBlocks, ulCol1, ulCol2, ulButtonID, ulButtonParam );
 	pxContainer->mContainsList.push_back( pNewShape );
 	return( pNewShape );
 }
@@ -267,10 +393,13 @@ UIXTextBox*			UIX::AddTextBox( UIXObject* pxContainer, UIXRECT rect )
 	return( NULL );
 }
 
-UIXListBox*			UIX::AddListBox( UIXObject* pxContainer, UIXRECT rect )
+UIXListBox*			UIX::AddListBox( UIXObject* pxContainer, UIXRECT rect, int mode, BOOL bContentsDraggable, int dragItemType )
 {
+UIXListBox*		pNewListbox = new UIXListBox( msulNextObjectID++, rect );
 
-	return( NULL );
+	pNewListbox->Initialise( mode, bContentsDraggable, dragItemType );
+	pxContainer->mContainsList.push_back( pNewListbox );
+	return( pNewListbox );
 }
 
 UIXSlider*			UIX::AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitial, float fMinStep )
@@ -284,8 +413,30 @@ UIXSlider*		pNewSlider = new UIXSlider( msulNextObjectID++, rect );
 
 UIXDropdown*		UIX::AddDropdown( UIXObject* pxContainer, UIXRECT rect )
 {
+UIXDropdown*		pNewDropdown = new UIXDropdown( msulNextObjectID++, rect );
 
-	return( NULL );
+	pNewDropdown->Initialise( 0 );
+	pxContainer->mContainsList.push_back( pNewDropdown );
+	return( pNewDropdown );
 }
 
+
+void	UIX::EndDragItemType( int type ) 
+{
+	if ( msDragItemType == type )
+	{
+		if ( mspDragDestinationHover != NULL )
+		{
+			mspDragDestinationHover->OnReceiveDragItem( type, mspDragSource, msDragSourceParam);
+			mspDragDestinationHover = NULL;
+		}
+		msDragItemType = 0; 
+	}
+
+}
+
+void	UIStateData::OnUpdate( float fDelta )
+{
+	if ( mpAssociatedUIXObj ) mpAssociatedUIXObj->UpdateUIStateData( this );
+}
 

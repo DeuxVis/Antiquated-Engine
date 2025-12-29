@@ -39,13 +39,14 @@ public:
 	void		TexturedRect( int nOverlayNum, int nX, int nY, int nWidth, int nHeight, uint32 ulCol, float fU, float fV, float fU2, float fV2 );
 
 	// Overlays
+	void	OutlineBox( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol);
 	void	Rect( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol);
 	void	ShadedRect( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol1, uint32 ulCol2,uint32 ulCol3, uint32 ulCol4 );
 	void	Triangle( int nLayer, int nX1, int nY1, int nX2, int nY2, int nX3, int nY3, uint32 ulCol1, uint32 ulCol2, uint32 ulCol3 );
 	void	Line( int nLayer, int nX, int nY, int x2, int y2, uint32 ulCol);
 
 	//------------------------------------------------------------------
-	void		InitD3D( HWND hWindow, BOOL bMinBackBufferSize );
+	void		InitD3D( HWND hWindow, BOOL bMinBackBufferSize, int nBackBufferMinW = 0, int nBackBufferMinH = 0 );
 
 	void		InitialiseInstance( BOOL bUseDefaultFonts );
 
@@ -72,6 +73,9 @@ public:
 	int			GetWindowHeight();
 	void		SetInitialWindowSize( int sizeX, int sizeY );
 	void		SetWindowSize( BOOL boFullScreen, int nWidth, int nHeight, BOOL boAdjust );
+	void		SetViewport( int X, int Y, int nWidth, int nHeight );
+	void		SetRenderCanvas();
+	void		CopyRenderCanvasToBackBuffer( int X, int Y, int W, int H );
 
 	const InterfaceRECT&		GetDrawDimensions() const { return( m_DrawRect );} 
 	void		SetDrawRegion( int nX, int nY, int nWidth, int nHeight );

@@ -15,22 +15,22 @@ void	UIXText::Initialise( const char* szTitle, uint32 ulCol, int font, UIX_TEXT_
 	
 UIXRECT		UIXText::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
-UIXRECT		localRect = GetDisplayRect();
+UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
 	switch( mFontFlags )
 	{
 	case ALIGN_RIGHT:
-		pInterface->TextRight( 1, displayRect.x + localRect.x + localRect.w, displayRect.y + localRect.y, mulCol, mFont, mText.c_str() );
+		pInterface->TextRight( 1, drawRect.x + drawRect.w, drawRect.y, mulCol, mFont, mText.c_str() );
 		break;
 	default:
-		pInterface->Text( 1, displayRect.x + localRect.x, displayRect.y + localRect.y, mulCol, mFont, mText.c_str() );
+		pInterface->Text( 1, drawRect.x, drawRect.y, mulCol, mFont, mText.c_str() );
 		break;
 	}
 	// TODO - Use mFontFlags if set
 	// TODO - Make this TextLimitWidth
 
 	displayRect.h = 0;//
-	displayRect.y = localRect.y + pInterface->GetStringHeight( mText.c_str(), mFont );		// displayRect.y returns the lowest point we drew to
+	displayRect.y = GetDisplayRect().y + pInterface->GetStringHeight( mText.c_str(), mFont );		// displayRect.y returns the lowest point we drew to
 	return displayRect;
 }
 

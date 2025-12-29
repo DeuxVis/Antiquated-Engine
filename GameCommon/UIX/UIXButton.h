@@ -10,7 +10,7 @@ friend class UIX;
 protected:
 	UIXButton( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
 
-	void	Initialise( int mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam );
+	void	Initialise( int mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL bIsBlocking = TRUE );
 	
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
 
@@ -19,7 +19,7 @@ private:
 	uint32				mulButtonID = 0;
 	uint32				mulButtonParam = 0;
 	int					mMode = 0;
-
+	BOOL				mbIsBlocking = TRUE;
 };
 
 

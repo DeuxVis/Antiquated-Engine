@@ -7,20 +7,35 @@
 class UIXCollapsableSection : public UIXObject
 {
 friend class UIX;
+public:
+	void	UpdateUIStateData( UIStateData* pData );
+
 protected:
 	UIXCollapsableSection( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
 
-	void	Initialise( int mode, const char* szTitle, BOOL bStartCollapsed );
+	void	Initialise( int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType = 0 );
 	void	ToggleCollapsed();
 
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
+
+	void			HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress );
+	static void		HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
+	static void		RegisterControlHandlers();
 	
+	UIXRECT					GetLastRenderRect() const { return( mLastRender ); }
+
 private:
 	virtual bool		ShouldDisplayChildren() { return !mbIsCollapsed; }
 
 	std::string			mTitle;
 	BOOL				mbIsCollapsed = FALSE;
 	int					mMode = 0;
+
+	UIXRECT				mLastRender;
+
+	int					mDragItemType = 0;
+	UIXRECT				mDragRectOriginal;
+	UIXRECT				mDragRectMouseOriginal;
 
 };
 

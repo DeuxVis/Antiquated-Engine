@@ -10,7 +10,7 @@ friend class UIX;
 protected:
 	UIXShape( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
 
-	void	Initialise( int mode, BOOL bBlocks,uint32 ulCol1, uint32 ulCol2 );
+	void	Initialise( int mode, BOOL bBlocks,uint32 ulCol1, uint32 ulCol2, uint32 ulButtonID, uint32 ulButtonParam);
 	
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
 
@@ -19,6 +19,8 @@ private:
 	uint32				mulCol2 = 0xC0C0C0C0;
 	int					mMode = 0;
 	BOOL				mBlocks = FALSE;
+	uint32				mulButtonID = 0;
+	uint32				mulButtonParam = 0;
 };
 
 

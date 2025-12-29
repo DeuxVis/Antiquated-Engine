@@ -364,7 +364,78 @@ void		InterfaceSetMaximumFrontBufferWidth( int nMaxWidth )
 	msnInterfaceMaxRenderPageWidth = nMaxWidth;
 }
 
-BOOL		InterfaceInternalsDX::GetDXDeviceCreateParams( HWND hWindow, BOOL boMinPageSize,  D3DPRESENT_PARAMETERS* pD3Dpp )
+void		InterfaceInternalsDX::SetViewport( int X, int Y, int W, int H )
+{
+HRESULT		hr;
+D3DVIEWPORT9	viewData = { (DWORD)X, (DWORD)Y, (DWORD)W, (DWORD)H, 0.0f, 1.0f };
+
+	hr = mpInterfaceD3DDevice->SetViewport( &viewData );
+}
+
+
+IDirect3DSurface9*		mspInterfaceRenderCanvas = NULL;
+IDirect3DSurface9*		mspInterfaceRenderCanvasSysMem = NULL;
+IDirect3DSurface9*		mspInterfaceNormalRenderTarget = NULL;
+
+void	InterfaceInternalsDX::SetRenderCanvas()
+{
+	if ( mspInterfaceRenderCanvas == NULL )
+	{
+	D3DDISPLAYMODE d3ddm;
+	int		surfaceW = mpInterfaceInstance->GetWidth();
+	int		surfaceH = mpInterfaceInstance->GetHeight();
+
+		mpD3D->GetAdapterDisplayMode( D3DADAPTER_DEFAULT, &d3ddm );
+
+		mpInterfaceD3DDevice->CreateRenderTarget( surfaceW, surfaceH, d3ddm.Format, D3DMULTISAMPLE_NONE, 0, FALSE, &mspInterfaceRenderCanvas, NULL );	
+		mpInterfaceD3DDevice->CreateOffscreenPlainSurface( surfaceW, surfaceH, d3ddm.Format, D3DPOOL_SYSTEMMEM, &mspInterfaceRenderCanvasSysMem, NULL );
+	}
+
+	if ( mspInterfaceRenderCanvas )
+	{
+	HRESULT		hr;
+		mpInterfaceD3DDevice->GetRenderTarget( 0, &mspInterfaceNormalRenderTarget );
+
+		hr = mpInterfaceD3DDevice->SetRenderTarget( 0, mspInterfaceRenderCanvas );
+		mpInterfaceD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, 0, 0.0f, 0 );
+		if ( FAILED( hr ))
+		{
+		int			error = 0;
+			error++;
+		}
+	}
+}
+
+void	InterfaceInternalsDX::CopyRenderCanvasToBackBuffer( int X, int Y, int W, int H )
+{
+IDirect3DSurface9*		pBackBuffer;
+RECT		sourceRect = { X, Y, X + W, Y + H };
+POINT		destPoint = { X, Y };
+HRESULT		hr;
+
+	mpInterfaceD3DDevice->SetRenderTarget( 0, mspInterfaceNormalRenderTarget );
+	mspInterfaceNormalRenderTarget->Release();
+
+	hr = mpInterfaceD3DDevice->GetRenderTargetData( mspInterfaceRenderCanvas, mspInterfaceRenderCanvasSysMem );
+	if ( FAILED( hr ))
+	{
+	int			error = 0;
+		error++;
+	}
+	mpInterfaceD3DDevice->GetBackBuffer( 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
+
+	hr = mpInterfaceD3DDevice->UpdateSurface( mspInterfaceRenderCanvasSysMem, &sourceRect, pBackBuffer, &destPoint );
+
+	pBackBuffer->Release();
+
+	if ( FAILED( hr ))
+	{
+	int			error = 0;
+		error++;
+	}
+}
+
+BOOL		InterfaceInternalsDX::GetDXDeviceCreateParams( HWND hWindow, BOOL boMinPageSize,  D3DPRESENT_PARAMETERS* pD3Dpp, int nBackBufferMinW, int nBackBufferMinH )
 {
 D3DDISPLAYMODE d3ddm;
 
@@ -389,12 +460,21 @@ D3DDISPLAYMODE d3ddm;
 		InterfaceSetWindowStyle( hWindow, false );
 		pD3Dpp->Windowed = TRUE;
 		
+		if ( nBackBufferMinW != 0 )
+		{
+			pD3Dpp->BackBufferWidth  = nBackBufferMinW;
+			pD3Dpp->BackBufferHeight = nBackBufferMinH;	
+	
+		}
+		else
+		{
 		RECT	xRect;
-		GetClientRect( hWindow, &xRect );
-		int nWindowWidth = xRect.right - xRect.left;
-		int nWindowHeight = xRect.bottom - xRect.top;
-		pD3Dpp->BackBufferWidth  = nWindowWidth;
-		pD3Dpp->BackBufferHeight = nWindowHeight;
+			GetClientRect( hWindow, &xRect );
+			int nWindowWidth = xRect.right - xRect.left;
+			int nWindowHeight = xRect.bottom - xRect.top;
+			pD3Dpp->BackBufferWidth  = nWindowWidth;
+			pD3Dpp->BackBufferHeight = nWindowHeight;	
+		}
 	}
 
 	if ( msnInterfaceMaxRenderPageWidth != 0 )
@@ -519,7 +599,7 @@ D3DDISPLAYMODE d3ddm;
 /***************************************************************************
  * Function    : InterfaceInstance::InitD3D
  ***************************************************************************/
-void	 InterfaceInstance::InitD3D( HWND hWindow, BOOL boMinPageSize )
+void	 InterfaceInstance::InitD3D( HWND hWindow, BOOL boMinPageSize, int nBackBufferMinW, int nBackBufferMinH )
 {
 LPGRAPHICSDEVICE	pNewGraphicsDevice;
 
@@ -600,7 +680,7 @@ LPGRAPHICSDEVICE	pNewGraphicsDevice;
 		D3DPRESENT_PARAMETERS d3dpp;
 		ZeroMemory( &d3dpp, sizeof(d3dpp) );
 
-		mpInterfaceInternals->GetDXDeviceCreateParams( hWindow, boMinPageSize, &d3dpp );
+		mpInterfaceInternals->GetDXDeviceCreateParams( hWindow, boMinPageSize, &d3dpp, nBackBufferMinW, nBackBufferMinH );
 
 		pNewGraphicsDevice = mpInterfaceInternals->mpInterfaceD3DDevice;
 		if ( pNewGraphicsDevice == NULL )
@@ -784,9 +864,9 @@ LPGRAPHICSDEVICE	pNewGraphicsDevice;
 }
 
 
-INTERFACE_API void				InterfaceInitDisplayDevice( BOOL boMinRenderPageSize )
+INTERFACE_API void				InterfaceInitDisplayDevice( BOOL boMinRenderPageSize, int nBackBufferMinW, int nBackBufferMinH )
 {
-	InterfaceInstanceMain()->InitD3D( mhwndInterfaceMain, boMinRenderPageSize );
+	InterfaceInstanceMain()->InitD3D( mhwndInterfaceMain, boMinRenderPageSize, nBackBufferMinW, nBackBufferMinH );
 	mpLegacyInterfaceD3DDeviceSingleton = InterfaceInstanceMain()->mpInterfaceInternals->mpInterfaceD3DDevice;
 }
 

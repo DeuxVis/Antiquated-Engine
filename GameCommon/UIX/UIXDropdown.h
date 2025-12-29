@@ -1,0 +1,66 @@
+#ifndef UIX_DROPDOWN_H
+#define UIX_DROPDOWN_H
+
+#include <string>
+#include <vector>
+#include "UIX.h"
+
+class UIXDropdown;
+
+typedef	void(*fnDropdownSelectionChangedCallback)( UIXObject* pxSourceObject, uint32 ulElementParam );
+
+class UIXDropdownEntry
+{
+friend class UIXDropdown;
+public:
+
+	const std::string&		GetText() const { return mTitle; }
+
+protected:
+	UIXDropdownEntry( UIXDropdown* pParent, const char* szTitle, uint32 ulUserParam );
+
+private:
+	std::string						mTitle;
+	uint32							mulUserParam;
+	UIXDropdown*					mpDropdown;
+};
+
+
+class UIXDropdown : public UIXObject
+{
+friend class UIX;
+friend class UIXDropdownEntry;
+public:
+	UIXDropdownEntry*		AddElement(	const char* szElementName, uint32 ulElementParam );
+
+	const UIXDropdownEntry*		GetElementByListIndex( int index ) const;
+
+	void		SetSelectedElementIndex( int index );
+
+	void		SetSelectionChangedCallback( fnDropdownSelectionChangedCallback func ) { mSelectionChangedCallback = func; }
+protected:
+	UIXDropdown( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+
+	void	Initialise( int mode );
+
+	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT rect );
+
+	void			ToggleExpanded() { mbIsExpanded = !mbIsExpanded; }
+	uint32			GetNextIndex( UIXDropdownEntry* pDropdownEntry ) { mDropdownEntries.push_back( pDropdownEntry ); return( mulNextElementIndex++ ); }
+private:
+
+	int					mMode = 0;
+	uint32				mulNextElementIndex = 0;
+	std::vector<UIXDropdownEntry*>	mDropdownEntries;
+	fnDropdownSelectionChangedCallback		mSelectionChangedCallback = NULL;
+	UIXDropdownEntry*		mpSelectedEntry = NULL;
+	BOOL				mbIsExpanded = FALSE;
+	
+};
+
+
+
+
+
+
+#endif
