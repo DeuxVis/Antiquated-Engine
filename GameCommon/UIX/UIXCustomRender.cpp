@@ -15,17 +15,13 @@ void	UIXCustomRender::Initialise( fnCustomRenderCallback renderFunc, uint32 ulUs
 	
 UIXRECT		UIXCustomRender::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
-UIXRECT		localRect = GetDisplayRect();
-UIXRECT		renderRect = localRect;
+UIXRECT		renderRect = GetActualRenderRect( displayRect );
 UIXRECT		occupyRect;
-
-	renderRect.x += displayRect.x;
-	renderRect.y += displayRect.y;
 
 	occupyRect = mfnRenderCallback( pInterface, renderRect, mulUserParam1, mulUserParam2 );
 
 	displayRect.h = 0;//
-	displayRect.y = localRect.y + occupyRect.h;	
+	displayRect.y = GetDisplayRect().y + occupyRect.h;	
 	return displayRect;
 }
 

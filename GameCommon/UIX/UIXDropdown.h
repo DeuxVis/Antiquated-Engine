@@ -8,6 +8,7 @@
 class UIXDropdown;
 
 typedef	void(*fnDropdownSelectionChangedCallback)( UIXObject* pxSourceObject, uint32 ulElementParam );
+typedef	int(*fnDropdownUpdateHandler)( UIXObject* pxSourceObject, uint32 ulSelectedElementIndex );
 
 class UIXDropdownEntry
 {
@@ -36,16 +37,20 @@ public:
 	const UIXDropdownEntry*		GetElementByListIndex( int index ) const;
 
 	void		SetSelectedElementIndex( int index );
+	void		SetSelectedElementName( const char* szName );
 
 	void		SetSelectionChangedCallback( fnDropdownSelectionChangedCallback func ) { mSelectionChangedCallback = func; }
+	void		RegisterValueUpdateHandler( fnDropdownUpdateHandler func ) { mValueUpdateFunc = func; }
+
 protected:
 	UIXDropdown( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
 
 	void	Initialise( int mode );
 
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT rect );
+	virtual void		OnUpdate( float fDelta );
 
-	void			ToggleExpanded() { mbIsExpanded = !mbIsExpanded; }
+	void			ToggleExpanded(); 
 	uint32			GetNextIndex( UIXDropdownEntry* pDropdownEntry ) { mDropdownEntries.push_back( pDropdownEntry ); return( mulNextElementIndex++ ); }
 private:
 
@@ -55,7 +60,9 @@ private:
 	fnDropdownSelectionChangedCallback		mSelectionChangedCallback = NULL;
 	UIXDropdownEntry*		mpSelectedEntry = NULL;
 	BOOL				mbIsExpanded = FALSE;
-	
+	fnDropdownUpdateHandler	mValueUpdateFunc = NULL;
+	int		mnSelectedIndex = NOTFOUND;
+
 };
 
 

@@ -21,6 +21,22 @@ void	UIXDropdown::Initialise( int mode )
 {
 }
 
+void	UIXDropdown::ToggleExpanded()
+{ 
+	mbIsExpanded = !mbIsExpanded;
+	if ( mbIsExpanded )
+	{
+		UIX::SetModalObject( this );
+	}	
+	else
+	{
+		if ( UIX::GetModalObject() == this )
+		{
+			UIX::SetModalObject( NULL );
+		}
+	}
+}
+
 
 UIXRECT		UIXDropdown::OnRender( InterfaceInstance* pInterface, UIXRECT rect )
 {
@@ -37,9 +53,13 @@ int			entryIndex = 0;
 		pInterface->Text( 1, renderRect.x + 3, renderRect.y + 3, 0xD0D0D0D0, 3, mpSelectedEntry->GetText().c_str() );
 	}
 		
-	if ( UIIsPressed( renderRect.x, renderRect.y, renderRect.w, renderRect.h ) == TRUE )
+	if ( ( UIX::GetModalObject() == NULL ) ||
+		 ( UIX::GetModalObject() == this ) ) 
 	{
-		UIPressIDSet( UIX_DROPDOWN_HEADER, GetID() );
+		if ( UIIsPressed( renderRect.x, renderRect.y, renderRect.w, renderRect.h ) == TRUE )
+		{
+			UIPressIDSet( UIX_DROPDOWN_HEADER, GetID() );
+		}
 	}
 	
 	if ( mbIsExpanded )
@@ -75,11 +95,50 @@ int			entryIndex = 0;
 	return occupyRect;
 }
 
+void	UIXDropdown::SetSelectedElementName( const char* szName )
+{
+int		index = 0;
+	for ( auto listEntry : mDropdownEntries )
+	{
+		if ( stricmp( szName, listEntry->GetText().c_str() ) == 0 )
+		{
+			mpSelectedEntry = listEntry;
+			mnSelectedIndex = index;
+			if ( mSelectionChangedCallback )
+			{
+				mSelectionChangedCallback( this, mpSelectedEntry->mulUserParam );
+			}
+			return;
+		}
+		index++;
+	}
+
+}
+void		UIXDropdown::OnUpdate( float fDelta )
+{
+	if ( mValueUpdateFunc )
+	{
+	int nNewVal = (int)mValueUpdateFunc( this, mnSelectedIndex );
+
+		if ( mnSelectedIndex != nNewVal )
+		{
+			if ( ( nNewVal >= 0 ) &&
+				 ( nNewVal < (int)mDropdownEntries.size() ) )
+			{
+				mnSelectedIndex = nNewVal;
+				mpSelectedEntry = mDropdownEntries[nNewVal];
+			}
+		}
+	}
+}
+
+
 void		UIXDropdown::SetSelectedElementIndex( int index )
 {
 	if ( index < (int)mDropdownEntries.size() )
 	{
 		mpSelectedEntry = mDropdownEntries[index];
+		mnSelectedIndex = index;
 
 		if ( mSelectionChangedCallback )
 		{
@@ -89,6 +148,7 @@ void		UIXDropdown::SetSelectedElementIndex( int index )
 	else
 	{
 		mpSelectedEntry = NULL;
+		mnSelectedIndex = NOTFOUND;
 	}
 }
 

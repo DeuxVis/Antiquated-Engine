@@ -24,6 +24,7 @@ int							UIX::msDragItemType = 0;
 UIXObject*					UIX::mspDragDestinationHover = NULL;
 UIXObject*					UIX::mspDragSource = NULL;
 UIXObject*					UIX::mspMousewheelHoverObject = NULL;
+UIXObject*					UIX::mspModalObject = NULL;
 
 uint32						UIX::msDragSourceParam = 0;
 //--------------------------------------------------------------------------------------
@@ -387,10 +388,13 @@ UIXShape*		pNewShape = new UIXShape( msulNextObjectID++, rect );
 }
 
 
-UIXTextBox*			UIX::AddTextBox( UIXObject* pxContainer, UIXRECT rect )
+UIXTextBox*			UIX::AddTextBox( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szDefaultText )
 {
+UIXTextBox*		pNewTextBox = new UIXTextBox( msulNextObjectID++, rect );
 
-	return( NULL );
+	pNewTextBox->Initialise( mode, szDefaultText );
+	pxContainer->mContainsList.push_back( pNewTextBox );
+	return( pNewTextBox );
 }
 
 UIXListBox*			UIX::AddListBox( UIXObject* pxContainer, UIXRECT rect, int mode, BOOL bContentsDraggable, int dragItemType )

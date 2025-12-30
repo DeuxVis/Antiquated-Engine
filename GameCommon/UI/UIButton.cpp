@@ -113,6 +113,7 @@ int		nButtonImageW = 8;
 int		nButtonImageH = 8;
 uint32	ulBackgroundCol;
 float	fAlphaVal = m_fGlobalAlpha * fAlpha;
+int		nFont = 1;
 
 	if ( mahUIButtonOverlays[0] == NOTFOUND )
 	{ 
@@ -146,8 +147,13 @@ float	fAlphaVal = m_fGlobalAlpha * fAlpha;
 	pInterface->TexturedRect( mahUIButtonOverlays[7], X+nButtonImageW, Y+H-nButtonImageH, W-(nButtonImageW*2), nButtonImageH, ulBackgroundCol, 0.0f, 0.0f, 1.0f, 1.0f );
 	pInterface->TexturedRect( mahUIButtonOverlays[8], X+W-nButtonImageW, Y+H-nButtonImageH, nButtonImageW, nButtonImageH, ulBackgroundCol, 0.0f, 0.0f, 1.0f, 1.0f );
 
+
+	if ( pInterface->GetStringWidth( szText, nFont ) > W )
+	{
+		nFont = 3;
+	}
 	uint32	ulTextCol = GetColWithModifiedAlpha( 0xD0F0E0C0, fAlphaVal );
-	int		nTextH = pInterface->GetStringHeight( szText, 1 );
+	int		nTextH = pInterface->GetStringHeight( szText, nFont );
 	int		nTextY;
 
 	if ( mode != 0 )
@@ -157,7 +163,7 @@ float	fAlphaVal = m_fGlobalAlpha * fAlpha;
 
 	nTextY = Y + ( ( H - (nTextH-1) ) / 2 );
 	InterfaceSetFontFlags( FONT_FLAG_DROP_SHADOW );
-	pInterface->TextCentre( 1, X + (W/2) + 1, nTextY, ulTextCol, 1, szText );
+	pInterface->TextCentre( 1, X + (W/2) + 1, nTextY, ulTextCol, nFont, szText );
 	InterfaceSetFontFlags( 0 );
 
 }

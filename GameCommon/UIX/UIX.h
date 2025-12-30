@@ -3,6 +3,7 @@
 
 #include "StandardDef.h"
 #include <vector>
+#include <string>
 #include <map>
 
 class InterfaceInstance;
@@ -93,6 +94,9 @@ public:
 	void*				GetUserObject() { return mpUserObject; }
 	void				SetUserObject( void* pObject ) { mpUserObject = pObject; }
 
+	int					GetUserParamEx( const char* szKey ) { return( mUserParamExList[szKey] ); }
+	void				SetUserParamEx( const char* szKey, int nValue ) { mUserParamExList[szKey] = nValue; }
+
 	virtual void		UpdateUIStateData( UIStateData* pData ) {}
 protected:
 	UIXObject( uint32 uID, UIXRECT rect );
@@ -121,6 +125,7 @@ private:
 	virtual bool		ShouldDisplayChildren() { return true; }
 
 	std::vector<UIXObject*>			mContainsList;
+	std::map<std::string, int>		mUserParamExList;
 	std::map<int, fnDragReceiveCallback>		mDragMap;
 	std::map<int, uint32>						mDragMapParams;
 	
@@ -146,11 +151,14 @@ public:
 	static void		SliderHoldHandler( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
 	static void		OnMouseWheel( float fOffset );
 
+	static void			SetModalObject( UIXObject* pObject ) { mspModalObject = pObject; }
+	static UIXObject*	GetModalObject() { return( mspModalObject ); }
+
 	static UIXObject*					AddPage( UIXRECT xRect, const char* szTitle, BOOL bUseClipping = FALSE );
 	static UIXCollapsableSection*		AddCollapsableSection( UIXObject* pxContainer, UIXRECT xRect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType = 0 );
 	static UIXScrollableSection*		AddScrollableSection( UIXObject* pxContainer, UIXRECT xRect );
 	static UIXButton*					AddButton( UIXObject* pxContainer, UIXRECT xRect, int mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL IsBlocking = TRUE );
-	static UIXTextBox*					AddTextBox( UIXObject* pxContainer, UIXRECT xRect );
+	static UIXTextBox*					AddTextBox( UIXObject* pxContainer, UIXRECT xRect, int mode, const char* szDefaultText );
 	static UIXListBox*					AddListBox( UIXObject* pxContainer, UIXRECT xRect, int mode = 0, BOOL bContentsDraggable = FALSE, int dragItemType = 0 );
 	static UIXSlider*					AddSlider( UIXObject* pxContainer, UIXRECT xRect, UIX_SLIDER_MODE mode = VALUE, uint32 ulUserParam = 0, float fMin = 0.0f, float fMax = 1.0f, float fInitial = 0.0f, float fMinStep = 0.1f  );
 	static UIXDropdown*					AddDropdown( UIXObject* pxContainer, UIXRECT xRect );
@@ -178,6 +186,7 @@ private:
 	static UIXObject*					mspDragSource;
 	static UIXObject*					mspMousewheelHoverObject;
 	static uint32						msDragSourceParam ;
+	static UIXObject*					mspModalObject;
 };
 
 

@@ -130,9 +130,9 @@ BOOL	bRet = FALSE;
 
 	if ( UIScrollablePageOnRelease( X, Y ) == 0 )
 	{
-		if ( ( UISliderOnRelease( X, Y, TRUE ) == FALSE ) &&
-			 ( UITextBoxOnRelease( X, Y ) == FALSE ) &&
-			 ( UIDropdownOnRelease( X, Y ) == FALSE ) )
+		if ( ( UIDropdownOnRelease( X, Y ) == FALSE ) &&
+			 ( UISliderOnRelease( X, Y, TRUE ) == FALSE ) &&
+			 ( UITextBoxOnRelease( X, Y ) == FALSE ) )
 		{
 			if ( mnUIButtonIDPressed != NOTFOUND )
 			{
