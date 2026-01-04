@@ -16,8 +16,8 @@ void	UIXText::Initialise( const char* szTitle, uint32 ulCol, int font, UIX_TEXT_
 UIXRECT		UIXText::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
 UIXRECT		drawRect = GetActualRenderRect( displayRect );
-	// Centre align vertically (should be an option)
-int			drawY = drawRect.y + ((drawRect.h - pInterface->GetStringHeight(mText.c_str(), mFont))/2);
+		// Centre align vertically (should be an option)
+int			drawY = drawRect.y + (((drawRect.h - pInterface->GetStringHeight(mText.c_str(), mFont))-1)/2);
 
 	// TODO - Use mFontFlags if set
 // TODO - These are bitflags and some should be combinable
