@@ -191,6 +191,8 @@ extern void	FontDefFreeAll( void );
 class FontSystem : public InterfaceModule
 {
 public:
+	void	Shutdown();
+
 	BOOL	LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags, int nGlobalVerticalOffset = 0 );
 	void	InitialiseFontBuffers( void );
 	HRESULT	InitialiseFonts( BOOL bUseDefaultFonts );

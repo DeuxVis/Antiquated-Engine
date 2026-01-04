@@ -62,6 +62,8 @@ extern void					InterfaceSetD3DDevice( LPGRAPHICSDEVICE pDevice );
 class InterfaceInternalsDX : public InterfaceModule
 {
 public:
+	void	Shutdown();
+
 	HRESULT				CreateVertexBuffer( unsigned int Length, unsigned int Usage, unsigned int FVF, IGRAPHICSVERTEXBUFFER** );
 	void				CreateTexture( int width, int height, int levels, int mode, eInterfaceTextureFormat format, LPGRAPHICSTEXTURE*, BOOL bReadable );
 	void				SetStreamSource( unsigned int StreamNumber, IGRAPHICSVERTEXBUFFER *pStreamData, unsigned int OffsetInBytes, unsigned int Stride );

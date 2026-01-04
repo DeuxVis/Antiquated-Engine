@@ -483,6 +483,18 @@ BOOL	FontSystem::IsFontLoaded( int nFontNum )
 	return( FALSE );
 }
 
+void	FontSystem::Shutdown()
+{
+	for( int nFontNum = 0; nFontNum < MAX_FONTS_IN_GAME; nFontNum++ )
+	{
+		if ( mpFontDefs[nFontNum] )
+		{
+			delete mpFontDefs[nFontNum];
+			mpFontDefs[nFontNum] = NULL;
+		}
+	}
+}
+
 BOOL	FontSystem::LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags, int nGlobalVerticalOffset )
 {
 	if ( nFontNum < MAX_FONTS_IN_GAME )

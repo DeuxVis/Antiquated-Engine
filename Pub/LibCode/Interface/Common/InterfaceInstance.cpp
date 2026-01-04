@@ -8,6 +8,19 @@
 #include "../Common/Font/FontCommon.h"
 #include "InterfaceInstance.h"
 
+void	InterfaceInstance::Shutdown()
+{
+	mpOverlays->Shutdown();
+	mpTexturedOverlays->Shutdown();
+	mpFontSystem->Shutdown();
+	mpInterfaceInternals->Shutdown();
+
+	delete mpOverlays;
+	delete mpTexturedOverlays;
+	delete mpInterfaceInternals;
+	delete mpFontSystem;
+}
+
 InterfaceInstance::InterfaceInstance()
 {
 	mpOverlays = new Overlays;

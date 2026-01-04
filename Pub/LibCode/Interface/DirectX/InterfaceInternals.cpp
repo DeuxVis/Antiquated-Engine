@@ -320,7 +320,13 @@ _D3DPOOL pool = D3DPOOL_DEFAULT;
 
 }
 
- 
+void		InterfaceInternalsDX::Shutdown()
+{
+
+
+}
+
+
 HRESULT			InterfaceInternalsDX::CreateVertexBuffer(  unsigned int Length, unsigned int Usage, unsigned int FVF, IGRAPHICSVERTEXBUFFER** ppVertexBufferOut )
 {
 #ifdef TUD11
@@ -801,6 +807,7 @@ void InterfaceInstance::Draw( void )
 INTERFACE_API void InterfaceFree( void )
 {
 	InterfaceInstanceMain()->FreeAll();
+	InterfaceInstanceMain()->Shutdown();
 }
 
 

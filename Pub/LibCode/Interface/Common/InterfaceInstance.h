@@ -20,6 +20,7 @@ class InterfaceInstance
 public:
 	InterfaceInstance();
 
+	void	Shutdown();
 	//-----------------------------------------------------------------------
 
 	// Font
