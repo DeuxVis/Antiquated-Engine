@@ -52,7 +52,7 @@ BOOL	bMouseIsOverSectionHeader = FALSE;
 		
 	if ( UIHoverItem( X, Y, W, headerH ) == TRUE )
 	{
-		UIHoverIDSet( UIX_COLLAPSABLE_SECTION_HEADER, GetID(), 0 );
+		UIHoverIDSet( UIX_COLLAPSABLE_SECTION_HEADER, 0, GetID() );
 		bMouseIsOverSectionHeader = TRUE;
 	}
 
@@ -127,22 +127,19 @@ void	UIXCollapsableSection::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BO
 			// If cursor has remained within the original section rect, treat it as a press (collapse the tab)
 			UIGetCurrentCursorPosition( &mouseX, &mouseY );
 
-			if ( UIHoverItem( mLastRender.x, mLastRender.y, mLastRender.w, mLastRender.h ) == TRUE )
-			{
-				UIPressIDSet( UIX_COLLAPSABLE_SECTION_HEADER, GetID(), 0 );
-			}
+			UIX::CheckForPress( this, mLastRender, UIX_COLLAPSABLE_SECTION_HEADER, 0 );
 		}
 	}
 }
 
 
-void	UIXCollapsableSection::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress )
+void	UIXCollapsableSection::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
 {
-UIXCollapsableSection*		pSection = (UIXCollapsableSection*)UIX::GetUIXObjectByID( ulParam );
+UIXCollapsableSection*		pSection = (UIXCollapsableSection*)UIX::GetUIXObjectByID( ulIDParam );
 
 	if ( pSection )
 	{
-		pSection->HoldHandler( ulIndex, bIsHeld, bFirstPress );
+		pSection->HoldHandler( ulParam, bIsHeld, bFirstPress );
 	}
 }
 

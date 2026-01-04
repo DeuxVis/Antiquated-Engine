@@ -132,8 +132,11 @@ int		nFont = 1;
 	case 2:		// Hovered
 		ulBackgroundCol = GetColWithModifiedAlpha( 0xFFFFFFFF, fAlphaVal );
 		break;
+	case 5:		// Always small font
+		nFont = 3;
+		ulBackgroundCol = GetColWithModifiedAlpha( 0xF0E0E0E0, fAlphaVal );
+		break;
 	}
-
 
 	pInterface->TexturedRect( mahUIButtonOverlays[0], X, Y, nButtonImageW, nButtonImageH, ulBackgroundCol, 0.0f, 0.0f, 1.0f, 1.0f );
 	pInterface->TexturedRect( mahUIButtonOverlays[1], X+nButtonImageW, Y, W-(nButtonImageW*2), nButtonImageH, ulBackgroundCol, 0.0f, 0.0f, 1.0f, 1.0f );
@@ -232,13 +235,19 @@ BOOL	bEnabled = TRUE;
 		}
 	}
 
-	if ( nMode > 2 )
+	switch ( nMode )
 	{
+	case 3:
+	case 4:
 		UIButtonDrawBasic( nButtonID, nX, nY, nWidth, nHeight, szText, nMode, ulParam, ulIDParam, fAlpha );	
-	}
-	else
-	{
+		break;
+	default:
+	case 0:
+	case 1:
+	case 2:
+	case 5:
 		msButtonStyle.Render( nX, nY, nWidth, nHeight, szText, nMode, fAlpha );
+		break;
 	}
 
 	if ( nMode != 1 )

@@ -13,5 +13,8 @@ extern void		GetISODateString( uint32 ulUnixTime, char* pcOut );
 extern uint32	ReadISODateString( const char* szDate );
 extern void		GetDateString( uint32 ulUnixTime, char* pcOut );
 
+extern void		RemoveCurrentPathFromFileName( const char* szFilenameIn, char* pcOut );
+extern void		RemovePathFromStartOfFileName( const char* szFilenameIn, const char* szPathToRemove, char* pcOut );
+
 #endif
 

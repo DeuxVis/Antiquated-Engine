@@ -130,7 +130,7 @@ uint32	ulCol;
 			ulCol = GetColWithModifiedAlpha( m_aConsoleBuffer[ nLineNum ].uCol, fAlpha );
 			if ( nWidth > nWidthOfBox )
 			{
-			char*	pcEndOfFirstLine;
+			const char*	pcEndOfFirstLine;
 				nCurrentY -= 12;
 				pcEndOfFirstLine = InterfaceTextLimitWidth( 1, nX, nCurrentY, pcNextConsoleLine, ulCol, 0, nWidthOfBox );
 				nCurrentY += 12;

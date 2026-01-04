@@ -19,6 +19,8 @@ class UIXScrollableSection;
 class UIXDropdown;
 class UIXShape;
 class UIXCustomRender;
+class UIXCheckbox;
+class UIXModalPopup;
 
 enum 
 {
@@ -31,14 +33,24 @@ enum
 	UIX_SCROLLABLE_SECTION_SCROLLBAR,
 	UIX_DROPDOWN_HEADER,
 	UIX_DROPDOWN_ENTRY,
+	UIX_CHECKBOX,
 };
 
-
+enum eUIXBUTTON_MODE
+{
+	UIXBUTTON_NORMAL,
+	UIXBUTTON_PLAIN_RECT,
+	UIXBUTTON_TEXT_WITH_SETTINGS,
+	UIXBUTTON_RECT_ICON,
+};
 
 enum UIX_TEXT_FLAGS
 {
-	NONE,
-	ALIGN_RIGHT,
+	NONE = 0,
+	ALIGN_RIGHT = 0x1,
+	BOLD = 0x2,
+	ALIGN_CENTRE = 0x4,
+	
 };
 
 enum UIX_SLIDER_MODE
@@ -46,6 +58,12 @@ enum UIX_SLIDER_MODE
 	VALUE,
 	ANGLE,
 	VALUERANGE,
+};
+
+enum UIX_CHECKBOX_MODE
+{
+	STANDARD_CHECKBOX,
+	POPUP_MENU_LIST,
 };
 
 enum UIX_VALUE_CALLBACK_FLAGS
@@ -56,6 +74,7 @@ enum UIX_VALUE_CALLBACK_FLAGS
 
 typedef	float(*fnValueUpdateCallback)( uint32 ulUIXObjectID, float fUIXValue, float fUIXValue2, uint32 ulUserParam, BOOL bIsUIHeld );
 typedef	void(*fnDragReceiveCallback)( UIXObject* pxSourceObject, uint32 ulDragParam, UIXObject* pxDestObject, uint32 ulDragDestParam );
+typedef	void(*fnSelectedCallback)( UIXObject* pxSourceObject );
 
 class UIStateData
 {
@@ -94,6 +113,7 @@ public:
 	void*				GetUserObject() { return mpUserObject; }
 	void				SetUserObject( void* pObject ) { mpUserObject = pObject; }
 
+	BOOL				DoesHaveUserParamEx( const char* szKey ) { return( (mUserParamExList.find(szKey) != mUserParamExList.end()) ); }
 	int					GetUserParamEx( const char* szKey ) { return( mUserParamExList[szKey] ); }
 	void				SetUserParamEx( const char* szKey, int nValue ) { mUserParamExList[szKey] = nValue; }
 
@@ -121,6 +141,8 @@ protected:
 	UIXRECT		GetActualRenderRect( UIXRECT parentRect );
 	int			GetChildContentsHeight() { return mChildContentsHeight; }
 	virtual int			GetScrollPosition() { return( 0 ); }
+	virtual int		GetSelectionPriorityLayer() { return( 0 ); }
+
 private:
 	virtual bool		ShouldDisplayChildren() { return true; }
 
@@ -154,17 +176,19 @@ public:
 	static void			SetModalObject( UIXObject* pObject ) { mspModalObject = pObject; }
 	static UIXObject*	GetModalObject() { return( mspModalObject ); }
 
-	static UIXObject*					AddPage( UIXRECT xRect, const char* szTitle, BOOL bUseClipping = FALSE );
-	static UIXCollapsableSection*		AddCollapsableSection( UIXObject* pxContainer, UIXRECT xRect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType = 0 );
-	static UIXScrollableSection*		AddScrollableSection( UIXObject* pxContainer, UIXRECT xRect );
-	static UIXButton*					AddButton( UIXObject* pxContainer, UIXRECT xRect, int mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL IsBlocking = TRUE );
-	static UIXTextBox*					AddTextBox( UIXObject* pxContainer, UIXRECT xRect, int mode, const char* szDefaultText );
-	static UIXListBox*					AddListBox( UIXObject* pxContainer, UIXRECT xRect, int mode = 0, BOOL bContentsDraggable = FALSE, int dragItemType = 0 );
-	static UIXSlider*					AddSlider( UIXObject* pxContainer, UIXRECT xRect, UIX_SLIDER_MODE mode = VALUE, uint32 ulUserParam = 0, float fMin = 0.0f, float fMax = 1.0f, float fInitial = 0.0f, float fMinStep = 0.1f  );
-	static UIXDropdown*					AddDropdown( UIXObject* pxContainer, UIXRECT xRect );
-	static UIXText*						AddText( UIXObject* pxContainer, UIXRECT xRect, uint32 ulCol = 0xc0c0c0c0, int font = 0, UIX_TEXT_FLAGS fontFlags = NONE,  const char* szTitle = NULL, ... );
-	static UIXShape*					AddShape( UIXObject* pxContainer, UIXRECT xRect, int mode = 0, BOOL bBlocks = FALSE, uint32 ulCol1 = 0xC0C0C0C0, uint32 ulCol2 = 0xC0C0C0C0, uint32 ulButtonID = 0, uint32 ulButtonParam = 0 );
-	static UIXCustomRender*				AddCustomRender( UIXObject* pxContainer, UIXRECT xRect, fnCustomRenderCallback renderFunc, uint32 ulUserParam1 = 0, uint32 ulUserParam2 = 0  );
+	static UIXObject*					AddPage( UIXRECT rect, const char* szTitle, BOOL bUseClipping = FALSE );
+	static UIXCollapsableSection*		AddCollapsableSection( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType = 0 );
+	static UIXScrollableSection*		AddScrollableSection( UIXObject* pxContainer, UIXRECT rect );
+	static UIXButton*					AddButton( UIXObject* pxContainer, UIXRECT rect, eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL IsBlocking = TRUE, uint32 ulCol = 0xD0404040, int iconNum = 0 );
+	static UIXTextBox*					AddTextBox( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szDefaultText );
+	static UIXListBox*					AddListBox( UIXObject* pxContainer, UIXRECT rect, int mode = 0, BOOL bContentsDraggable = FALSE, int dragItemType = 0 );
+	static UIXSlider*					AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode = VALUE, uint32 ulUserParam = 0, float fMin = 0.0f, float fMax = 1.0f, float fInitial = 0.0f, float fMinStep = 0.1f  );
+	static UIXDropdown*					AddDropdown( UIXObject* pxContainer, UIXRECT rect );
+	static UIXText*						AddText( UIXObject* pxContainer, UIXRECT rect, uint32 ulCol = 0xc0c0c0c0, int font = 0, UIX_TEXT_FLAGS fontFlags = NONE,  const char* szTitle = NULL, ... );
+	static UIXShape*					AddShape( UIXObject* pxContainer, UIXRECT rect, int mode = 0, BOOL bBlocks = FALSE, uint32 ulCol1 = 0xC0C0C0C0, uint32 ulCol2 = 0xC0C0C0C0, uint32 ulButtonID = 0, uint32 ulButtonParam = 0 );
+	static UIXCustomRender*				AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam1 = 0, uint32 ulUserParam2 = 0  );
+	static UIXCheckbox*					AddCheckbox( UIXObject* pxContainer, UIXRECT rect, UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc );
+	static UIXModalPopup*				AddModalPopup( UIXObject* pxContainer, UIXRECT rect );
 
 	static void							DeleteObject( UIXObject* pObject );
 	static UIXObject*					GetUIXObjectByID( uint32 ulObjectID ) { return( msComponentIDMap[ulObjectID]);}
@@ -176,7 +200,15 @@ public:
 	static void							EndDragItemType( int type );
 
 	static void							SetMousewheelHoverObject( UIXObject* pObject ) { mspMousewheelHoverObject = pObject; }
+	static BOOL							IsMouseHover( UIXRECT rect );
+
+	static BOOL							CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam );
+	static void							IncrementSelectionPriority();
+	static void							DecrementSelectionPriority();
+
+	static void							DrawIcon( InterfaceInstance* pInterface, int iconNum, UIXRECT rect, uint32 ulCol );
 protected:
+
 	static std::map<uint32, UIXObject*>		msComponentIDMap;
 private:
 	static uint32						msulNextObjectID;
@@ -187,6 +219,8 @@ private:
 	static UIXObject*					mspMousewheelHoverObject;
 	static uint32						msDragSourceParam ;
 	static UIXObject*					mspModalObject;
+	static int							msSelectionPriority;
+	static int							msPressedSelectionPriority;
 };
 
 

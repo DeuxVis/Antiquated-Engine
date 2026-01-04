@@ -14,7 +14,7 @@ protected:
 
 	void	Initialise( );
 
-	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
+	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT pDisplayRect );
 
 	void			HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress );
 	static void		HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );

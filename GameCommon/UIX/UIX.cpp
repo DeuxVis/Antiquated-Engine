@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include "StandardDef.h"
 
+#include "InterfaceEx.h"
 #include "../UI/UI.h"
 #include "UIX.h"
 #include "UIXButton.h"
@@ -11,11 +12,13 @@
 #include "UIXSlider.h"
 #include "UIXDropdown.h"
 #include "UIXShape.h"
+#include "UIXCheckbox.h"
 #include "UIXTextBox.h"
 #include "UIXText.h"
 #include "UIXCustomRender.h"
 #include "UIXCollapsableSection.h"
 #include "UIXScrollableSection.h"
+#include "UIXModalPopup.h"
 
 uint32						UIX::msulNextObjectID = 2001;
 std::vector<UIXObject*>		UIX::msPagesList;
@@ -25,6 +28,9 @@ UIXObject*					UIX::mspDragDestinationHover = NULL;
 UIXObject*					UIX::mspDragSource = NULL;
 UIXObject*					UIX::mspMousewheelHoverObject = NULL;
 UIXObject*					UIX::mspModalObject = NULL;
+int							UIX::msSelectionPriority = 0;
+int							UIX::msPressedSelectionPriority = 0;
+
 
 uint32						UIX::msDragSourceParam = 0;
 //--------------------------------------------------------------------------------------
@@ -84,6 +90,8 @@ UIXRECT		xMaxRect;
 	xUsedRect.h = 0;
 
 	xRect = OnRender( pInterface, displayRect );
+	UIX::msSelectionPriority += GetSelectionPriorityLayer();
+
 	xUsedRect.w = xRect.w;		// w is reduced by things like scrollbars occupying space within the page
 	xUsedRect.h = xRect.h;
 	xUsedRect.y = xRect.y;
@@ -137,6 +145,7 @@ UIXRECT		xMaxRect;
 		}
 		mChildContentsHeight = xUsedRect.h;
 	}
+	UIX::msSelectionPriority -= GetSelectionPriorityLayer();
 	return( xUsedRect );
 }
 
@@ -188,9 +197,19 @@ void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam )
 {
 	switch( nButtonID )
 	{
+	case UIX_CHECKBOX:
+		{
+		UIXCheckbox*		pCheckbox = (UIXCheckbox*)msComponentIDMap[ulIDParam];
+			if ( pCheckbox )
+			{
+				pCheckbox->OnPressed();
+			}
+		}	
+		break;
+
 	case UIX_COLLAPSABLE_SECTION_HEADER:
 		{
-		UIXCollapsableSection*		pCollapsableSection = (UIXCollapsableSection*)msComponentIDMap[ulParam];
+		UIXCollapsableSection*		pCollapsableSection = (UIXCollapsableSection*)msComponentIDMap[ulIDParam];
 			if ( pCollapsableSection )
 			{
 				pCollapsableSection->ToggleCollapsed();
@@ -199,17 +218,17 @@ void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam )
 		break;
 	case UIX_DROPDOWN_ENTRY:
 		{
-		UIXDropdown*		pDropdown = (UIXDropdown*)msComponentIDMap[ulParam];
+		UIXDropdown*		pDropdown = (UIXDropdown*)msComponentIDMap[ulIDParam];
 			if ( pDropdown )
 			{
-				pDropdown->SetSelectedElementIndex( ulIDParam );
+				pDropdown->SetSelectedElementIndex( ulParam );
 				pDropdown->ToggleExpanded();
 			}
 		}	
 		break;
 	case UIX_DROPDOWN_HEADER:
 		{
-		UIXDropdown*		pDropdown = (UIXDropdown*)msComponentIDMap[ulParam];
+		UIXDropdown*		pDropdown = (UIXDropdown*)msComponentIDMap[ulIDParam];
 			if ( pDropdown )
 			{
 				pDropdown->ToggleExpanded();
@@ -227,28 +246,28 @@ void		UIX::OnMouseWheel( float fOffset )
 	}
 }
 
-void		UIX::SliderHoldHandler( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress  )
+void		UIX::SliderHoldHandler( int nButtonID, uint32 ulIndex, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress  )
 {
 UIXSlider*		pSlider;
 
 	switch( nButtonID )
 	{
 	case UIX_SLIDER_BAR_MAXRANGE:
-		pSlider = (UIXSlider*)msComponentIDMap[ulParam];
+		pSlider = (UIXSlider*)msComponentIDMap[ulIDParam];
 		if ( pSlider )
 		{
 			pSlider->OnMaxRangeHeldUpdate( bIsHeld, bFirstPress );
 		}
 		break;
 	case UIX_SLIDER_BAR_MINRANGE:
-		pSlider = (UIXSlider*)msComponentIDMap[ulParam];
+		pSlider = (UIXSlider*)msComponentIDMap[ulIDParam];
 		if ( pSlider )
 		{
 			pSlider->OnMinRangeHeldUpdate( bIsHeld, bFirstPress );
 		}
 		break;
 	case UIX_SLIDER_BAR:
-		pSlider = (UIXSlider*)msComponentIDMap[ulParam];
+		pSlider = (UIXSlider*)msComponentIDMap[ulIDParam];
 		if ( pSlider )
 		{
 			pSlider->OnHeldUpdate( bIsHeld, bFirstPress );
@@ -259,11 +278,27 @@ UIXSlider*		pSlider;
 	}
 }
 
+BOOL		UIX::CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam )
+{
+	if ( msSelectionPriority >= msPressedSelectionPriority )
+	{
+		if ( UIIsPressed( rect.x, rect.y, rect.w, rect.h ) == TRUE )
+		{
+			UIPressIDSet( ulButtonID, ulButtonParam, pxObject->GetID() );
+			msPressedSelectionPriority = msSelectionPriority;
+		}
+
+		return( IsMouseHover( rect ) );
+	}
+	return( FALSE );
+}
+
 void		UIX::Initialise( int mode )
 {
 	UIRegisterButtonPressHandler( UIX_COLLAPSABLE_SECTION_HEADER, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_DROPDOWN_HEADER, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_DROPDOWN_ENTRY, ButtonPressHandler );
+	UIRegisterButtonPressHandler( UIX_CHECKBOX, ButtonPressHandler );
 		
 	UIRegisterHoldHandler( UIX_SLIDER_BAR, SliderHoldHandler );
 	UIRegisterHoldHandler( UIX_SLIDER_BAR_MINRANGE, SliderHoldHandler );
@@ -290,10 +325,33 @@ void		UIX::Reset()
 	msPagesList.clear();
 }
 
+void	UIX::DrawIcon( InterfaceInstance* pInterface, int iconNum, UIXRECT rect, uint32 ulCol )
+{
+	switch( iconNum )
+	{
+	case 1:
+		pInterface->OutlineBox( 1, rect.x + 2, rect.y + 2, rect.w - 4, rect.h - 4, ulCol );
+		pInterface->Rect( 1, rect.x + 5, rect.y + (rect.h/2), rect.w - 10, 2, ulCol );
+		break;
+	default:
+		// TODO - load sprites n create overlays etc
+		pInterface->Rect( 1, rect.x, rect.y, rect.w, rect.h, ulCol );
+		break;
+	}
+	
+}
+
+BOOL		UIX::IsMouseHover( UIXRECT rect )
+{
+	return ( UIHoverItem( rect.x, rect.y, rect.w, rect.h ) );
+}
 
 void		UIX::Render( InterfaceInstance* pxInterface )
 {
 UIXRECT		pageDisplayRect;
+
+	msSelectionPriority = 0;
+	msPressedSelectionPriority = 0;
 
 	for( UIXObject* pxObjects : msPagesList )
 	{
@@ -360,11 +418,11 @@ UIXCollapsableSection*		pNewCollapsableSection = new UIXCollapsableSection( msul
 	return( pNewCollapsableSection );
 }
 
-UIXButton*			UIX::AddButton( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL bIsBlocking  )
+UIXButton*			UIX::AddButton( UIXObject* pxContainer, UIXRECT rect, eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL bIsBlocking, uint32 ulCol, int iconNum  )
 {
 UIXButton*		pNewButton = new UIXButton( msulNextObjectID++, rect );
 
-	pNewButton->Initialise( mode, szTitle, ulButtonID, ulButtonParam, bIsBlocking );
+	pNewButton->Initialise( mode, szTitle, ulButtonID, ulButtonParam, bIsBlocking, ulCol, iconNum );
 	pxContainer->mContainsList.push_back( pNewButton );
 	return( pNewButton );
 }
@@ -377,6 +435,27 @@ UIXCustomRender*		pNewCustomRender = new UIXCustomRender( msulNextObjectID++, re
 	pxContainer->mContainsList.push_back( pNewCustomRender );
 	return( pNewCustomRender );
 }
+
+
+UIXModalPopup*		UIX::AddModalPopup( UIXObject* pxContainer, UIXRECT rect )
+{
+UIXModalPopup*		pNewModalPopup = new UIXModalPopup( msulNextObjectID++, rect );
+
+	pNewModalPopup->Initialise(  );
+	pxContainer->mContainsList.push_back( pNewModalPopup );
+	return( pNewModalPopup );
+}
+
+
+UIXCheckbox*		UIX::AddCheckbox( UIXObject* pxContainer, UIXRECT rect, UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc )
+{
+UIXCheckbox*		pNewCheckbox = new UIXCheckbox( msulNextObjectID++, rect );
+
+	pNewCheckbox->Initialise( mode, bIsChecked, szText, selectedFunc );
+	pxContainer->mContainsList.push_back( pNewCheckbox );
+	return( pNewCheckbox );
+}
+
 
 UIXShape*			UIX::AddShape( UIXObject* pxContainer, UIXRECT rect, int mode, BOOL bBlocks, uint32 ulCol1, uint32 ulCol2, uint32 ulButtonID, uint32 ulButtonParam )
 {

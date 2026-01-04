@@ -56,10 +56,7 @@ int			entryIndex = 0;
 	if ( ( UIX::GetModalObject() == NULL ) ||
 		 ( UIX::GetModalObject() == this ) ) 
 	{
-		if ( UIIsPressed( renderRect.x, renderRect.y, renderRect.w, renderRect.h ) == TRUE )
-		{
-			UIPressIDSet( UIX_DROPDOWN_HEADER, GetID() );
-		}
+		UIX::CheckForPress( this, renderRect, UIX_DROPDOWN_HEADER, 0 );
 	}
 	
 	if ( mbIsExpanded )
@@ -80,10 +77,10 @@ int			entryIndex = 0;
 		for ( auto listEntry : mDropdownEntries )
 		{
 			pInterface->Text( 2, lineRect.x + 3, lineRect.y, 0xc0d0d0d0, 3, listEntry->GetText().c_str() );
-			if ( UIHoverItem( lineRect.x, lineRect.y, lineRect.w, lineRect.h ) == TRUE )
-			{
+
+			if ( UIX::CheckForPress( this, lineRect, UIX_DROPDOWN_ENTRY, entryIndex ) )
+			{		
 				pInterface->Rect( 2, lineRect.x, lineRect.y, lineRect.w, lineRect.h, 0xa0808080 );
-				UIPressIDSet( UIX_DROPDOWN_ENTRY, GetID(), entryIndex );			
 			}
 			lineRect.y += 14;
 			entryIndex++;

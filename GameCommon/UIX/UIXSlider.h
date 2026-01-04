@@ -26,15 +26,15 @@ private:
 	float				GetCursorValue();
 	UIXRECT				mRenderRect;
 	UIX_SLIDER_MODE		mMode;
-	float				mfMinVal;
-	float				mfMaxVal;
-	float				mfInitialMinVal;
-	float				mfInitialMaxVal;
-	float				mfInitialVal;
-	float				mfCurrentVal;
-	float				mfMinStep;
-	uint32				mulUserParam;
-	BOOL				mbIsHeld;
+	float				mfMinVal = 0.0f;
+	float				mfMaxVal = 1.0f;
+	float				mfInitialMinVal = 0.0f;
+	float				mfInitialMaxVal = 1.0f;
+	float				mfInitialVal = 0.0f;
+	float				mfCurrentVal = 0.0f;
+	float				mfMinStep = 0.1f;
+	uint32				mulUserParam = 0;
+	BOOL				mbIsHeld = FALSE;
 
 	fnValueUpdateCallback	mValueUpdateFunc = NULL;
 };

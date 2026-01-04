@@ -28,7 +28,7 @@ UIXRECT			UIXListBoxEntry::Render( InterfaceInstance* pInstance, UIXRECT rect )
 
 	if ( UIHoverItem(  rect.x, rect.y, rect.w, 19 ) == TRUE )
 	{
-		UIHoverIDSet( UIX_LISTBOX, mpListBox->GetID(), mIndex );
+		UIHoverIDSet( UIX_LISTBOX, mIndex, mpListBox->GetID() );
 	}
 
 	pInstance->Text( 1, rect.x + 5, rect.y + 2, 0xd0d0d0d0, 0, mTitle.c_str() );
@@ -124,13 +124,13 @@ UIXListBoxEntry*		pListBoxElement = mListBoxEntriesFlatList[ulIndex];
 }
 
 
-void	UIXListBox::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress )
+void	UIXListBox::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
 {
-UIXListBox*		pListBox = (UIXListBox*)UIX::GetUIXObjectByID( ulParam );
+UIXListBox*		pListBox = (UIXListBox*)UIX::GetUIXObjectByID( ulIDParam );
 
 	if ( pListBox )
 	{
-		pListBox->HoldHandler( ulIndex, bIsHeld, bFirstPress );
+		pListBox->HoldHandler( ulParam, bIsHeld, bFirstPress );
 	}
 }
 

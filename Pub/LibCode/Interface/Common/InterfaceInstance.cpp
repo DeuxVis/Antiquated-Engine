@@ -31,6 +31,11 @@ LPGRAPHICSDEVICE		pGraphicsDevice = (LPGRAPHICSDEVICE)pDevice;
 	mpFontSystem->SetGraphicsDevice( pGraphicsDevice );
 }
 
+BOOL		InterfaceInstance::LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags )
+{
+	return( mpFontSystem->LoadFont( nFontNum, pcImageFileName, pcLayoutFile, ulFlags ) );
+}
+
 void		InterfaceInstance::InitialiseInstance( BOOL bUseDefaultFonts )
 {
 	if ( mboInterfaceInitialised == FALSE )
@@ -60,10 +65,24 @@ static BOOL			ms_bHasInitialisedMainInstance = FALSE;
 	return( &ms_MainSingletonInstance );
 }
 
+const char*	InterfaceInstance::TextLimitWidth( int nLayer, int nX, int nY, int nMaxWidth, uint32 ulCol, int nFont, const char* text, ... )
+{
+char		acString[2048];
+va_list		marker;
+uint32*		pArgs;
+
+	pArgs = (uint32*)( &text ) + 1;
+
+    va_start( marker, text );     
+	vsprintf( acString, text, marker );
+	if ( ulCol == 0 ) ulCol = 0xd0d0d0d0;			// Default col is an offwhite 
+
+	return( mpFontSystem->TextLimitWidth( nLayer, nX, nY, acString, ulCol, nFont, nMaxWidth ) );
+}
 
 void	InterfaceInstance::Text( int nLayer, int nX, int nY, uint32 ulCol, int nFont, const char* text, ... )
 {
-char		acString[4096];
+char		acString[2048];
 va_list		marker;
 uint32*		pArgs;
 

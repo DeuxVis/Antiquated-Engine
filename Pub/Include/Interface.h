@@ -106,7 +106,7 @@ extern INTERFACE_API void	InterfaceTextScaled( int nLayer, int nX, int nY, const
 
 //extern INTERFACE_API void	InterfaceTextCentre( int nLayer, int nX, int nY, const char* szString, uint32 ulCol, int font );
 
-extern INTERFACE_API char*	InterfaceTextLimitWidth( int nLayer, int nX, int nY, const char* szString, int ulCol, int font, int nMaxWidth );
+extern INTERFACE_API const char*	InterfaceTextLimitWidth( int nLayer, int nX, int nY, const char* szString, int ulCol, int font, int nMaxWidth );
 extern INTERFACE_API char* InterfaceTextLimitWidthCentred( int nLayer, int nX, int nY, const char* szString, int ulCol, int nFont, int nMaxWidth );
 
 extern INTERFACE_API int	InterfaceTextBox( int nLayer, int nX, int nY, const char* szString, int ulCol, int font, int nMaxWidth, BOOL bLeftAlign );

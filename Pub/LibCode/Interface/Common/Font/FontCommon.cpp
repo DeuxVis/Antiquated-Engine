@@ -207,7 +207,7 @@ uint32 InterfaceGetARGBForColour(uint32 nCol)
 
 
 
-void	CFontDef::Initialise( const char* szDefName)
+void	CFontDef::Initialise( const char* szDefName, int nGlobalVerticalOffset )
 {
 int		nStrlen = strlen( szDefName );
 
@@ -221,6 +221,7 @@ int		nStrlen = strlen( szDefName );
 	{
 		ReadFontrastFile( szDefName );
 	}
+	m_GlobalVerticalOffset = nGlobalVerticalOffset;
 }
 
 void	CFontDef::ReadJSONLayoutFile( const char* szDefName )
@@ -482,7 +483,7 @@ BOOL	FontSystem::IsFontLoaded( int nFontNum )
 	return( FALSE );
 }
 
-BOOL	FontSystem::LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags )
+BOOL	FontSystem::LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags, int nGlobalVerticalOffset )
 {
 	if ( nFontNum < MAX_FONTS_IN_GAME )
 	{
@@ -496,7 +497,7 @@ BOOL	FontSystem::LoadFont( int nFontNum, const char* pcImageFileName, const char
 
 		// TEMP - REMOVE
 		mpFontDefs[nFontNum]->LoadTexture( mpInterfaceInstance );
-		mpFontDefs[nFontNum]->Initialise( pcLayoutFile );
+		mpFontDefs[nFontNum]->Initialise( pcLayoutFile, nGlobalVerticalOffset );
 		if ( ulFlags & 1 )
 		{
 			mpFontDefs[nFontNum]->EnableFiltering( FALSE );
@@ -707,7 +708,12 @@ int		nWidth = GetStringWidth( szString, font );
 	return( nWidth );
 }
 
-char* InterfaceTextLimitWidth( int nLayer, int nX, int nY, const char* szString, int ulCol, int nFont, int nMaxWidth )
+const char* InterfaceTextLimitWidth( int nLayer, int nX, int nY, const char* szString, int ulCol, int nFont, int nMaxWidth )
+{
+	return( InterfaceInstanceMain()->TextLimitWidth( nLayer, nX, nY, nMaxWidth, ulCol, nFont, szString ) );
+}
+
+const char* FontSystem::TextLimitWidth( int nLayer, int nX, int nY, const char* szString, uint32 ulCol, int nFont, int nMaxWidth )
 {
 char	acBuff[512];
 int		nLoop = 0;
@@ -765,8 +771,11 @@ int		nPreBackstepPos;
 			InterfaceText( nLayer, nX, nY, acBuff, ulCol, nFont );
 		}
 	}
-	return( (char*)szString + nLoop );
+	return( szString + nLoop );
+
+
 }
+
 
 char* InterfaceTextLimitWidthCentred( int nLayer, int nX, int nY, const char* szString, int ulCol, int nFont, int nMaxWidth )
 {
@@ -1321,9 +1330,11 @@ float		fAdvance = 0.0f;
 			xScrRect.y1 += (pFontDef->mnFontOverallSize + (pFontDef->mnFontOccupyHeightReduction*2)) * (fScaleOverride * fAlignScale);		// Hack.. should be font size...
 			xScrRect.y1 -= (uvChar.originY * fTextureHeightScale) * fScaleOverride;
 
-			xScrRect.y1 -= 20 * (fScaleOverride * fAlignScale);
+	// removed for viCanvas 4/1/26 - it offset everything by 20px.. not sure what this was doing previously?
+//			xScrRect.y1 -= 20 * (fScaleOverride * fAlignScale);
 		}
 	}
+	xScrRect.y1 += pFontDef->GetGlobalVerticalOffset();
 
 	xScrRect.x2 = xScrRect.x1 + (float)(nFontScreenWidth);
 	xScrRect.y2 = xScrRect.y1 + (float)(nFontScreenHeight);
@@ -1595,7 +1606,7 @@ int	InterfaceTextBoxMaxHeight(int nLayer, int nX, int nY, const char* szString, 
 
 int	FontSystem::TextBoxMaxHeight(int nLayer, int nX, int nY, const char* szString, int ulCol, int font, int nMaxWidth, int nMaxHeight, BOOL bLeftAlign)
 {
-char*	pcEndOfLine = (char*)szString;
+const char*	pcEndOfLine = szString;
 int		nLineSep = 13;
 int		nBaseY = nY;
 int		nStringWidth;

@@ -29,11 +29,11 @@ uint32		mulUIButtonIDPressedIDParam = 0;
 
 int			mnUIButtonIDHovered = NOTFOUND;
 uint32		mulUIButtonIDHoveredParam = 0;
-uint32		mulUIButtonIDHoveredIndex = 0;
+uint32		mulUIButtonIDHoveredID = 0;
 
 int			mnUIButtonIDHeld = NOTFOUND;
 uint32		mulUIButtonIDHeldParam = 0;
-uint32		mulUIButtonIDHeldIndex = 0;
+uint32		mulUIButtonIDHeldID = 0;
 
 std::map<int, UIButtonHandler>	msButtonHandlerList;
 std::map<int, UIHoldHandler>	msHoldHandlerList;
@@ -73,7 +73,7 @@ void		UIUpdate( float fDelta )
 	{
 		if ( msHoldHandlerList[mnUIButtonIDHeld])
 		{			
-			msHoldHandlerList[mnUIButtonIDHeld]( mnUIButtonIDHeld, mulUIButtonIDHeldParam, mulUIButtonIDHeldIndex, TRUE, FALSE );
+			msHoldHandlerList[mnUIButtonIDHeld]( mnUIButtonIDHeld, mulUIButtonIDHeldParam, mulUIButtonIDHeldID, TRUE, FALSE );
 		}
 	}
 
@@ -101,10 +101,10 @@ BOOL		UIOnPress( int X, int Y )
 		{
 			if ( msHoldHandlerList[mnUIButtonIDHovered] )
 			{			
-				msHoldHandlerList[mnUIButtonIDHovered]( mnUIButtonIDHovered, mulUIButtonIDHoveredParam, mulUIButtonIDHoveredIndex, TRUE, TRUE );
+				msHoldHandlerList[mnUIButtonIDHovered]( mnUIButtonIDHovered, mulUIButtonIDHoveredParam, mulUIButtonIDHoveredID, TRUE, TRUE );
 				mnUIButtonIDHeld = mnUIButtonIDHovered;
 				mulUIButtonIDHeldParam = mulUIButtonIDHoveredParam;
-				mulUIButtonIDHeldIndex = mulUIButtonIDHoveredIndex;
+				mulUIButtonIDHeldID = mulUIButtonIDHoveredID;
 			}
 		}
 	}
@@ -122,7 +122,7 @@ BOOL	bRet = FALSE;
 	{
 		if ( msHoldHandlerList[mnUIButtonIDHeld])
 		{			
-			msHoldHandlerList[mnUIButtonIDHeld]( mnUIButtonIDHeld, mulUIButtonIDHeldParam, mulUIButtonIDHoveredIndex, FALSE, FALSE );
+			msHoldHandlerList[mnUIButtonIDHeld]( mnUIButtonIDHeld, mulUIButtonIDHeldParam, mulUIButtonIDHeldID, FALSE, FALSE );
 		}
 		mnUIButtonIDHeld = NOTFOUND;
 		bRet = TRUE;		
@@ -145,7 +145,7 @@ BOOL	bRet = FALSE;
 				}
 				else if ( msHoldHandlerList[mnUIButtonIDPressed])
 				{			
-					msHoldHandlerList[mnUIButtonIDPressed]( mnUIButtonIDPressed, mulUIButtonIDPressedParam, mulUIButtonIDHoveredIndex, FALSE, FALSE );
+					msHoldHandlerList[mnUIButtonIDPressed]( mnUIButtonIDPressed, mulUIButtonIDPressedParam, mulUIButtonIDHoveredID, FALSE, FALSE );
 				}
 				 mnUIButtonIDPressed = NOTFOUND;
 				 bRet = TRUE;
@@ -210,11 +210,11 @@ void		UISetCurrentCursorPosition( int nX, int nY )
 }
 
 
-void		UIHoverIDSet( int nButtonID, uint32 ulParam, uint32 ulIndex )
+void		UIHoverIDSet( int nButtonID, uint32 ulParam, uint32 ulID )
 {
 	mnUIButtonIDHovered = nButtonID;
 	mulUIButtonIDHoveredParam = ulParam;
-	mulUIButtonIDHoveredIndex = ulIndex;
+	mulUIButtonIDHoveredID = ulID;
 }
 
 

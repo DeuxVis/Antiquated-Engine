@@ -41,7 +41,7 @@ public:
 	{
 		FreeTexture( NULL );
 	}
-	void 	Initialise( const char* szDefName );
+	void 	Initialise( const char* szDefName, int nGlobalVerticalOffset );
 
 	void	SetTextureFileName( const char* szTextureFilename )
 	{
@@ -78,9 +78,10 @@ public:
 
 	void	EnableFiltering( BOOL bEnable ) { m_bFilteringOn = bEnable; }
 	void	SetFixedWidth( BOOL bEnable, int nWidth ) { m_bIsFixedWidth = bEnable; }
-	BOOL	IsFilteringOn( void ) { return( m_bFilteringOn ); }
-	BOOL	IsFixedWidth( void ) { return( m_bIsFixedWidth ); }
-	BOOL	IsBottomAligned( void ) { return( m_bIsBottomAligned ); }
+	BOOL	IsFilteringOn( void ) const { return( m_bFilteringOn ); }
+	BOOL	IsFixedWidth( void ) const { return( m_bIsFixedWidth ); }
+	BOOL	IsBottomAligned( void ) const { return( m_bIsBottomAligned ); }
+	int		GetGlobalVerticalOffset( void ) const { return( m_GlobalVerticalOffset );}
 
 	int			mnFontOccupyWidthReduction;
 	int			mnFontOccupyHeightReduction;
@@ -103,6 +104,7 @@ private:
 	BOOL		m_bFilteringOn;
 	BOOL		m_bIsFixedWidth;
 	BOOL		m_bIsBottomAligned;
+	int			m_GlobalVerticalOffset = 0;
 
 };
 
@@ -185,16 +187,18 @@ extern void	FontDefFreeAll( void );
 }
 #endif
 
+
 class FontSystem : public InterfaceModule
 {
 public:
-	BOOL	LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags );
+	BOOL	LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags, int nGlobalVerticalOffset = 0 );
 	void	InitialiseFontBuffers( void );
 	HRESULT	InitialiseFonts( BOOL bUseDefaultFonts );
 	
 	void	Text( int nLayer, int nX, int nY, const char* szString, uint32 ulCol, int nFont );
 	void	TextCentre( int nLayer, int nX1, int nX2, int nY, const char* szString, uint32 ulCol, int nFont );
 	void	TextRight( int nLayer, int nX, int nY, const char* szString, uint32 ulCol, int nFont );
+	const char*	TextLimitWidth( int nLayer, int nX1, int nY, const char* szString, uint32 ulCol, int nFont, int nMaxWidth );
 
 	void	RenderStrings( int nLayer );
 	void	ClearStrings( void );

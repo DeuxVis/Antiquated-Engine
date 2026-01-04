@@ -26,6 +26,7 @@ public:
 	void	Text( int nLayer, int nX, int nY, uint32 ulCol, int nFont, const char* szString, ...  );
 	void	TextCentre( int nLayer, int nX1, int nY, uint32 ulCol, int nFont, const char* szString, ... );
 	void	TextRight( int nLayer, int nX, int nY, uint32 ulCol, int nFont, const char* szString, ... );
+	const char*	TextLimitWidth( int nLayer, int nX, int nY, int nMaxWidth, uint32 ulCol, int nFont, const char* szString, ...  );
 
 	int		GetStringWidth( const char* pcString, int nFont );
 	int		GetStringHeight( const char* pcString, int nFont );
@@ -80,6 +81,8 @@ public:
 	const InterfaceRECT&		GetDrawDimensions() const { return( m_DrawRect );} 
 	void		SetDrawRegion( int nX, int nY, int nWidth, int nHeight );
 	void		SetRenderSurfaceSize( int W, int H ) { mnRenderSurfaceWidth = W; mnRenderSurfaceHeight = H; }
+
+	BOOL		LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags );
 
 	// TODO - Make these private and expose all the functionality through this top level interface
 	TexturedOverlays*		mpTexturedOverlays;

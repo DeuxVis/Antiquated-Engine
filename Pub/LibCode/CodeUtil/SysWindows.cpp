@@ -14,6 +14,7 @@
 #include <errno.h>
 
 #include <windows.h>
+#include <string>
 
 #include <direct.h>
 #include <commctrl.h>
@@ -678,7 +679,7 @@ char	acExtensionRequired[64];
 //   szOutputFile where the filename will be stocked is expected to be an allocated 256 char string.
 //   Returns True if all ok, False if error or user pressed cancel button.
 //--------------------------------------------------------
-BOOL SysGetSaveFilenameDialog( char* szFileFilter, char* szTitle, char* szDefaultFolder, int nFlags, char* szOutputFile )
+BOOL SysGetSaveFilenameDialog( const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, char* szOutputFile )
 {
 OPENFILENAME	ofnOpen;
 
@@ -709,11 +710,12 @@ OPENFILENAME	ofnOpen;
 }
 
 
+
 //-------------------------------------------------------
 // Function : SysGetOpenFilenameDialog				Windows Implementation
 //   This function is used to allow the user to select a file from the folders on their puter
 //--------------------------------------------------------
-BOOL SysGetOpenFilenameDialog( char* szFileFilter, char* szTitle, char* szDefaultFolder, int nFlags, char* szOutputFile )
+BOOL SysGetOpenFilenameDialog( const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, char* szOutputFile )
 {
 OPENFILENAME	ofnOpen;
 

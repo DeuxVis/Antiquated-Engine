@@ -28,14 +28,9 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
 		if ( mulButtonID != 0 )
 		{
-			if ( UIHoverItem( drawRect.x, drawRect.y, drawRect.w, drawRect.h) )
-			{
+			if ( UIX::CheckForPress( this, drawRect, mulButtonID, mulButtonParam ) )
+			{		
 				pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x20FFFFFF );				
-			}
-
-			if ( UIIsPressed( drawRect.x, drawRect.y, drawRect.w, drawRect.h ) == TRUE )
-			{
-				UIPressIDSet( mulButtonID, mulButtonParam, GetID() );
 			}
 		}
 		break;

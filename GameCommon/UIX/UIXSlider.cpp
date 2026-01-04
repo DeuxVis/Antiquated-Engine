@@ -94,7 +94,7 @@ uint32		ulCol = 0xf0505070;
 			ulCol = 0xf0505070;
 			if ( UIHoverItem( mRenderRect.x + nMinBarPos - 6, mRenderRect.y, 6, mRenderRect.h ) == TRUE )
 			{
-				UIHoverIDSet( UIX_SLIDER_BAR_MINRANGE, GetID() );
+				UIHoverIDSet( UIX_SLIDER_BAR_MINRANGE, 0, GetID() );
 				ulCol = 0xf0a08050;
 			}
 			pInterface->Triangle( 1, mRenderRect.x + nMinBarPos - 6, mRenderRect.y + 6, mRenderRect.x + nMinBarPos, mRenderRect.y + 6, mRenderRect.x + nMinBarPos, mRenderRect.y, ulCol, ulCol, ulCol );
@@ -103,7 +103,7 @@ uint32		ulCol = 0xf0505070;
 			ulCol = 0xf0505070;
 			if ( UIHoverItem( mRenderRect.x + nMaxBarPos, mRenderRect.y, 6, mRenderRect.h ) == TRUE )
 			{
-				UIHoverIDSet( UIX_SLIDER_BAR_MAXRANGE, GetID() );
+				UIHoverIDSet( UIX_SLIDER_BAR_MAXRANGE, 0, GetID() );
 				ulCol = 0xf0a08050;
 			}
 			pInterface->Rect( 0, mRenderRect.x + nMaxBarPos, mRenderRect.y + 6, 6, mRenderRect.h - 6, ulCol );
@@ -132,7 +132,7 @@ uint32		ulCol = 0xf0505070;
 			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, nBarMaxW, mRenderRect.h, 0xf0010101 );
 			if ( UIHoverItem( mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h ) == TRUE )
 			{
-				UIHoverIDSet( UIX_SLIDER_BAR, GetID() );
+				UIHoverIDSet( UIX_SLIDER_BAR, 0, GetID() );
 			}
 			// INDICATOR
 			pInterface->Rect( 0, mRenderRect.x + nBarPos - 2, mRenderRect.y, 4, mRenderRect.h, 0xf0303040 );
@@ -159,7 +159,7 @@ uint32		ulCol = 0xf0505070;
 				
 			if ( UIHoverItem( mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h ) == TRUE )
 			{
-				UIHoverIDSet( UIX_SLIDER_BAR, GetID() );
+				UIHoverIDSet( UIX_SLIDER_BAR, 0, GetID() );
 			}
 			// Notches
 			pInterface->Rect( 1, mRenderRect.x, mRenderRect.y + mRenderRect.h - 5, 1, 5, 0xa0909090 );

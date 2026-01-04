@@ -84,7 +84,7 @@ int				nY;
 uint32			ulNewCol = ulCol;
 int				nSegmentMaxW;
 int				nStringWidth;
-char*			pcSecondLine;
+const char*			pcSecondLine;
 
 	nSegmentX = (int)( InterfaceGetWidth() * fX );
 	nY = (int)( InterfaceGetHeight() * fY );

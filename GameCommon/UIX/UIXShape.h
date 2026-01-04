@@ -12,7 +12,7 @@ protected:
 
 	void	Initialise( int mode, BOOL bBlocks,uint32 ulCol1, uint32 ulCol2, uint32 ulButtonID, uint32 ulButtonParam);
 	
-	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
+	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT pDisplayRect );
 
 private:
 	uint32				mulCol1 = 0xC0C0C0C0;

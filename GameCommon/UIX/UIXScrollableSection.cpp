@@ -79,7 +79,7 @@ int		childContentsHeight = GetChildContentsHeight();
 		int		nMouseX, nMouseY;
 				
 			UIGetCurrentCursorPosition( &nMouseX, &nMouseY );
-			UIHoverIDSet( UIX_SCROLLABLE_SECTION_SCROLLBAR, GetID(), 0 );
+			UIHoverIDSet( UIX_SCROLLABLE_SECTION_SCROLLBAR, 0, GetID() );
 			mHoverOffsetY = nMouseY - nBarY;
 		}
 
@@ -141,13 +141,13 @@ int		nMouseX, nMouseY;
 }
 
 
-void	UIXScrollableSection::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress )
+void	UIXScrollableSection::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
 {
-UIXScrollableSection*		pSection = (UIXScrollableSection*)UIX::GetUIXObjectByID( ulParam );
+UIXScrollableSection*		pSection = (UIXScrollableSection*)UIX::GetUIXObjectByID( ulIDParam );
 
 	if ( pSection )
 	{
-		pSection->HoldHandler( ulIndex, bIsHeld, bFirstPress );
+		pSection->HoldHandler( ulParam, bIsHeld, bFirstPress );
 	}
 }
 
