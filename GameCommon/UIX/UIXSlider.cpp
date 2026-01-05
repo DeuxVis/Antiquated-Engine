@@ -6,7 +6,7 @@
 #include "UIXSlider.h"
 
 
-void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitialVal, float fMinStep )
+void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitialVal, float fMinStep, const char* szText )
 {
 	mfMinVal = fMin;
 	mfMaxVal = fMax;
@@ -17,6 +17,10 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 	mfMinStep = fMinStep;
 	mMode = mode;
 	mulUserParam = ulUserParam;
+	if ( szText )
+	{
+		mText = szText;
+	}
 }
 
 
@@ -27,11 +31,21 @@ int		cursY = 0;
 float	fRange = (float)mRenderRect.w;
 float		fMinVal = mfInitialMinVal;
 float		fMaxVal = mfInitialMaxVal;
+float		fVal;
 
 	UIGetCurrentCursorPosition( &cursX, &cursY );
 	
-	if ( fRange <= 0.0f ) fRange = 1.0f;
-	float	fVal = ((cursX - mRenderRect.x) * (fMaxVal-fMinVal)) / fRange;
+	if ( mMode == VERTICAL_VALUE )
+	{
+		fRange = (float)( mRenderRect.h );
+		if ( fRange <= 0.0f ) fRange = 1.0f;
+		fVal = (((mRenderRect.y + mRenderRect.h) - cursY) * (fMaxVal-fMinVal)) / fRange;
+	}
+	else
+	{
+		if ( fRange <= 0.0f ) fRange = 1.0f;
+		fVal = ((cursX - mRenderRect.x) * (fMaxVal-fMinVal)) / fRange;
+	}
 	fVal += fMinVal;
 	if ( fVal < fMinVal ) fVal = fMinVal;
 	if ( fVal > fMaxVal ) fVal = fMaxVal;
@@ -142,6 +156,40 @@ uint32		ulCol = 0xf0505070;
 			pInterface->Rect( 1, mRenderRect.x + nBarMaxW, mRenderRect.y + mRenderRect.h - 3, 1, 3, 0xa0909090 );
 		}
 		break;
+	case VERTICAL_VALUE:
+		{
+		int		nKnobH = mRenderRect.w;
+		int		nBarMaxH = mRenderRect.h - nKnobH;
+		int		nBarH = (int)(((mfCurrentVal-mfMinVal) * nBarMaxH) / (mfMaxVal-mfMinVal));
+		uint32	ulKnobCol = 0xf0303040;
+			if ( nBarH > nBarMaxH ) nBarH = nBarMaxH;
+			if ( nBarH < 0 ) nBarH = 0;
+
+			// TODO - This should be editable text box
+//			pInterface->Text( 1, X + 110, lineY + 4, 0xd0e0e0e0, 3, "%d%%", (int)(pProperty->Value(0)*100.0f) );
+			// Background
+			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h, 0xf0080808 );
+				
+			if ( UIHoverItem( mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h ) == TRUE )
+			{
+				UIHoverIDSet( UIX_SLIDER_BAR, 0, GetID() );
+				ulKnobCol = 0xf0505070;
+			}
+			// Notches
+			pInterface->Rect( 1, mRenderRect.x, mRenderRect.y, 4, 1, 0xa0909090 );
+			pInterface->Rect( 1, mRenderRect.x, mRenderRect.y + (mRenderRect.h/2), 3, 1, 0xa0909090 );
+			pInterface->Rect( 1, mRenderRect.x, mRenderRect.y + mRenderRect.h, 4, 1, 0xa0909090 );
+			// Bar
+			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y + nBarMaxH + nKnobH - nBarH, mRenderRect.w, nBarH, 0xf0202020 );
+
+			int		nKnobTop =  mRenderRect.y + mRenderRect.h - (nBarH + nKnobH);
+			pInterface->Rect( 0, mRenderRect.x, nKnobTop, mRenderRect.w, nKnobH, ulKnobCol );
+
+			int			textY = nKnobTop + (((nKnobH - pInterface->GetStringHeight(mText.c_str(), 3))-1)/2);
+
+			pInterface->TextCentre( 1, mRenderRect.x + (mRenderRect.w / 2), textY, 0xD0F0F0F0, 3, mText.c_str() );
+		}
+		break;
 //	case SCALER10:
 	case VALUE:
 	default:
@@ -185,6 +233,7 @@ void		UIXSlider::OnUpdate( float fDelta )
 	{
 		switch( mMode )
 		{
+		case VERTICAL_VALUE:
 		case VALUE:
 		case ANGLE:
 		default:

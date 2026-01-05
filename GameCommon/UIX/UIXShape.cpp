@@ -34,6 +34,9 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 			}
 		}
 		break;
+	case 1:
+		pInterface->OutlineBox( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol1 );
+		break;
 	}
 
 	if ( mBlocks == FALSE )

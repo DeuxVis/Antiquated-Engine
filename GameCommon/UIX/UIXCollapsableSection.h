@@ -9,7 +9,7 @@ class UIXCollapsableSection : public UIXObject
 friend class UIX;
 public:
 	void	UpdateUIStateData( UIStateData* pData );
-
+	void	SetNotCollapsable() { mbCollapsable = FALSE; mbIsCollapsed = FALSE;}
 protected:
 	UIXCollapsableSection( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
 
@@ -29,6 +29,7 @@ private:
 
 	std::string			mTitle;
 	BOOL				mbIsCollapsed = FALSE;
+	BOOL				mbCollapsable = TRUE;
 	int					mMode = 0;
 
 	UIXRECT				mLastRender;

@@ -1,6 +1,7 @@
 #ifndef UIX_SLIDER_H
 #define UIX_SLIDER_H
 
+#include <string>
 #include "UIX.h"
 
 class UIXSlider : public UIXObject
@@ -13,7 +14,7 @@ public:
 protected:
 	UIXSlider( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
 
-	void	Initialise( UIX_SLIDER_MODE mode,uint32 ulUserParam, float fMin, float fMax, float fInitialVal, float fMinStep );
+	void	Initialise( UIX_SLIDER_MODE mode,uint32 ulUserParam, float fMin, float fMax, float fInitialVal, float fMinStep, const char* szText );
 	
 	void	OnHeldUpdate( BOOL bIsHeld, BOOL bFirstPress );
 	void	OnMinRangeHeldUpdate( BOOL bIsHeld, BOOL bFirstPress );
@@ -35,6 +36,7 @@ private:
 	float				mfMinStep = 0.1f;
 	uint32				mulUserParam = 0;
 	BOOL				mbIsHeld = FALSE;
+	std::string			mText;
 
 	fnValueUpdateCallback	mValueUpdateFunc = NULL;
 };

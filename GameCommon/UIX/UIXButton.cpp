@@ -26,7 +26,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 	{
 	case UIXBUTTON_NORMAL:
 	default:
-		UIButtonDraw( mulButtonID, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mTitle.c_str(), mMode, mulButtonParam, GetID() );
+		UIButtonDraw( mulButtonID, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mTitle.c_str(), 5, mulButtonParam, GetID() );
 		break;
 	case UIXBUTTON_RECT_ICON:
 		pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol );
@@ -37,7 +37,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 				pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x20FFFFFF );				
 			}
 		}
-		UIX::DrawIcon( pInterface, mIconNum, UIXRECT(drawRect.x + 2, drawRect.y + 2, drawRect.w - 4, drawRect.h - 4), 0xc0c0c0c0 );
+		UIX::DrawIcon( pInterface, mIconNum, UIXRECT(drawRect.x + 1, drawRect.y + 1, drawRect.w - 2, drawRect.h - 2), 0xE0A0A0A0 );
 		break;		
 	case UIXBUTTON_PLAIN_RECT:
 		pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol );
@@ -68,9 +68,10 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 				cogRect.h -= 4;
 				cogRect.w = cogRect.h;
 				// Draw  
-				UIX::DrawIcon( pInterface, 0, cogRect, 0xa0606060 );
+				UIX::DrawIcon( pInterface, 2, cogRect, 0xa0a0a0a0 );
 			}
 		}
+
 		break;
 
 	}

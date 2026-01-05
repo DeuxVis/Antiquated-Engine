@@ -7,25 +7,29 @@
 void	UIXPage::Initialise( const char* szTitle, BOOL bUseClipping )
 {
 	mbUseClipping = bUseClipping;
+	mTitle = szTitle;
 }
 
-UIXRECT		UIXPage::OnRender( InterfaceInstance* pInterface, UIXRECT rect )
+UIXRECT		UIXPage::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
+UIXRECT		renderRect = GetActualRenderRect( displayRect );
+
 	if ( mbUseClipping )
 	{
 		pInterface->DrawAllElements();
-		mPageRenderRect = rect;
+		mPageRenderRect = displayRect;
 	//	pInterface->SetViewport( rect.x, rect.y, rect.w, rect.h );
 		pInterface->SetRenderCanvas();
 	}
 
-	rect.y = 0;
-	rect.h = 0;
-	return rect;
+	displayRect.y = 0;
+	displayRect.h = 0;
+	return displayRect;
 }
 
 void	UIXPage::OnPostChildrenRender( InterfaceInstance* pInterface )
 {
+
 	if ( mbUseClipping )
 	{
 		pInterface->DrawAllElements();

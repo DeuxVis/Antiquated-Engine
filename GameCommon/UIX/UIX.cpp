@@ -30,7 +30,8 @@ UIXObject*					UIX::mspMousewheelHoverObject = NULL;
 UIXObject*					UIX::mspModalObject = NULL;
 int							UIX::msSelectionPriority = 0;
 int							UIX::msPressedSelectionPriority = 0;
-
+int							UIX::mshUIXIconOverlays[MAX_NUM_UIX_ICONS] = { NOTFOUND };
+int							UIX::mshUIXIconsList[MAX_NUM_UIX_ICONS] = { NOTFOUND };
 
 uint32						UIX::msDragSourceParam = 0;
 //--------------------------------------------------------------------------------------
@@ -197,6 +198,15 @@ void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam )
 {
 	switch( nButtonID )
 	{
+	case UIX_LISTBOX_SELECT:
+		{
+		UIXListBox*		pListBox = (UIXListBox*)msComponentIDMap[ulIDParam];
+			if ( pListBox )
+			{
+				pListBox->OnPressed( ulParam );
+			}
+		}	
+		break;
 	case UIX_CHECKBOX:
 		{
 		UIXCheckbox*		pCheckbox = (UIXCheckbox*)msComponentIDMap[ulIDParam];
@@ -299,6 +309,8 @@ void		UIX::Initialise( int mode )
 	UIRegisterButtonPressHandler( UIX_DROPDOWN_HEADER, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_DROPDOWN_ENTRY, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_CHECKBOX, ButtonPressHandler );
+	UIRegisterButtonPressHandler( UIX_LISTBOX_SELECT, ButtonPressHandler );
+	
 		
 	UIRegisterHoldHandler( UIX_SLIDER_BAR, SliderHoldHandler );
 	UIRegisterHoldHandler( UIX_SLIDER_BAR_MINRANGE, SliderHoldHandler );
@@ -325,21 +337,7 @@ void		UIX::Reset()
 	msPagesList.clear();
 }
 
-void	UIX::DrawIcon( InterfaceInstance* pInterface, int iconNum, UIXRECT rect, uint32 ulCol )
-{
-	switch( iconNum )
-	{
-	case 1:
-		pInterface->OutlineBox( 1, rect.x + 2, rect.y + 2, rect.w - 4, rect.h - 4, ulCol );
-		pInterface->Rect( 1, rect.x + 5, rect.y + (rect.h/2), rect.w - 10, 2, ulCol );
-		break;
-	default:
-		// TODO - load sprites n create overlays etc
-		pInterface->Rect( 1, rect.x, rect.y, rect.w, rect.h, ulCol );
-		break;
-	}
-	
-}
+
 
 BOOL		UIX::IsMouseHover( UIXRECT rect )
 {
@@ -349,6 +347,11 @@ BOOL		UIX::IsMouseHover( UIXRECT rect )
 void		UIX::Render( InterfaceInstance* pxInterface )
 {
 UIXRECT		pageDisplayRect;
+
+	for ( int loop = 0; loop < MAX_NUM_UIX_ICONS; loop++ )
+	{
+		mshUIXIconOverlays[loop] = NOTFOUND;
+	}
 
 	msSelectionPriority = 0;
 	msPressedSelectionPriority = 0;
@@ -373,7 +376,50 @@ void		UIX::DeleteObject( UIXObject* pObject )
 	delete pObject;
 }
 
-UIXObject*		UIX::AddPage( UIXRECT rect, const char* szTitle, BOOL bUseClipping  )
+void			UIX::DrawIcon( InterfaceInstance* pInterface, int iconNum, UIXRECT rect, uint32 ulCol )
+{
+	if ( ( iconNum >= 0 ) &&
+		 ( iconNum < MAX_NUM_UIX_ICONS ) )
+	{
+	int		nIconPageNum = iconNum / 36;
+	
+		iconNum %= 36;
+		float	fU = ((iconNum%6) * 19.0f) / 128.0f;
+		float	fV = ((iconNum/6) * 19.0f) / 128.0f;
+		float	fUW = 19.0f / 128.0f;
+		float	fVH = 19.0f / 128.0f;
+
+		if ( mshUIXIconOverlays[nIconPageNum] == NOTFOUND )
+		{
+		int		hTexture = mshUIXIconsList[nIconPageNum];
+
+			mshUIXIconOverlays[nIconPageNum] = pInterface->CreateNewTexturedOverlay( 1, hTexture );
+		}
+		pInterface->TexturedRect( mshUIXIconOverlays[nIconPageNum], rect.x, rect.y, rect.w, rect.h, ulCol, fU, fV, fU + fUW, fV + fVH );
+	}	
+}
+
+void	UIX::LoadIconSheet( InterfaceInstance* pInterface, int sheetNum, const char* szFilename )
+{
+	mshUIXIconsList[sheetNum] = pInterface->GetTexture( szFilename, 0 );
+}
+
+void		UIX::LoadIcon( InterfaceInstance* pInterface, int iconNum, const char* szFilename )
+{
+	mshUIXIconsList[iconNum] = pInterface->GetTexture( szFilename, 0 );
+}
+
+
+UIXObject*		UIX::AddSubPage( UIXObject* pxContainer, UIXRECT rect, const char* szTitle, BOOL bUseClipping )
+{
+UIXPage*		pNewPage = new UIXPage( msulNextObjectID++, rect );
+
+	pNewPage->Initialise( szTitle, bUseClipping );
+	pxContainer->mContainsList.push_back( pNewPage );
+	return( pNewPage );
+}
+
+UIXObject*		UIX::AddPage( UIXRECT rect, const char* szTitle, BOOL bUseClipping )
 {
 UIXPage*		pNewPage = new UIXPage( msulNextObjectID++, rect );
 
@@ -485,11 +531,11 @@ UIXListBox*		pNewListbox = new UIXListBox( msulNextObjectID++, rect );
 	return( pNewListbox );
 }
 
-UIXSlider*			UIX::AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitial, float fMinStep )
+UIXSlider*			UIX::AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitial, float fMinStep, const char* szText )
 {
 UIXSlider*		pNewSlider = new UIXSlider( msulNextObjectID++, rect );
 
-	pNewSlider->Initialise( mode, ulUserParam, fMin, fMax, fInitial, fMinStep );
+	pNewSlider->Initialise( mode, ulUserParam, fMin, fMax, fInitial, fMinStep, szText );
 	pxContainer->mContainsList.push_back( pNewSlider );
 	return( pNewSlider );
 }

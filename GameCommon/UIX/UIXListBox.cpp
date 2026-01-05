@@ -21,17 +21,29 @@ UIXListBoxEntry*	pNewElement = new UIXListBoxEntry( mpListBox, szElementName, ul
 	return( pNewElement );
 }
 
+
 UIXRECT			UIXListBoxEntry::Render( InterfaceInstance* pInstance, UIXRECT rect )
 {
 	mLastRender = rect;
 	mLastRender.h = 21;
+	uint32	ulTextCol = 0xd0d0d0d0;
 
 	if ( UIHoverItem(  rect.x, rect.y, rect.w, 19 ) == TRUE )
 	{
 		UIHoverIDSet( UIX_LISTBOX, mIndex, mpListBox->GetID() );
+		ulTextCol = 0xE0F0F0F0;
+		pInstance->Rect( 0, rect.x, rect.y, rect.w, 19, 0x40404040 );
 	}
 
-	pInstance->Text( 1, rect.x + 5, rect.y + 2, 0xd0d0d0d0, 0, mTitle.c_str() );
+	if ( mpListBox->IsSelectable() )
+	{
+		if ( UIIsPressed( rect.x, rect.y, rect.w, 19 ) )
+		{
+			UIPressIDSet( UIX_LISTBOX_SELECT, mulUserParam, mpListBox->GetID() );
+		}
+	}
+
+	pInstance->Text( 1, rect.x + 5, rect.y + 2, ulTextCol, 0, mTitle.c_str() );
 	rect.ConsumeVertical( 22 );
 
 	if ( !mChildren.empty() )
@@ -50,6 +62,14 @@ UIXRECT			UIXListBoxEntry::Render( InterfaceInstance* pInstance, UIXRECT rect )
 
 //-----------------------------------------------
 
+void	UIXListBox::OnPressed( uint32 ulParam )
+{
+	if ( mSelectionChangedCallback )
+	{
+		mSelectionChangedCallback( this, ulParam );
+	}
+}
+
 void	UIXListBox::Initialise( int mode, BOOL bContentsDraggable, int dragItemType )
 {
 	mMode = mode;
@@ -59,7 +79,7 @@ void	UIXListBox::Initialise( int mode, BOOL bContentsDraggable, int dragItemType
 
 UIXRECT		UIXListBox::OnRender( InterfaceInstance* pInterface, UIXRECT rect )
 {
-UIXRECT		lineRect = rect;
+UIXRECT		lineRect = GetActualRenderRect( rect );
 
 	for( UIXListBoxEntry* pElement : mListBoxEntries )
 	{
@@ -85,6 +105,8 @@ UIXRECT		lineRect = rect;
 	}
 	// 
 	// TODO - Return correct occupyRect
+	rect.h = GetDisplayRect().h + 1;
+	rect.y = GetDisplayRect().h + 1;
 	return( rect );
 }
 

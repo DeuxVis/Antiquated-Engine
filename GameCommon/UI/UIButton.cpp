@@ -133,6 +133,7 @@ int		nFont = 1;
 		ulBackgroundCol = GetColWithModifiedAlpha( 0xFFFFFFFF, fAlphaVal );
 		break;
 	case 5:		// Always small font
+	case 7:		// Always small font (hovered)
 		nFont = 3;
 		ulBackgroundCol = GetColWithModifiedAlpha( 0xF0E0E0E0, fAlphaVal );
 		break;

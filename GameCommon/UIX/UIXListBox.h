@@ -7,6 +7,7 @@
 
 class UIXListBox;
 
+
 class UIXListBoxEntry
 {
 friend class UIXListBox;
@@ -30,6 +31,8 @@ private:
 	uint32							mIndex;
 };
 
+typedef	void(*fnListboxSelectionChangedCallback)( UIXObject* pxSourceObject, uint32 ulElementParam );
+
 
 class UIXListBox : public UIXObject
 {
@@ -38,18 +41,22 @@ friend class UIXListBoxEntry;
 public:
 	UIXListBoxEntry*		AddElement(	const char* szElementName, uint32 ulElementParam );
 
+	void		SetSelectionChangedCallback( fnListboxSelectionChangedCallback func ) { mSelectionChangedCallback = func; }
+
 	const UIXListBoxEntry*		GetElementByListIndex( int index ) const;
+
 protected:
 	UIXListBox( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
 
 	void	Initialise( int mode, BOOL bContentsDraggable, int dragItemType );
 
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
-
+	
+	void			OnPressed( uint32 ulParam );
 	void			HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress );
 	static void		HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
 	static void		RegisterControlHandlers();
-
+	BOOL			IsSelectable( ) { return( mSelectionChangedCallback != NULL ); }
 	uint32			GetNextIndex( UIXListBoxEntry* pListBoxEntry ) { mListBoxEntriesFlatList.push_back( pListBoxEntry ); return( mulNextElementIndex++ ); }
 private:
 
@@ -64,7 +71,7 @@ private:
 	int					mDragItemType = 0;
 	UIXRECT				mDragRectOriginal;
 	UIXRECT				mDragRectMouseOriginal;
-	
+	fnListboxSelectionChangedCallback		mSelectionChangedCallback = NULL;
 };
 
 

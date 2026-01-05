@@ -1,6 +1,7 @@
 #ifndef UIX_PAGE_H
 #define UIX_PAGE_H
 
+#include <string>
 #include "UIX.h"
 
 class UIXPage : public UIXObject
@@ -16,6 +17,7 @@ public:
 private:
 	UIXRECT		mPageRenderRect;
 	BOOL		mbUseClipping = FALSE;
+	std::string		mTitle;
 
 };
 

@@ -33,8 +33,10 @@ int	Y = renderRect.y;
 int	W = renderRect.w;
 int	H = renderRect.h;
 uint32		ulCol = 0x90303030;
+uint32		ulTextCol = 0xd0d0d0d0;
 int		headerH = 20;
 int		nHeaderOffsetX = 0;
+int			nHeaderW = W;
 BOOL	bMouseIsOverSectionHeader = FALSE;
 
 	switch( mMode )
@@ -43,14 +45,21 @@ BOOL	bMouseIsOverSectionHeader = FALSE;
 		ulCol = 0x90303040;
 		nHeaderOffsetX = 20;
 		break;
+	case 2:
+		ulCol = 0x90404040;
+		ulTextCol = 0xd0f0c080;
+		nHeaderOffsetX = 5;
+		nHeaderW -= 44;
+		headerH = 21;
+		break;
 	default:
 		break;
 	}
 
-	mLastRender = UIXRECT( X,Y,W, headerH );
-	pInterface->Rect( 0, X, Y, W, headerH, ulCol );
+	mLastRender = UIXRECT( X,Y,nHeaderW, headerH );
+	pInterface->Rect( 0, X, Y, nHeaderW, headerH, ulCol );
 		
-	if ( UIHoverItem( X, Y, W, headerH ) == TRUE )
+	if ( UIHoverItem( X, Y, nHeaderW, headerH ) == TRUE )
 	{
 		UIHoverIDSet( UIX_COLLAPSABLE_SECTION_HEADER, 0, GetID() );
 		bMouseIsOverSectionHeader = TRUE;
@@ -58,21 +67,24 @@ BOOL	bMouseIsOverSectionHeader = FALSE;
 
 //	UIButtonRegion( UIX_COLLAPSABLE_SECTION_HEADER, X, Y, W, headerH, GetID() );
 
-	if ( CheckDragHoverRegion( UIXRECT( X, Y, W, headerH ) ) )
+	if ( CheckDragHoverRegion( UIXRECT( X, Y, nHeaderW, headerH ) ) )
 	{
-		pInterface->Rect( 0, X, Y + headerH, W, 2, 0xd08080c0 );	
+		pInterface->Rect( 0, X, Y + headerH, nHeaderW, 2, 0xd08080c0 );	
 		UIX::HoverAcceptDragItem( this );
 	}
 
-	pInterface->Text( 1, X + 20 + nHeaderOffsetX, Y + 4, 0xd0d0d0d0, 3, mTitle.c_str() );
+	pInterface->Text( 1, X + 20 + nHeaderOffsetX, Y + 4, ulTextCol, 3, mTitle.c_str() );
 
-	if ( !mbIsCollapsed )
+	if ( mbCollapsable )
 	{
-		pInterface->Triangle( 1, X + 4 + nHeaderOffsetX, Y + 8, X + 12 + nHeaderOffsetX, Y + 8, X + 8 + nHeaderOffsetX, Y + 16, 0xa0a0a0a0, 0xa0a0a0a0, 0xa0a0a0a0 );	
-	}
-	else
-	{
-		pInterface->Triangle( 1, X + 4 + nHeaderOffsetX, Y + 6, X + 10 + nHeaderOffsetX, Y + 10, X + 4 + nHeaderOffsetX, Y + 14, 0xa0a0a0a0, 0xa0a0a0a0, 0xa0a0a0a0 );	
+		if ( !mbIsCollapsed )
+		{
+			pInterface->Triangle( 1, X + 4 + nHeaderOffsetX, Y + 8, X + 12 + nHeaderOffsetX, Y + 8, X + 8 + nHeaderOffsetX, Y + 16, 0xa0a0a0a0, 0xa0a0a0a0, 0xa0a0a0a0 );	
+		}
+		else
+		{
+			pInterface->Triangle( 1, X + 4 + nHeaderOffsetX, Y + 6, X + 10 + nHeaderOffsetX, Y + 10, X + 4 + nHeaderOffsetX, Y + 14, 0xa0a0a0a0, 0xa0a0a0a0, 0xa0a0a0a0 );	
+		}
 	}
 
 	displayRect.h = headerH + 1;
