@@ -22,6 +22,7 @@ public:
 		VECT	xPos;
 		uint32	ulTimeAdded;
 		BOOL	mbIsVisible;
+		uint32	ulTintCol;
 	} TRAIL_POINT;
 
 	TrailListInternal()
@@ -61,6 +62,7 @@ public:
 
 	void	SetScale( float fScale ) { mfScale = fScale; }
 	void	SetAlpha( float fAlpha ) { mfAlpha = fAlpha; }
+	void	SetTint( uint32 ulCol ) { mulTintCol = ulCol; }
 	void	SetDecayTime( uint32 ulTime ) { mulDecayTime = ulTime; }
 	void	RequestDelete( BOOL bImmediately ) { mbWantsDelete = TRUE; mbDeleteImmediately = bImmediately; }
 
@@ -112,6 +114,7 @@ private:
 	float	mfScale;
 	float	mfAlpha;
 	uint32	mulDecayTime;
+	uint32	mulTintCol;
 
 	int		mhTrailVertexBuffer;
 	int		mhTrailIndexBuffer;
@@ -190,17 +193,17 @@ uint32	TrailListInternal::GetColour( int nIndex )
 		{
 		uint32	nExpiryTime;
 		uint32	ulCol;
-		int		nColMax = 0xD0;
+		int		nColMax = 0xFF;
 
 			if ( mnType == 0 )
 			{
-				nColMax = 0xB0;
+				nColMax = 0xFF;
 			}
 			nExpiryTime = mulDecayTime;
 			if ( ulAliveTime < nExpiryTime )
 			{
 				ulAliveTime = ((nExpiryTime-ulAliveTime) * nColMax)/nExpiryTime;
-				ulCol = 0xF0000000 | (ulAliveTime<<16) | (ulAliveTime<<8) | ulAliveTime;
+				ulCol = (ulAliveTime<<24) | axTrailListInternal[nActualIndex].ulTintCol;
 				ulCol = GetColWithModifiedAlpha( ulCol, mfAlpha );
 				return( ulCol );
 			}
@@ -226,6 +229,7 @@ void	TrailListInternal::AddPos( const VECT* pxIn, BOOL bDoDraw )
 uint32	ulCurrentTick = SysGetTick();
 
 	axTrailListInternal[ mnNextTrailPoint ].mbIsVisible = bDoDraw;
+	axTrailListInternal[ mnNextTrailPoint ].ulTintCol = mulTintCol;
 	if ( pxIn )
 	{
 		axTrailListInternal[ mnNextTrailPoint ].xPos = *pxIn;
@@ -323,12 +327,7 @@ BOOL	bStillAlive = FALSE;
 							mxLastValidTangent = xTangent;
 						}
 						VectNormalize( &xTangent );
-						float fDot = VectDot( &xTangent, &xCamDir );
-						if ( fDot > 0.9f )
-						{
-						int		test = 0;
-							test++;
-						}						VectCross( &xRight, &xTangent, &xCamDir );
+						VectCross( &xRight, &xTangent, &xCamDir );
 						VectNormalize( &xRight );
 		
 					}
@@ -443,6 +442,7 @@ void	TrailListInternal::Initialise( int nType, TRAIL_HANDLE hHandle )
 {
 	mnType = nType;
 	mnTrailHandle = hHandle;
+	mulTintCol = 0xFFFFFF;
 	InitTrailBuffers();
 
 }
@@ -620,5 +620,26 @@ TrailListInternal*		pTrail = TrailFind( hHandle );
 	if ( pTrail )
 	{
 		pTrail->SetScale(fBandScale);
+	}	
+}
+
+void		TrailSetAlpha( TRAIL_HANDLE hHandle, float fAlpha )
+{
+TrailListInternal*		pTrail = TrailFind( hHandle );
+	
+	if ( pTrail )
+	{
+		pTrail->SetAlpha(fAlpha);
+	}	
+}
+
+
+void		TrailSetTint( TRAIL_HANDLE hHandle, uint32 ulTintCol )
+{
+TrailListInternal*		pTrail = TrailFind( hHandle );
+	
+	if ( pTrail )
+	{
+		pTrail->SetTint( ulTintCol );
 	}	
 }
