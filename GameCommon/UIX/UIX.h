@@ -104,7 +104,7 @@ struct UIXRECT
 	int h;
 };
 
-typedef	UIXRECT(*fnCustomRenderCallback)( InterfaceInstance* pInterface, UIXRECT rect, uint32 ulUserParam1, uint32 ulUserParam2 );
+typedef	UIXRECT(*fnCustomRenderCallback)( UIXObject* pObj, InterfaceInstance* pInterface, UIXRECT rect, uint32 ulUserParam );
 
 class UIXObject
 {
@@ -191,7 +191,7 @@ public:
 	static UIXDropdown*					AddDropdown( UIXObject* pxContainer, UIXRECT rect );
 	static UIXText*						AddText( UIXObject* pxContainer, UIXRECT rect, uint32 ulCol = 0xc0c0c0c0, int font = 0, UIX_TEXT_FLAGS fontFlags = NONE,  const char* szTitle = NULL, ... );
 	static UIXShape*					AddShape( UIXObject* pxContainer, UIXRECT rect, int mode = 0, BOOL bBlocks = FALSE, uint32 ulCol1 = 0xC0C0C0C0, uint32 ulCol2 = 0xC0C0C0C0, uint32 ulButtonID = 0, uint32 ulButtonParam = 0 );
-	static UIXCustomRender*				AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam1 = 0, uint32 ulUserParam2 = 0  );
+	static UIXCustomRender*				AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam = 0  );
 	static UIXCheckbox*					AddCheckbox( UIXObject* pxContainer, UIXRECT rect, UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc );
 	static UIXModalPopup*				AddModalPopup( UIXObject* pxContainer, UIXRECT rect );
 

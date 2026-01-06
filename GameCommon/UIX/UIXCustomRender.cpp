@@ -5,12 +5,11 @@
 #include "UIXCustomRender.h"
 
 
-void	UIXCustomRender::Initialise( fnCustomRenderCallback renderFunc, uint32 ulUserParam1, uint32 ulUserParam2 )
+void	UIXCustomRender::Initialise( fnCustomRenderCallback renderFunc, uint32 ulUserParam )
 {
 	mfnRenderCallback = renderFunc;
-	mulUserParam1 = ulUserParam1;
-	mulUserParam2 = ulUserParam2;
-	
+	mulUserParam = ulUserParam;
+
 }
 	
 UIXRECT		UIXCustomRender::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
@@ -18,7 +17,7 @@ UIXRECT		UIXCustomRender::OnRender( InterfaceInstance* pInterface, UIXRECT displ
 UIXRECT		renderRect = GetActualRenderRect( displayRect );
 UIXRECT		occupyRect;
 
-	occupyRect = mfnRenderCallback( pInterface, renderRect, mulUserParam1, mulUserParam2 );
+	occupyRect = mfnRenderCallback( this, pInterface, renderRect, mulUserParam );
 
 	displayRect.h = 0;//
 	displayRect.y = GetDisplayRect().y + occupyRect.h;	

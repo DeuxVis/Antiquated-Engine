@@ -107,6 +107,8 @@ private:
 	uint32	mulLastInternalAddTick;
 	int		mnType;
 	VECT	mxCurrentPos;
+	VECT	mxLastValidTangent;
+	VECT	mxLastValidRight;
 	float	mfScale;
 	float	mfAlpha;
 	uint32	mulDecayTime;
@@ -139,13 +141,19 @@ BOOL	bSwitch = FALSE;
 	pxVertices = EngineVertexBufferGetBufferPointer( mhTrailVertexBuffer, MAX_TRAIL_VERTICES );
 	if ( pxVertices )
 	{
+#ifdef MAIN_GAME
 		fBaseV += ((nType%8) * 0.125f);
+#endif
 		for ( nLoop = 0; nLoop < MAX_TRAIL_VERTICES; nLoop++ )
 		{
 			pxVertices->color = 0xFFFFFFFF;
 			if ( bSwitch )
 			{
+#ifdef MAIN_GAME
 				pxVertices->tv = fBaseV + 0.120f;
+#else
+				pxVertices->tv = fBaseV + 0.9f;
+#endif
 			}
 			else
 			{
@@ -306,9 +314,23 @@ BOOL	bStillAlive = FALSE;
 						xTangent.x = xNextPos.x - xPos.x;
 						xTangent.y = xNextPos.y - xPos.y;
 						xTangent.z = xNextPos.z - xPos.z;
+						if ( VectGetLength( &xTangent ) < 0.01f )
+						{
+							xTangent = mxLastValidTangent;
+						}
+						else
+						{
+							mxLastValidTangent = xTangent;
+						}
 						VectNormalize( &xTangent );
-						VectCross( &xRight, &xTangent, &xCamDir );
+						float fDot = VectDot( &xTangent, &xCamDir );
+						if ( fDot > 0.9f )
+						{
+						int		test = 0;
+							test++;
+						}						VectCross( &xRight, &xTangent, &xCamDir );
 						VectNormalize( &xRight );
+		
 					}
 					ulLastCol= GetColour( nLoop );
 					if ( ulLastCol != 0 )
@@ -429,7 +451,7 @@ void	TrailListInternal::Initialise( int nType, TRAIL_HANDLE hHandle )
 
 void		TrailsInitialise( void )
 {
-	mshTrailTextureHandle = EngineLoadTexture( "Data/Textures/trails.bmp", 0, NULL );
+	mshTrailTextureHandle = EngineLoadTexture( "Data/Textures/TrailFader.png", 0, NULL );
 
 }
 
@@ -504,10 +526,11 @@ int				nTotalPolysDrawn = 0;
 
 	EngineEnableZWrite( TRUE );
 	EngineEnableCulling(1);
-	EngineEnableLighting( TRUE );
+
 //	char	acString[256]; 
 //	sprintf( acString, "%d trails active, %d drawn (%d polys)", nCount, nNumDrawn, nTotalPolysDrawn );
 //	InterfaceText( 1, 100, 100, acString, 0xffffffff, 0 );
+	EngineSetBlendMode( BLEND_MODE_ALPHABLEND );
 
 }
 
@@ -588,4 +611,14 @@ TrailListInternal*		pTrail = TrailFind( hHandle );
 	{
 		pTrail->RequestDelete( bDeleteImmediately );
 	}
+}
+
+void		TrailSetScale( TRAIL_HANDLE hHandle, float fBandScale )
+{
+TrailListInternal*		pTrail = TrailFind( hHandle );
+	
+	if ( pTrail )
+	{
+		pTrail->SetScale(fBandScale);
+	}	
 }

@@ -16,6 +16,15 @@ UIXDropdownEntry::UIXDropdownEntry( UIXDropdown* pParent, const char* szTitle, u
 
 //-------------------------------------
 
+UIXDropdown::~UIXDropdown()
+{
+	for ( UIXDropdownEntry* pListEntry : mDropdownEntries )
+	{
+		delete pListEntry;
+	}
+	mDropdownEntries.clear();
+}
+
 
 void	UIXDropdown::Initialise( int mode )
 {

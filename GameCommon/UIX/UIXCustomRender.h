@@ -10,14 +10,13 @@ friend class UIX;
 protected:
 	UIXCustomRender( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
 
-	void	Initialise( fnCustomRenderCallback renderFunc, uint32 ulUserParam1, uint32 ulUserParam2 );
+	void	Initialise( fnCustomRenderCallback renderFunc, uint32 ulUserParam );
 	
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
 
 private:
 	fnCustomRenderCallback		mfnRenderCallback;
-	uint32			mulUserParam1;
-	uint32			mulUserParam2;
+	uint32			mulUserParam;
 
 };
 

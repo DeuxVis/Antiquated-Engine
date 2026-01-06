@@ -173,7 +173,9 @@ void	UIXObject::Shutdown()
 	for ( UIXObject* pContainedObject : mContainsList )
 	{
 		pContainedObject->Shutdown();
+		delete pContainedObject;
 	}
+	mContainsList.clear();
 }
 
 void		UIXObject::OnReceiveDragItem( int dragType, UIXObject* pxSourceObject, uint32 ulDragParam )
@@ -365,7 +367,12 @@ UIXRECT		pageDisplayRect;
 
 void		UIX::Shutdown()
 {
-
+	for( UIXObject* pxObjects : msPagesList )
+	{
+		pxObjects->Shutdown();
+		delete pxObjects;
+	}
+	msPagesList.clear();
 }
 
 void		UIX::DeleteObject( UIXObject* pObject )
@@ -473,11 +480,11 @@ UIXButton*		pNewButton = new UIXButton( msulNextObjectID++, rect );
 	return( pNewButton );
 }
 
-UIXCustomRender*	UIX::AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam1, uint32 ulUserParam2 )
+UIXCustomRender*	UIX::AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam )
 {
 UIXCustomRender*		pNewCustomRender = new UIXCustomRender( msulNextObjectID++, rect );
 
-	pNewCustomRender->Initialise( renderFunc, ulUserParam1, ulUserParam2 );
+	pNewCustomRender->Initialise( renderFunc, ulUserParam );
 	pxContainer->mContainsList.push_back( pNewCustomRender );
 	return( pNewCustomRender );
 }

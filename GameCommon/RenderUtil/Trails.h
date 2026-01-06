@@ -9,6 +9,7 @@ extern TRAIL_HANDLE		TrailCreate( int nMode, const VECT* pxStartPoint, int nFade
 extern void		TrailUpdate( TRAIL_HANDLE hHandle, const VECT* pxPos, BOOL bVisible );
 extern void		TrailUpdateEx( TRAIL_HANDLE hHandle, const VECT* pxPos, BOOL bVisible, uint32 ulUpdateIntervalMS );
 
+extern void		TrailSetScale( TRAIL_HANDLE hHandle, float fBandScale );
 extern void		TrailDelete( TRAIL_HANDLE hHandle, BOOL bDeleteImmediately );
 
 //--------------------------------------------------------------

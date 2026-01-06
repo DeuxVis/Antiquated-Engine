@@ -32,6 +32,7 @@ class UIXDropdown : public UIXObject
 friend class UIX;
 friend class UIXDropdownEntry;
 public:
+	~UIXDropdown();
 	UIXDropdownEntry*		AddElement(	const char* szElementName, uint32 ulElementParam );
 
 	const UIXDropdownEntry*		GetElementByListIndex( int index ) const;
