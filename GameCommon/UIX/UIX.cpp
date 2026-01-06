@@ -43,6 +43,11 @@ UIXObject::UIXObject( uint32 uID, UIXRECT rect )
 
 }
 
+UIXObject::~UIXObject()
+{
+	// todo - Get rid of this by using smart(er) pointers for things like the mousewheel hover
+	if ( UIX::mspMousewheelHoverObject == this ) UIX::mspMousewheelHoverObject = NULL;
+}
 
 void	UIXObject::Update( float delta )
 {
@@ -377,9 +382,6 @@ void		UIX::Shutdown()
 
 void		UIX::DeleteObject( UIXObject* pObject )
 {
-	// todo - Get rid of this by using smart(er) pointers for things like the mousewheel hover
-	if ( mspMousewheelHoverObject == pObject ) mspMousewheelHoverObject = NULL;
-
 	msPagesList.erase( std::remove(msPagesList.begin(), msPagesList.end(), pObject), msPagesList.end() );
 	msComponentIDMap.erase( pObject->GetID() );
 	pObject->Shutdown();

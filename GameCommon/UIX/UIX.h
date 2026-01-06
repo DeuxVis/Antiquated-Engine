@@ -110,6 +110,8 @@ class UIXObject
 {
 friend class UIX;
 public:
+	~UIXObject();
+
 	uint32			GetID() { return( mulID ); }
 
 	void		SetDragReceiveCallback( int dragType, fnDragReceiveCallback func, uint32 ulDestParam );
@@ -168,6 +170,7 @@ class UIX
 {
 friend class UIXObject;
 public:
+
 	static void		Initialise( int mode );
 	static void		Update( float delta );
 	static void		Render( InterfaceInstance* pInterface );

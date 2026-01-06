@@ -182,7 +182,7 @@ void	BaseMeshDX9::Create( int nNumFaces, int nNumVertices, int nFlags )
 		}
 		else
 		{
-			D3DXCreateMeshFVF( nNumFaces, nNumVertices, D3DXMESH_MANAGED, D3DFVF_CUSTOMVERTEX, mpEngineDevice, &mpDXPlatformMesh );
+			D3DXCreateMeshFVF( nNumFaces, nNumVertices, D3DXMESH_WRITEONLY, D3DFVF_CUSTOMVERTEX, mpEngineDevice, &mpDXPlatformMesh );
 		}
 		break;
 	case 1:		// Standard system-mem model
