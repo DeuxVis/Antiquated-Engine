@@ -1523,6 +1523,7 @@ float	fDelta;
 
 		EngineSetTexture( 0, m_MainSceneObject.GetTextureHandle() );
 
+
 		if ( pxModelData->xCollisionAttachData.nModelHandle != NOTFOUND )
 		{
 			EnableWindow( GetDlgItem( mhwndMainDialog, IDC_SHOW_COLLISION ), TRUE );

@@ -23,6 +23,10 @@ Particle::~Particle()
 
 }
 
+void	Particle::SetGraphicHandle( TEXTURE_HANDLE hTex, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )
+{
+	mnParticleGraphicsNum = ParticleGraphicsCreateHandle( hTex, fGridScale, bUseRotation, renderFlags );
+}
 
 void	Particle::SetGraphic( const char* szSpriteTextureName, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )
 {

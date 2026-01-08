@@ -656,20 +656,44 @@ int		boMipFilter = 1;
 #endif
 }
 
-
-TEXTURE_HANDLE	EngineLoadTextureFromMem( byte* pbMem, int nMemSize, int width, int height, int format, int nMipMode, int* pnErrorFlag )
+TEXTURE_HANDLE		EngineGetFreeTextureHandle( )
 {
-int	nRet;
 int		nLoop = 1;
-LPGRAPHICSTEXTURE	pxTexture = NULL;
-int		nMipLevels = 1;
-//char	acString[256];
-
 	while ( maTextureReferences[nLoop].nUsed != 0 )
 	{
 		nLoop++;
 		if ( nLoop == MAX_TEXTURES_IN_MANAGER ) return( 0 );
 	}
+	return( nLoop );
+}
+
+void					EngineSetTextureHandleDirect( TEXTURE_HANDLE hTex, LPGRAPHICSTEXTURE pTexture )
+{
+	maTextureReferences[hTex].pTexture = pTexture;
+}
+
+TEXTURE_HANDLE		EngineCreateTextureHandleFromRawTexture( LPGRAPHICSTEXTURE pTexture )
+{
+int		nLoop = EngineGetFreeTextureHandle();
+
+	maTextureReferences[nLoop].pTexture = pTexture;
+	maTextureReferences[nLoop].nUsed = 1;
+	maTextureReferences[nLoop].nState = TEXTURE_STATE_LOADED;
+	strcpy( maTextureReferences[nLoop].szFilename, "<ExternTex>" );
+	maTextureReferences[nLoop].boTextureHasAlpha = TRUE;
+	maTextureReferences[nLoop].boIsRenderTarget = FALSE;
+	maTextureReferences[nLoop].pDepthStencilSurface = NULL;
+	return( nLoop );
+}
+
+
+TEXTURE_HANDLE	EngineLoadTextureFromMem( byte* pbMem, int nMemSize, int width, int height, int format, int nMipMode, int* pnErrorFlag )
+{
+int	nRet;
+int		nLoop = EngineGetFreeTextureHandle();
+LPGRAPHICSTEXTURE	pxTexture = NULL;
+int		nMipLevels = 1;
+//char	acString[256];
 
 #ifdef TUD11
 	PANIC_IF( TRUE, "DX11 EngineLoadTextureFromMem TBI" );
