@@ -129,12 +129,14 @@ protected:
 
 	virtual void		OnUpdate( float delta ) {}
 	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT rect ) { rect.h = 0; return rect; }
+	virtual void		OnPostRender( InterfaceInstance* pInterface, UIXRECT rect ) {}
 	virtual void		OnShutdown() {}
 	virtual void		OnPostChildrenRender( InterfaceInstance* pInterface ) { }
 	virtual void		OnMouseWheel( float fAmount ) {}
 
 	void		Update( float delta );
 	UIXRECT		Render( InterfaceInstance* pInterface, UIXRECT rect );
+	void		PostRender(InterfaceInstance* pInterface);	
 	void		Shutdown();
 
 	BOOL		CheckDragHoverRegion( UIXRECT dragReceiveRegion );
@@ -161,6 +163,7 @@ private:
 	UIXRECT			mDisplayRect;
 	void*			mpUserObject = NULL;
 	int				mChildContentsHeight = 0;
+	UIXRECT			mLastRenderDisplayRect;
 };
 
 

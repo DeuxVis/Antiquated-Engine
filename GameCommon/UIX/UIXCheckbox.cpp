@@ -63,7 +63,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 	UIX::CheckForPress( this, drawRect, UIX_CHECKBOX, 0 );
 	
 	displayRect.h = 0;
-	displayRect.y = GetDisplayRect().y + GetDisplayRect().h;		// displayRect.y returns the lowest point we drew to
+	displayRect.y = GetDisplayRect().y + GetDisplayRect().h + 1;		// displayRect.y returns the lowest point we drew to
 	return displayRect;
 }
 
