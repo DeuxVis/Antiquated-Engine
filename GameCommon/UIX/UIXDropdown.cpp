@@ -68,8 +68,8 @@ pInterface->Rect( 1, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0xa
 	}
 
 
-	occupyRect.h = 0;
-	occupyRect.y = renderRect.h + 1;
+	occupyRect.h = 0;//GetDisplayRect().h + 1;
+	occupyRect.y = GetDisplayRect().y + GetDisplayRect().h + 1;
 	return occupyRect;
 }
 
