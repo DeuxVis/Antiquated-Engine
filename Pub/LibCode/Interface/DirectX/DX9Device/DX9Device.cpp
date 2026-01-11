@@ -668,6 +668,8 @@ LPGRAPHICSDEVICE	pNewGraphicsDevice;
 			}
 		}
 
+		int		nNumAdapters = mpD3D->GetAdapterCount();
+
 		// Get the current desktop display mode, so we can set up a back
 		// buffer of the same format
 		if( FAILED( mpD3D->GetAdapterDisplayMode( D3DADAPTER_DEFAULT, &d3ddm ) ) )
@@ -675,7 +677,8 @@ LPGRAPHICSDEVICE	pNewGraphicsDevice;
 			PANIC_IF(TRUE,"Couldn't get display mode" );
 			return;
 		}
-
+		D3DADAPTER_IDENTIFIER9	identifier;
+		mpD3D->GetAdapterIdentifier( 0, 0, &identifier );
 		// Set up the present parameters - This is generally what odd vid cards have a problem with
 		D3DPRESENT_PARAMETERS d3dpp;
 		ZeroMemory( &d3dpp, sizeof(d3dpp) );
