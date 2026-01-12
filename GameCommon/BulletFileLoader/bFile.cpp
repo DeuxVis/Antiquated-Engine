@@ -1302,7 +1302,7 @@ int bFile::resolvePointersStructRecursive(char *strcPtr, int dna_nr, int verbose
 						}
 						//skip the *
 						printf("<%s type=\"pointer\"> ",&memName[1]);
-						printf("%d ", array[a]);
+						printf("%d ", (int)( array[a] ) );
 						printf("</%s>\n",&memName[1]);
 					}
 
@@ -1320,7 +1320,7 @@ int bFile::resolvePointersStructRecursive(char *strcPtr, int dna_nr, int verbose
 						printf("  ");
 					}
 					printf("<%s type=\"pointer\"> ",&memName[1]);
-					printf("%d ", ptr);
+					printf("%d ", (int)ptr);
 					printf("</%s>\n",&memName[1]);
 				}
 				ptr = findLibPointer(ptr);
@@ -1501,7 +1501,7 @@ void bFile::resolvePointers(int verboseMode)
 				char* oldType = fileDna->getType(oldStruct[0]);
 				
 				if (verboseMode & FD_VERBOSE_EXPORT_XML)
-					printf(" <%s pointer=%d>\n",oldType,dataChunk.oldPtr);
+					printf(" <%s pointer=%d>\n",oldType, (int)(dataChunk.oldPtr));
 
 				resolvePointersChunk(dataChunk, verboseMode);
 
