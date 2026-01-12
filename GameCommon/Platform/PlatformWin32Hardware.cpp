@@ -39,5 +39,5 @@ GUID *pguid = 0x00;
 	pguid = new GUID;
 	CoCreateGuid(pguid);
 	// Convert the GUID to a string
-	sprintf( szGUIDOut, "%08x-%04x%04x-%08x-%08x", pguid->Data1, pguid->Data2, pguid->Data3, (unsigned int*)&pguid->Data4[0],(unsigned int*)&pguid->Data4[4] );
+	sprintf( szGUIDOut, "%08x-%04x%04x-%08x-%08x", pguid->Data1, pguid->Data2, pguid->Data3, *(unsigned int*)&pguid->Data4[0],*(unsigned int*)&pguid->Data4[4] );
 }
