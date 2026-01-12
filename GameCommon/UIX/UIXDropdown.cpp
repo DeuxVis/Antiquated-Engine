@@ -53,11 +53,11 @@ int			entryIndex = 0;
 		pInterface->Text( 1, renderRect.x + 3, renderRect.y + 3, 0xD0D0D0D0, 3, mpSelectedEntry->GetText().c_str() );
 	}
 		
-	if ( ( UIX::GetModalObject() == NULL ) ||
-		 ( UIX::GetModalObject() == this ) ) 
-	{
+//	if ( ( UIX::GetModalObject() == NULL ) ||
+//		 ( UIX::GetModalObject() == this ) ) 
+//	{
 		UIX::CheckForPress( this, renderRect, UIX_DROPDOWN_HEADER, 0 );
-	}
+//	}
 	
 	if ( mbIsExpanded )
 	{
