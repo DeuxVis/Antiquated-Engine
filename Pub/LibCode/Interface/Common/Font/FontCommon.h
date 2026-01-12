@@ -1,6 +1,7 @@
 #ifndef FONT_COMMON_H
 #define FONT_COMMON_H
 
+#include "../../DirectX/InterfaceTypesDX.h"
 
 #define		MAX_FONTS_IN_GAME		8
 #define		SIZE_OF_FONT_VERTEX_BUFFER		1020
@@ -38,15 +39,15 @@ public:
 	}
 	~CFontDef()
 	{
-		FreeTexture();
+		FreeTexture( NULL );
 	}
-	void 	Initialise( const char* szDefName );
+	void 	Initialise( const char* szDefName, int nGlobalVerticalOffset );
 
 	void	SetTextureFileName( const char* szTextureFilename )
 	{
 		strcpy( m_szTextureFilename, szTextureFilename );
 	}
-	void 	LoadTexture( void );
+	void 	LoadTexture( InterfaceInstance* pInterfaceInstance );
 
 
 	void	LookupChar( BYTE cChar, FONT_UVCHAR* pOut )
@@ -55,10 +56,12 @@ public:
 	}
 	int		GetTextureSizeX( void ) { return m_TextureSizeX; }
 	int		GetTextureSizeY( void ) { return m_TextureSizeY; }
-	void	FreeTexture( void )
+
+	void	FreeTexture( InterfaceInstance* pInterface )
 	{
 		if ( mhTexture != NOTFOUND )
 		{
+			// todo - FIX THIS.. NEEDS TO know the interface instance
 			InterfaceReleaseTexture( mhTexture );
 			mhTexture = NOTFOUND;
 		}
@@ -71,13 +74,14 @@ public:
 #endif
 	}
 
-	void	SetTextureAsCurrent( void );
+	void	SetTextureAsCurrent( InterfaceInstance* );
 
 	void	EnableFiltering( BOOL bEnable ) { m_bFilteringOn = bEnable; }
 	void	SetFixedWidth( BOOL bEnable, int nWidth ) { m_bIsFixedWidth = bEnable; }
-	BOOL	IsFilteringOn( void ) { return( m_bFilteringOn ); }
-	BOOL	IsFixedWidth( void ) { return( m_bIsFixedWidth ); }
-	BOOL	IsBottomAligned( void ) { return( m_bIsBottomAligned ); }
+	BOOL	IsFilteringOn( void ) const { return( m_bFilteringOn ); }
+	BOOL	IsFixedWidth( void ) const { return( m_bIsFixedWidth ); }
+	BOOL	IsBottomAligned( void ) const { return( m_bIsBottomAligned ); }
+	int		GetGlobalVerticalOffset( void ) const { return( m_GlobalVerticalOffset );}
 
 	int			mnFontOccupyWidthReduction;
 	int			mnFontOccupyHeightReduction;
@@ -100,6 +104,7 @@ private:
 	BOOL		m_bFilteringOn;
 	BOOL		m_bIsFixedWidth;
 	BOOL		m_bIsBottomAligned;
+	int			m_GlobalVerticalOffset = 0;
 
 };
 
@@ -165,9 +170,6 @@ extern BOOL	InterfaceFontIsFilteringOn( int nFontNum );
 
 
 extern HRESULT InitialiseFont( BOOL bUseDefaultFonts );
-extern void RenderStrings( int );
-extern void ClearStrings( void );
-extern void FreeFont( BOOL bFreeEverything );
 
 extern void InitialiseFontBuffers( void );
 
@@ -176,7 +178,6 @@ extern int GetFontTextureHeight( int nFont );
 extern int					mnCurrentFontFlags;
 extern TEXT_BUFFER			maxTextBuffer[];
 extern FLATVERTEX*			mpFontVertices;
-extern int					mnFontVertexIndex;
 extern int		mnPosInTextBuffer;
 
 extern int FontDrawText( char* pcString, RECT* pxAlignRect, int nAlign, uint32 ulCol, int nFont, int nFlag, float fTextScale );
@@ -186,5 +187,70 @@ extern void	FontDefFreeAll( void );
 }
 #endif
 
+
+class FontSystem : public InterfaceModule
+{
+public:
+	void	Shutdown();
+
+	BOOL	LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags, int nGlobalVerticalOffset = 0 );
+	void	InitialiseFontBuffers( void );
+	HRESULT	InitialiseFonts( BOOL bUseDefaultFonts );
+	
+	void	Text( int nLayer, int nX, int nY, const char* szString, uint32 ulCol, int nFont );
+	void	TextCentre( int nLayer, int nX1, int nX2, int nY, const char* szString, uint32 ulCol, int nFont );
+	void	TextRight( int nLayer, int nX, int nY, const char* szString, uint32 ulCol, int nFont );
+	const char*	TextLimitWidth( int nLayer, int nX1, int nY, const char* szString, uint32 ulCol, int nFont, int nMaxWidth );
+
+	void	RenderStrings( int nLayer );
+	void	ClearStrings( void );
+	void	FreeResources( BOOL bFreeEverything );
+
+	BOOL	IsFontFixedWidth( int nFontNum );
+	BOOL	IsFontFilteringOn( int nFontNum );
+	BOOL	FontSetAsCurrentTexture( int nFontNum );
+	BOOL	FontLookupChar( int nFontNum, char cChar, FONT_UVCHAR* pOut );
+	BOOL	FontSetFixedOffsets( int nFontNum, int nPosOffsetX, int nPosOffsetY, int nOccupyWidthReduction, int nOccupyHeightReduction );
+	void	FreeFont( int nFontNum );
+	BOOL	IsFontLoaded( int nFontNum );
+	int		ChopTextWidth( char* pcString, int nWidth, int nFont );
+	int		GetStringWidth( const char* pcString, int nFont );
+	int		GetStringHeight( const char* pcString, int nFont );
+	int		TextBoxMaxHeight(int nLayer, int nX, int nY, const char* szString, int ulCol, int font, int nMaxWidth, int nMaxHeight, BOOL bLeftAlign);
+
+private:
+	void	InitialiseFontBuffersDX( void );
+
+	void	StringRenderBegin( void );
+
+	void	AddFontString( int nX, int nY, const char* szString, uint32 ulCol, int nFlag );
+	void	AddFontStringCenter( int nY, int nX1, int nX2, const char* szString, uint32 ulCol );
+
+	int		FontDrawText( char* pcString, RECT* pxAlignRect, int nAlign, uint32 ulCol, int nFont, int nFlag, float fTextScale );
+	void	AddCharVertices( FLOATRECT* pxScrRect, FLOATRECT* pxTexRect, uint32 ulCol, int nFlag );
+	float	FontDrawChar( BYTE cChar, int nX, int nY, uint32 ulCol, int nFont, int nFlag, float fScaleOverride );
+	float	FontGetCharUWidthAndScreenWidth( char cChar, int nFont, int nFlags, float* pfUWidth, int* pnScrWidth, float *pfAdvance );
+	float	GetFontAdvance( BYTE cChar, int nFont );
+	int		GetFontTextureWidth( int nFont );
+	int		GetFontTextureHeight( int nFont );
+	float	GetFontVHeight( BYTE cChar, int nFont );
+	float	GetFontV( BYTE cChar, int nFont );
+	float	GetFontU( BYTE cChar, int nFont );
+	float	GetFontUWidth( BYTE cChar, int nFont );
+
+	void	DrawFontBufferDX( void );
+	void	FontDefFreeAll( void );
+
+	int							mnCurrentRenderFont = 0;
+
+	IGRAPHICSVERTEXBUFFER*		mpxFontVertexBuffer1 = NULL;
+	IGRAPHICSVERTEXBUFFER*		mpxFontVertexBuffer2 = NULL;
+	IGRAPHICSVERTEXBUFFER*		mpxCurrentFontVertexBuffer = NULL;
+
+	CFontDef*	mpFontDefs[MAX_FONTS_IN_GAME] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+
+	FLATVERTEX*			mpFontVertices = NULL;
+	int					mnFontVertexIndex = 0;
+};
 
 #endif

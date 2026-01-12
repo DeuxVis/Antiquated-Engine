@@ -20,12 +20,14 @@
 
 // -------- Forward declarations of gameside C functions
 
+// TODO - Have these passed in on init rather than assumed like this..
 extern void		MainInitialise( void );
 extern void		MainUpdate( void );
 extern void		MainShutdown( void );
 
 extern void		MainOnPress( int X, int Y );
 extern void		MainOnRelease( int X, int Y );
+extern void		MainOnReleaseRightButton( int X, int Y );
 
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -74,7 +76,7 @@ void DetectMemoryLeaks()
    _CrtSetReportMode(_CRT_ASSERT,_CRTDBG_MODE_FILE); 
    _CrtSetReportFile(_CRT_ASSERT,_CRTDBG_FILE_STDERR); 
 
-//	_CrtSetBreakAlloc( 1844 );
+//	_CrtSetBreakAlloc( 10623 );
 } 
 #endif
 
@@ -536,6 +538,15 @@ LRESULT WINAPI WindowsMsgProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 		mwMouseY = HIWORD(lParam);
 		MainOnPress( mwMouseX, mwMouseY );
 		break;
+	case WM_RBUTTONUP:
+		{
+		uint32	ulExtraInfo = GetMessageExtraInfo();
+			mwMouseX = LOWORD(lParam);
+			mwMouseY = HIWORD(lParam);
+
+			MainOnReleaseRightButton( mwMouseX, mwMouseY );
+		}
+		break;
 	case WM_LBUTTONUP:
 		{
 		uint32	ulExtraInfo = GetMessageExtraInfo();
@@ -654,7 +665,7 @@ const char*		szWindowTitle = mszWindowName;
 
 WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WindowsMsgProc, 0L, 0L,
                   GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
-                  "Herd", NULL };
+                  "GamesForMay Window", NULL };
 
 	// Create window
 	InterfaceInitWindow( szWindowTitle, (void*)&wc, bAllowResize );

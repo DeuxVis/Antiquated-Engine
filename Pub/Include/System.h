@@ -167,8 +167,8 @@ enum
 
 extern BOOL	SysMessageBox( char* acError, char* acTitle, int nFlags );
 
-extern BOOL	SysGetOpenFilenameDialog( char* szFileFilter, char* szTitle, char* szDefaultFolder, int nFlags, char* szOutputFile );
-extern BOOL	SysGetSaveFilenameDialog( char* szFileFilter, char* szTitle, char* szDefaultFolder, int nFlags, char* szOutputFile );
+extern BOOL	SysGetOpenFilenameDialog( const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, char* szOutputFile );
+extern BOOL	SysGetSaveFilenameDialog( const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, char* szOutputFile );
 extern BOOL	SysBrowseForFolderDialog( const char* szTitle, const char* szRootPath, char* szOutFolderName, const char* szDefaultPath );
 extern void	SysAddFileExtensionIfNeeded( char* szFilename, const char* szExtension );
 extern const char*	SysGetFileExtension( const char* szFilename );		// Returns a pointer to the extension within szFilename

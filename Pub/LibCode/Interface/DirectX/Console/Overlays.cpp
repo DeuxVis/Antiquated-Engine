@@ -6,34 +6,11 @@
 #include <Engine.h>
 
 #include "../../Common/Overlays/Overlays.h"
+#include "../../Common/InterfaceInstance.h"
 
 
-//------------------------------------------------------------------------------------------------------------
 
-#define		LINE_VERTEX_BUFFER_SIZE			65536
-#define		MAX_NUM_OVERLAY_LAYERS			4
-
-typedef struct
-{
-	IGRAPHICSVERTEXBUFFER*		mpxVertexBuffer;
-	int							mnNextOverlayVertex;
-	BOOL						mboBufferIsLocked;
-	FLATVERTEX*					mpOverlayVertices;
-
-} OVERLAY_VERTEX_BUFFER_CONTAINER;
-
-OVERLAY_VERTEX_BUFFER_CONTAINER		maOverlayVertexBuffer[ MAX_NUM_OVERLAY_LAYERS ];
-
-FLATVERTEX*	mpIconVertices = NULL;
-
-IGRAPHICSVERTEXBUFFER*		mpxOverlaysLineVertexBuffer = NULL;
-FLATVERTEX*	mpLineVertices = NULL;
-int			mnNextLineVertex = 0;
-BOOL	mbAdditiveOverlays = FALSE;
-
-//------------------------------------------------------------------------------------------------------------
-
-void	RenderLinesBuffer( void )
+void	Overlays::RenderLinesBuffer( void )
 {
 int		nDrawHowMany;
 
@@ -47,15 +24,32 @@ int		nDrawHowMany;
 
 	if ( nDrawHowMany > 0 )
 	{
-		EngineSetVertexFormat( VERTEX_FORMAT_FLATVERTEX );
-		EngineEnableLighting( FALSE );
-		EngineSetTexture( 0, NOTFOUND );
-		EngineSetColourMode( 0, COLOUR_MODE_DIFFUSE_ONLY );
-		EngineEnableFog( FALSE );
-		EngineEnableZTest( FALSE );
-		EngineEnableZWrite( FALSE );
-		EngineResetColourMode();
-		EngineEnableAlphaTest( 0 );
+		mpInterfaceD3DDevice->SetTexture( 0, NULL );
+		mpInterfaceD3DDevice->SetFVF( D3DFVF_FLATVERTEX );
+		mpInterfaceD3DDevice->SetRenderState( D3DRS_LIGHTING, FALSE );
+		mpInterfaceD3DDevice->SetRenderState( D3DRS_FOGENABLE, 0 );//nFlag );
+		mpInterfaceD3DDevice->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+		mpInterfaceD3DDevice->SetRenderState( D3DRS_ZENABLE, FALSE );
+		mpInterfaceD3DDevice->SetRenderState( D3DRS_ZWRITEENABLE, FALSE );
+		mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1 );
+		mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_DIFFUSE );
+		mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
+		mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE );	
+
+		//  Duplicating the state changes here so the engine knows whats what
+		//		((TODO) Should probably work out a cleaner way of handling this for multiple devices)
+		if ( mpInterfaceD3DDevice == EngineGetDXDevice() )
+		{			
+			EngineSetVertexFormat( VERTEX_FORMAT_FLATVERTEX );
+			EngineEnableLighting( FALSE );
+			EngineEnableFog( FALSE );
+			EngineEnableCulling( 0 );
+			EngineEnableZTest( FALSE );
+			EngineEnableZWrite( FALSE );
+			EngineSetColourMode( 0, COLOUR_MODE_DIFFUSE_ONLY );
+		}
+
+		// TODO.. Set properly
 		if ( mboRenderLineAlpha == TRUE )
 		{
 			EngineEnableBlend( TRUE );
@@ -65,19 +59,24 @@ int		nDrawHowMany;
 		{
 			EngineEnableBlend( FALSE );
 		}
-		InterfaceInternalDXSetStreamSource( 0, mpxOverlaysLineVertexBuffer, 0, sizeof(FLATVERTEX) );
+		mpInterfaceInstance->mpInterfaceInternals->SetStreamSource( 0, mpxOverlaysLineVertexBuffer, 0, sizeof(FLATVERTEX) );
 		mpInterfaceD3DDevice->DrawPrimitive( D3DPT_LINELIST, 0, nDrawHowMany );
 		
 		mnNextLineVertex = 0;
 	}
 }
 
-
 INTERFACE_API void InterfaceLine( int nLayer, int nX1, int nY1, int nX2, int nY2, uint32 ulCol1, uint32 ulCol2 )
 {
+	InterfaceInstanceMain()->mpOverlays->Line( nLayer, nX1, nY1, nX2, nY2, ulCol1, ulCol2 );
+}
+
+
+void Overlays::Line( int nLayer, int nX1, int nY1, int nX2, int nY2, uint32 ulCol1, uint32 ulCol2 )
+{
 FLATVERTEX*		pxLineVertex;
-int		nWidth = InterfaceGetWidth();
-int		nHeight = InterfaceGetHeight();
+int		nWidth = mpInterfaceInstance->GetWidth();
+int		nHeight = mpInterfaceInstance->GetHeight();
 
 	if ( !mpxOverlaysLineVertexBuffer ) return;
 
@@ -109,14 +108,14 @@ int		nHeight = InterfaceGetHeight();
 	pxLineVertex->color = ulCol1;
 //	mpLineVertices[mnNextLineVertex].tu = 0.0f;
 //	mpLineVertices[mnNextLineVertex].tv = 0.0f;
-	pxLineVertex->x = (float)nX1 + mnInterfaceDrawX;
-	pxLineVertex->y = (float)nY1 + mnInterfaceDrawY;
+	pxLineVertex->x = (float)nX1 + mpInterfaceInstance->GetDrawDimensions().x;
+	pxLineVertex->y = (float)nY1 + mpInterfaceInstance->GetDrawDimensions().y;
 	pxLineVertex->z = 0.0f;
 	pxLineVertex++;
 
 	pxLineVertex->color = ulCol2;
-	pxLineVertex->x = (float)nX2 + mnInterfaceDrawX;
-	pxLineVertex->y = (float)nY2 + mnInterfaceDrawY;
+	pxLineVertex->x = (float)nX2 + mpInterfaceInstance->GetDrawDimensions().x;
+	pxLineVertex->y = (float)nY2 + mpInterfaceInstance->GetDrawDimensions().y;
 	pxLineVertex->z = 0.0f;
 	
 	mnNextLineVertex += 2;
@@ -236,15 +235,22 @@ float	fV1;
 }
 
 
-
-
 INTERFACE_API void	InterfaceOverlaysAdditive( BOOL bFlag )
+{
+	InterfaceInstanceMain()->mpOverlays->EnableAdditive( bFlag );
+}
+
+void	Overlays::EnableAdditive( BOOL bFlag )
 {
 	mbAdditiveOverlays = bFlag;
 }
 
-
 INTERFACE_API void InterfaceShadedRect( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol1, uint32 ulCol2,uint32 ulCol3, uint32 ulCol4 )
+{
+	InterfaceInstanceMain()->mpOverlays->ShadedRect( nLayer, nX, nY, nWidth, nHeight, ulCol1, ulCol2, ulCol3, ulCol4 );
+}
+	
+void Overlays::ShadedRect( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol1, uint32 ulCol2,uint32 ulCol3, uint32 ulCol4 )
 {
 FLATVERTEX* pVertices;
 int nVertIndex;
@@ -343,11 +349,13 @@ OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
 
 /***************************************************************************
  * Function    : InterfaceRect
- * Params      : 
- * Returns     :
- * Description : 
  ***************************************************************************/
 INTERFACE_API void InterfaceRect( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol)
+{
+	InterfaceInstanceMain()->mpOverlays->Rect( nLayer, nX, nY, nWidth, nHeight, ulCol );
+}
+
+void Overlays::Rect( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol)
 {
 OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
 	
@@ -370,10 +378,16 @@ OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
 		pxContainer->mboBufferIsLocked = TRUE;
 	}
 	
-	pxContainer->mnNextOverlayVertex = AddOverlayVertices( pxContainer->mpOverlayVertices, nX + mnInterfaceDrawX, nY + mnInterfaceDrawY, nWidth, nHeight, ulCol, pxContainer->mnNextOverlayVertex, 0 );
+	pxContainer->mnNextOverlayVertex = AddOverlayVertices( pxContainer->mpOverlayVertices, nX + mpInterfaceInstance->GetDrawDimensions().x, nY + mpInterfaceInstance->GetDrawDimensions().y, nWidth, nHeight, ulCol, pxContainer->mnNextOverlayVertex, 0 );
 }
 
 INTERFACE_API void	InterfaceTri( int nLayer, int nX1, int nY1, int nX2, int nY2, int nX3, int nY3, uint32 ulCol1, uint32 ulCol2, uint32 ulCol3 )
+{
+	InterfaceInstanceMain()->mpOverlays->Triangle( nLayer, nX1, nY1, nX2, nY2, nX3, nY3, ulCol1, ulCol2, ulCol3 );
+}
+
+
+void	Overlays::Triangle( int nLayer, int nX1, int nY1, int nX2, int nY2, int nX3, int nY3, uint32 ulCol1, uint32 ulCol2, uint32 ulCol3 )
 {
 OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
 	
@@ -395,18 +409,29 @@ OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
 		}
 		pxContainer->mboBufferIsLocked = TRUE;
 	}
-		
-	pxContainer->mnNextOverlayVertex = AddOverlayTriVertices( pxContainer->mpOverlayVertices, nX1 + mnInterfaceDrawX, nY1 + mnInterfaceDrawY, nX2 + mnInterfaceDrawX, nY2 + mnInterfaceDrawY, nX3 + mnInterfaceDrawX, nY3 + mnInterfaceDrawY, ulCol1, ulCol2, ulCol3, pxContainer->mnNextOverlayVertex, 0 );
+
+	nX1 += mpInterfaceInstance->GetDrawDimensions().x;
+	nX2 += mpInterfaceInstance->GetDrawDimensions().x;
+	nX3 += mpInterfaceInstance->GetDrawDimensions().x;
+	nY1 += mpInterfaceInstance->GetDrawDimensions().y;
+	nY2 += mpInterfaceInstance->GetDrawDimensions().y;
+	nY3 += mpInterfaceInstance->GetDrawDimensions().y;
+
+	pxContainer->mnNextOverlayVertex = AddOverlayTriVertices( pxContainer->mpOverlayVertices, nX1, nY1, nX2, nY2, nX3, nY3, ulCol1, ulCol2, ulCol3, pxContainer->mnNextOverlayVertex, 0 );
 }
 
 
 /***************************************************************************
- * Function    : AddBox
- * Params      : 
- * Returns     :
- * Description : 
+ * Function    : InterfaceOutlineBox
  ***************************************************************************/
 INTERFACE_API void InterfaceOutlineBox ( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol )
+{
+	InterfaceInstanceMain()->mpOverlays->OutlineBox( nLayer, nX, nY, nWidth, nHeight, ulCol );
+	
+}
+
+	
+void Overlays::OutlineBox( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol )
 {
 uint32	ulColHi = ulCol;
 uint32	ulColLo;
@@ -445,36 +470,37 @@ float	R, G, B, A;
 		InterfaceLine( nLayer, nX + nWidth, nY, nX + nWidth, nY + nHeight + 1, ulColLo, ulColLo );
 		InterfaceLine( nLayer, nX - 1, nY + nHeight, nX + nWidth + 1, nY + nHeight, ulColLo, ulColLo );
 	*/
-		InterfaceRect( nLayer, nX + nWidth - 2, nY - 1, 3, nHeight + 2, ulColLo2 );
-		InterfaceRect( nLayer, nX - 2, nY + nHeight - 1, nWidth + 3, 3, ulColLo2 );
+		Rect( nLayer, nX + nWidth - 2, nY - 1, 3, nHeight + 2, ulColLo2 );
+		Rect( nLayer, nX - 2, nY + nHeight - 1, nWidth + 3, 3, ulColLo2 );
 
-		InterfaceRect( nLayer, nX - 2, nY - 1, nWidth + 2, 1, ulColLo2 );
-		InterfaceRect( nLayer, nX - 1, nY, nWidth + 1, 1, ulColHi );
-		InterfaceRect( nLayer, nX, nY + 1, nWidth, 1, ulColLo3 );
-		InterfaceRect( nLayer, nX - 2, nY - 1, 1, nHeight + 2, ulColLo2 );
-		InterfaceRect( nLayer, nX - 1, nY, 1, nHeight + 1, ulColHi );
-		InterfaceRect( nLayer, nX, nY + 1, 1, nHeight - 1, ulColLo3 );
+		Rect( nLayer, nX - 2, nY - 1, nWidth + 2, 1, ulColLo2 );
+		Rect( nLayer, nX - 1, nY, nWidth + 1, 1, ulColHi );
+		Rect( nLayer, nX, nY + 1, nWidth, 1, ulColLo3 );
+		Rect( nLayer, nX - 2, nY - 1, 1, nHeight + 2, ulColLo2 );
+		Rect( nLayer, nX - 1, nY, 1, nHeight + 1, ulColHi );
+		Rect( nLayer, nX, nY + 1, 1, nHeight - 1, ulColLo3 );
 
-		InterfaceRect( nLayer, nX + nWidth - 1, nY, 1, nHeight + 1, ulColLo );
-		InterfaceRect( nLayer, nX - 1, nY + nHeight, nWidth + 1, 1, ulColLo );
+		Rect( nLayer, nX + nWidth - 1, nY, 1, nHeight + 1, ulColLo );
+		Rect( nLayer, nX - 1, nY + nHeight, nWidth + 1, 1, ulColLo );
 	}
 	else
 	{
-		InterfaceRect( nLayer, nX - 1, nY, nWidth + 1, 1, ulColHi );
-		InterfaceRect( nLayer, nX - 1, nY, 1, nHeight + 1, ulColHi );
-		InterfaceRect( nLayer, nX + nWidth - 1, nY, 1, nHeight + 1, ulColHi );
-		InterfaceRect( nLayer, nX - 1, nY + nHeight, nWidth + 1, 1, ulColHi );
+		Rect( nLayer, nX - 1, nY, nWidth + 1, 1, ulColHi );
+		Rect( nLayer, nX - 1, nY, 1, nHeight + 1, ulColHi );
+		Rect( nLayer, nX + nWidth - 1, nY, 1, nHeight + 1, ulColHi );
+		Rect( nLayer, nX - 1, nY + nHeight, nWidth + 1, 1, ulColHi );
 	}
 }
 
-
 /***************************************************************************
  * Function    : InterfaceShadedBox
- * Params      : 
- * Returns     :
- * Description : 
  ***************************************************************************/
 INTERFACE_API void InterfaceShadedBox( int nLayer, int nX, int nY, int nWidth, int nHeight, int nStyle )
+{
+	InterfaceInstanceMain()->mpOverlays->ShadedBox( nLayer, nX, nY, nWidth, nHeight, nStyle );
+}
+
+void Overlays::ShadedBox( int nLayer, int nX, int nY, int nWidth, int nHeight, int nStyle )
 {
 	if ( ( nStyle < 0xFFFFFF ) &&
 		 ( nStyle > 0 ) )
@@ -483,51 +509,56 @@ INTERFACE_API void InterfaceShadedBox( int nLayer, int nX, int nY, int nWidth, i
 		{
 		case 0:
 		default:
-			InterfaceRect( 1, nX - 2, nY - 2, 2, nHeight + 4, 0x404080CF );
-			InterfaceRect( 1, nX + nWidth, nY - 2, 2, nHeight + 4, 0x404080CF );
+			Rect( 1, nX - 2, nY - 2, 2, nHeight + 4, 0x404080CF );
+			Rect( 1, nX + nWidth, nY - 2, 2, nHeight + 4, 0x404080CF );
 
-			InterfaceRect( 1, nX, nY - 2, nWidth, 2, 0x404080CF );
-			InterfaceRect( 1, nX, nY + nHeight, nWidth, 2, 0x404080CF );
+			Rect( 1, nX, nY - 2, nWidth, 2, 0x404080CF );
+			Rect( 1, nX, nY + nHeight, nWidth, 2, 0x404080CF );
 			break;
 		case 1:
-			InterfaceRect( 1, nX, nY, nWidth, nHeight, 0x70000000 );
-			InterfaceRect( 1, nX - 2, nY - 2, 2, nHeight + 4, 0x404080CF );
-			InterfaceRect( 1, nX + nWidth, nY - 2, 2, nHeight + 4, 0x404080CF );
+			Rect( 1, nX, nY, nWidth, nHeight, 0x70000000 );
+			Rect( 1, nX - 2, nY - 2, 2, nHeight + 4, 0x404080CF );
+			Rect( 1, nX + nWidth, nY - 2, 2, nHeight + 4, 0x404080CF );
 
-			InterfaceRect( 1, nX, nY - 2, nWidth, 2, 0x404080CF );
-			InterfaceRect( 1, nX, nY + nHeight, nWidth, 2, 0x404080CF );
+			Rect( 1, nX, nY - 2, nWidth, 2, 0x404080CF );
+			Rect( 1, nX, nY + nHeight, nWidth, 2, 0x404080CF );
 			break;
 		case 2:
-			InterfaceRect( 1, nX, nY, nWidth, nHeight, 0x70404040 );
-			InterfaceRect( 1, nX - 2, nY - 2, 2, nHeight + 4, 0x60B0B0B0 );
-			InterfaceRect( 1, nX + nWidth, nY - 2, 2, nHeight + 4, 0x60B0B0B0 );
+			Rect( 1, nX, nY, nWidth, nHeight, 0x70404040 );
+			Rect( 1, nX - 2, nY - 2, 2, nHeight + 4, 0x60B0B0B0 );
+			Rect( 1, nX + nWidth, nY - 2, 2, nHeight + 4, 0x60B0B0B0 );
 
-			InterfaceRect( 1, nX, nY - 2, nWidth, 2, 0x60101010 );
-			InterfaceRect( 1, nX, nY + nHeight, nWidth, 2, 0x60101010 );
+			Rect( 1, nX, nY - 2, nWidth, 2, 0x60101010 );
+			Rect( 1, nX, nY + nHeight, nWidth, 2, 0x60101010 );
 			break;
 		}
 	}
 	else 
 	{
-		InterfaceRect( 1, nX, nY, nWidth, nHeight, (uint32)(nStyle) );
+		Rect( 1, nX, nY, nWidth, nHeight, (uint32)(nStyle) );
 
-		InterfaceRect( 1, nX - 2, nY - 2, 2, nHeight + 4, 0x404080CF );
-		InterfaceRect( 1, nX + nWidth, nY - 2, 2, nHeight + 4, 0x404080CF );
+		Rect( 1, nX - 2, nY - 2, 2, nHeight + 4, 0x404080CF );
+		Rect( 1, nX + nWidth, nY - 2, 2, nHeight + 4, 0x404080CF );
 
-		InterfaceRect( 1, nX, nY - 2, nWidth, 2, 0x404080CF );
-		InterfaceRect( 1, nX, nY + nHeight, nWidth, 2, 0x404080CF );
+		Rect( 1, nX, nY - 2, nWidth, 2, 0x404080CF );
+		Rect( 1, nX, nY + nHeight, nWidth, 2, 0x404080CF );
 	}
 
+}
+
+/***************************************************************************
+ * Function    : RenderOverlays
+ ***************************************************************************/
+void RenderOverlays( int nLayer )
+{
+	InterfaceInstanceMain()->mpOverlays->Render( nLayer );
 }
 
 
 /***************************************************************************
  * Function    : RenderOverlays
- * Params      : 
- * Returns     :
- * Description : TODO - This needs to be expanded so it can cope with more than 2 layers
  ***************************************************************************/
-void RenderOverlays( int nLayer )
+void Overlays::Render( int nLayer )
 {
 OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
 int				nDrawHowMany;
@@ -548,16 +579,31 @@ int				nDrawHowMany;
 	
 	if ( nDrawHowMany > 0 )
 	{
-		EngineSetVertexFormat( VERTEX_FORMAT_FLATVERTEX );
-		EngineEnableLighting( FALSE );
 		mpInterfaceD3DDevice->SetTexture( 0, NULL );
-		EngineSetColourMode( 0, COLOUR_MODE_DIFFUSE_ONLY );
-		// Enable alpha testing (skips pixels with less than a certain alpha.)
-		EngineEnableFog( FALSE );
-		EngineEnableZTest( FALSE );
-		EngineEnableZWrite( FALSE );
-		EngineEnableAlphaTest( 0 );
-		EngineEnableBlend( TRUE );
+		mpInterfaceD3DDevice->SetFVF( D3DFVF_FLATVERTEX );
+		mpInterfaceD3DDevice->SetRenderState( D3DRS_LIGHTING, FALSE );
+		mpInterfaceD3DDevice->SetRenderState( D3DRS_FOGENABLE, 0 );//nFlag );
+		mpInterfaceD3DDevice->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+		mpInterfaceD3DDevice->SetRenderState( D3DRS_ZENABLE, FALSE );
+		mpInterfaceD3DDevice->SetRenderState( D3DRS_ZWRITEENABLE, FALSE );
+		mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_COLOROP,   D3DTOP_SELECTARG1 );
+		mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_COLORARG1, D3DTA_DIFFUSE );
+		mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
+		mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE );	
+
+		//  Duplicating the state changes here so the engine knows whats what
+		//		((TODO) Should probably work out a cleaner way of handling this for multiple devices)
+		if ( mpInterfaceD3DDevice == EngineGetDXDevice() )
+		{			
+			EngineSetVertexFormat( VERTEX_FORMAT_FLATVERTEX );
+			EngineEnableLighting( FALSE );
+			EngineEnableFog( FALSE );
+			EngineEnableCulling( 0 );
+			EngineEnableZTest( FALSE );
+			EngineEnableZWrite( FALSE );
+			EngineSetColourMode( 0, COLOUR_MODE_DIFFUSE_ONLY );
+		}
+
 		if ( mbAdditiveOverlays )
 		{
 			mpInterfaceD3DDevice->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
@@ -574,21 +620,23 @@ int				nDrawHowMany;
 			pxContainer->mpxVertexBuffer->Unlock();
 			pxContainer->mboBufferIsLocked = FALSE;
 		}
-		InterfaceInternalDXSetStreamSource( 0, pxContainer->mpxVertexBuffer, 0, sizeof(FLATVERTEX) );
+		mpInterfaceInstance->mpInterfaceInternals->SetStreamSource( 0, pxContainer->mpxVertexBuffer, 0, sizeof(FLATVERTEX) );
 		mpInterfaceD3DDevice->DrawPrimitive( D3DPT_TRIANGLELIST, 0, nDrawHowMany );
 		pxContainer->mnNextOverlayVertex = 0;
 	}
 
 }
 
-
 /***************************************************************************
  * Function    : InitialiseOverlays
- * Params      :
- * Returns     :
- * Description : 
  ***************************************************************************/
 HRESULT InitialiseOverlays( void )
+{
+	InterfaceInstanceMain()->mpOverlays->Initialise();
+	return S_OK;
+}
+
+void	Overlays::Initialise( void )
 {
 int		nLoop;
 OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
@@ -599,12 +647,12 @@ OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
 		if ( pxContainer->mpxVertexBuffer == NULL )
 		{
 			// Create the vertex buffer.
-			if( FAILED( InterfaceInternalDXCreateVertexBuffer( NUM_OVERLAY_VERTICES * sizeof(FLATVERTEX),
+			if( FAILED( mpInterfaceInstance->mpInterfaceInternals->CreateVertexBuffer( NUM_OVERLAY_VERTICES * sizeof(FLATVERTEX),
 													  D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC, D3DFVF_FLATVERTEX,
 													  &pxContainer->mpxVertexBuffer ) ) )
 			{
 				PANIC_IF( TRUE, "Couldnt create Overlay Vertex buffer");
-				return ( FALSE);
+				return;
 			}
 		}
 	}
@@ -612,27 +660,27 @@ OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
 	if ( mpxOverlaysLineVertexBuffer == NULL )
 	{
 		// Create the vertex buffer.
-		if( FAILED( InterfaceInternalDXCreateVertexBuffer( LINE_VERTEX_BUFFER_SIZE * sizeof(FLATVERTEX),
+		if( FAILED( mpInterfaceInstance->mpInterfaceInternals->CreateVertexBuffer( LINE_VERTEX_BUFFER_SIZE * sizeof(FLATVERTEX),
 													  D3DUSAGE_WRITEONLY|D3DUSAGE_DYNAMIC, D3DFVF_FLATVERTEX,
 													  &mpxOverlaysLineVertexBuffer ) ) )
 		{
 			PANIC_IF( TRUE, "Couldnt create Line Vertex buffer 1");
-			return ( FALSE);
+			return;
 		}
 	}
 
-	return S_OK;
-
 } 
-
 
 /***************************************************************************
  * Function    : FreeOverlays
- * Params      :
- * Returns     :
- * Description : 
  ***************************************************************************/
 void FreeOverlays( void )
+{
+	InterfaceInstanceMain()->mpOverlays->Shutdown();
+}
+
+
+void Overlays::Shutdown( void )
 {
 int		nLoop;
 OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
@@ -663,11 +711,13 @@ OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
 
 /***************************************************************************
  * Function    : LockOverlays
- * Params      :
- * Returns     :
- * Description : 
  ***************************************************************************/
 void LockOverlays( void )
+{
+	InterfaceInstanceMain()->mpOverlays->LockOverlays();
+}
+
+void Overlays::LockOverlays( void )
 {
 int		nLoop;
 OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
@@ -685,14 +735,19 @@ OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;
 }
 
 
+/***************************************************************************
+ * Function    : UnlockOverlays
+ ***************************************************************************/
+void UnlockOverlays( void )
+{
+	InterfaceInstanceMain()->mpOverlays->UnlockOverlays();
+}
+
 
 /***************************************************************************
  * Function    : UnlockOverlays
- * Params      :
- * Returns     :
- * Description : 
  ***************************************************************************/
-void UnlockOverlays( void )
+void Overlays::UnlockOverlays( void )
 {
 int		nLoop;
 OVERLAY_VERTEX_BUFFER_CONTAINER*		pxContainer;

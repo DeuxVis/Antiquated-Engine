@@ -12,6 +12,7 @@ public:
 	~ParticleGraphic();
 
 	void			Init( const char* szSpriteTextureName, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags );
+	void			InitFromTexHandle( int hTex, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags );
 
 	const char*		GetTextureName( void ) { return( mszTextureName ); }
 
@@ -60,6 +61,17 @@ ParticleGraphic::~ParticleGraphic()
 		EngineReleaseTexture( &mhTexture );
 	}
 }
+void		ParticleGraphic::InitFromTexHandle( int hTex, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )
+{
+const char*		szTextureName = "<External>";
+
+	mszTextureName = (char*)( malloc( strlen( szTextureName ) + 1 ) );
+	strcpy( mszTextureName, szTextureName );
+
+	mhTexture = hTex;
+	mhSpriteGroup = Sprites3DGetGroup( mhTexture, fGridScale, renderFlags );// kSpriteRender_Additive );
+}
+
 
 void		ParticleGraphic::Init( const char* szTextureName, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )
 {
@@ -95,6 +107,23 @@ ParticleGraphic*		pParticleGraphic = mspParticleGraphics;
 	return( NULL );
 }
 
+ParticleGraphic*		ParticleGraphicsFindTexHandle( int hTex )
+{
+ParticleGraphic*		pParticleGraphic = mspParticleGraphics;
+
+	while( pParticleGraphic )
+	{
+		if ( pParticleGraphic->GetTextureHandle() == hTex )
+		{
+			return( pParticleGraphic );
+		}
+		 
+		pParticleGraphic = pParticleGraphic->GetNext();
+	}
+
+	return( NULL );
+}
+
 ParticleGraphic*		ParticleGraphicsFind(const char* szTextureName )
 {
 ParticleGraphic*		pParticleGraphic = mspParticleGraphics;
@@ -110,6 +139,27 @@ ParticleGraphic*		pParticleGraphic = mspParticleGraphics;
 	}
 
 	return( NULL );
+}
+
+int		ParticleGraphicsCreateHandle( int hTex, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )
+{
+ParticleGraphic*		pParticleGraphic = ParticleGraphicsFindTexHandle( hTex );
+
+	if ( pParticleGraphic )
+	{
+		return( pParticleGraphic->GetParticleGraphicID() );
+	}
+
+	pParticleGraphic = new ParticleGraphic;
+	pParticleGraphic->InitFromTexHandle( hTex, fGridScale, bUseRotation, renderFlags );
+	pParticleGraphic->SetParticleGraphicID( msnNextParticleGraphicID );
+	msnNextParticleGraphicID++;
+
+	pParticleGraphic->SetNext( mspParticleGraphics );
+	mspParticleGraphics = pParticleGraphic;
+
+	return( pParticleGraphic->GetParticleGraphicID() );
+	
 }
 
 int		ParticleGraphicsCreate( const char* szTextureName, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )

@@ -22,6 +22,7 @@ public:
 		VECT	xPos;
 		uint32	ulTimeAdded;
 		BOOL	mbIsVisible;
+		uint32	ulTintCol;
 	} TRAIL_POINT;
 
 	TrailListInternal()
@@ -61,6 +62,7 @@ public:
 
 	void	SetScale( float fScale ) { mfScale = fScale; }
 	void	SetAlpha( float fAlpha ) { mfAlpha = fAlpha; }
+	void	SetTint( uint32 ulCol ) { mulTintCol = ulCol; }
 	void	SetDecayTime( uint32 ulTime ) { mulDecayTime = ulTime; }
 	void	RequestDelete( BOOL bImmediately ) { mbWantsDelete = TRUE; mbDeleteImmediately = bImmediately; }
 
@@ -107,9 +109,12 @@ private:
 	uint32	mulLastInternalAddTick;
 	int		mnType;
 	VECT	mxCurrentPos;
+	VECT	mxLastValidTangent;
+	VECT	mxLastValidRight;
 	float	mfScale;
 	float	mfAlpha;
 	uint32	mulDecayTime;
+	uint32	mulTintCol;
 
 	int		mhTrailVertexBuffer;
 	int		mhTrailIndexBuffer;
@@ -139,13 +144,19 @@ BOOL	bSwitch = FALSE;
 	pxVertices = EngineVertexBufferGetBufferPointer( mhTrailVertexBuffer, MAX_TRAIL_VERTICES );
 	if ( pxVertices )
 	{
+#ifdef MAIN_GAME
 		fBaseV += ((nType%8) * 0.125f);
+#endif
 		for ( nLoop = 0; nLoop < MAX_TRAIL_VERTICES; nLoop++ )
 		{
 			pxVertices->color = 0xFFFFFFFF;
 			if ( bSwitch )
 			{
+#ifdef MAIN_GAME
 				pxVertices->tv = fBaseV + 0.120f;
+#else
+				pxVertices->tv = fBaseV + 0.9f;
+#endif
 			}
 			else
 			{
@@ -182,17 +193,17 @@ uint32	TrailListInternal::GetColour( int nIndex )
 		{
 		uint32	nExpiryTime;
 		uint32	ulCol;
-		int		nColMax = 0xD0;
+		int		nColMax = 0xFF;
 
 			if ( mnType == 0 )
 			{
-				nColMax = 0xB0;
+				nColMax = 0xFF;
 			}
 			nExpiryTime = mulDecayTime;
 			if ( ulAliveTime < nExpiryTime )
 			{
 				ulAliveTime = ((nExpiryTime-ulAliveTime) * nColMax)/nExpiryTime;
-				ulCol = 0xF0000000 | (ulAliveTime<<16) | (ulAliveTime<<8) | ulAliveTime;
+				ulCol = (ulAliveTime<<24) | axTrailListInternal[nActualIndex].ulTintCol;
 				ulCol = GetColWithModifiedAlpha( ulCol, mfAlpha );
 				return( ulCol );
 			}
@@ -218,6 +229,7 @@ void	TrailListInternal::AddPos( const VECT* pxIn, BOOL bDoDraw )
 uint32	ulCurrentTick = SysGetTick();
 
 	axTrailListInternal[ mnNextTrailPoint ].mbIsVisible = bDoDraw;
+	axTrailListInternal[ mnNextTrailPoint ].ulTintCol = mulTintCol;
 	if ( pxIn )
 	{
 		axTrailListInternal[ mnNextTrailPoint ].xPos = *pxIn;
@@ -306,9 +318,18 @@ BOOL	bStillAlive = FALSE;
 						xTangent.x = xNextPos.x - xPos.x;
 						xTangent.y = xNextPos.y - xPos.y;
 						xTangent.z = xNextPos.z - xPos.z;
+						if ( VectGetLength( &xTangent ) < 0.01f )
+						{
+							xTangent = mxLastValidTangent;
+						}
+						else
+						{
+							mxLastValidTangent = xTangent;
+						}
 						VectNormalize( &xTangent );
 						VectCross( &xRight, &xTangent, &xCamDir );
 						VectNormalize( &xRight );
+		
 					}
 					ulLastCol= GetColour( nLoop );
 					if ( ulLastCol != 0 )
@@ -383,7 +404,7 @@ float	fBaseV = 0.005f;
 
 	if ( mhTrailVertexBuffer == NOTFOUND )
 	{
-		mhTrailVertexBuffer = EngineCreateVertexBuffer( MAX_TRAIL_VERTICES, 0 );
+		mhTrailVertexBuffer = EngineCreateVertexBuffer( MAX_TRAIL_VERTICES, 0, "Trail VB" );
 	    if( mhTrailVertexBuffer == NOTFOUND )
 	    {
 //			PANIC_IF( TRUE, "Couldnt create trail vertex buffer");
@@ -421,6 +442,7 @@ void	TrailListInternal::Initialise( int nType, TRAIL_HANDLE hHandle )
 {
 	mnType = nType;
 	mnTrailHandle = hHandle;
+	mulTintCol = 0xFFFFFF;
 	InitTrailBuffers();
 
 }
@@ -429,7 +451,7 @@ void	TrailListInternal::Initialise( int nType, TRAIL_HANDLE hHandle )
 
 void		TrailsInitialise( void )
 {
-	mshTrailTextureHandle = EngineLoadTexture( "Data/Textures/trails.bmp", 0, NULL );
+	mshTrailTextureHandle = EngineLoadTexture( "Data/Textures/TrailFader.png", 0, NULL );
 
 }
 
@@ -504,10 +526,11 @@ int				nTotalPolysDrawn = 0;
 
 	EngineEnableZWrite( TRUE );
 	EngineEnableCulling(1);
-	EngineEnableLighting( TRUE );
+
 //	char	acString[256]; 
 //	sprintf( acString, "%d trails active, %d drawn (%d polys)", nCount, nNumDrawn, nTotalPolysDrawn );
 //	InterfaceText( 1, 100, 100, acString, 0xffffffff, 0 );
+	EngineSetBlendMode( BLEND_MODE_ALPHABLEND );
 
 }
 
@@ -588,4 +611,35 @@ TrailListInternal*		pTrail = TrailFind( hHandle );
 	{
 		pTrail->RequestDelete( bDeleteImmediately );
 	}
+}
+
+void		TrailSetScale( TRAIL_HANDLE hHandle, float fBandScale )
+{
+TrailListInternal*		pTrail = TrailFind( hHandle );
+	
+	if ( pTrail )
+	{
+		pTrail->SetScale(fBandScale);
+	}	
+}
+
+void		TrailSetAlpha( TRAIL_HANDLE hHandle, float fAlpha )
+{
+TrailListInternal*		pTrail = TrailFind( hHandle );
+	
+	if ( pTrail )
+	{
+		pTrail->SetAlpha(fAlpha);
+	}	
+}
+
+
+void		TrailSetTint( TRAIL_HANDLE hHandle, uint32 ulTintCol )
+{
+TrailListInternal*		pTrail = TrailFind( hHandle );
+	
+	if ( pTrail )
+	{
+		pTrail->SetTint( ulTintCol );
+	}	
 }

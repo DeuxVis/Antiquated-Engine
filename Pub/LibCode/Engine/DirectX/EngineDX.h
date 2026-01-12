@@ -16,6 +16,8 @@
 
 #include "Engine.h"
 
+#define USE_D3DEX_INTERFACE
+
 #ifdef TUD11
 typedef ID3D11Buffer			IGRAPHICSVERTEXBUFFER;
 typedef ID3D11Buffer			IGRAPHICSINDEXBUFFER;
@@ -40,11 +42,16 @@ typedef DXGI_FORMAT				IGRAPHICSFORMAT;
 //typedef D3DLIGHT9				GRAPHICSLIGHT;
 //typedef D3DMATERIAL9			GRAPHICSMATERIAL;
 #else
+#ifdef USE_D3DEX_INTERFACE
+extern LPDIRECT3DDEVICE9EX      mpInterfaceD3DDevice; // Our rendering device
+typedef LPDIRECT3DDEVICE9EX		LPGRAPHICSDEVICE;
+#else
 extern LPDIRECT3DDEVICE9        mpInterfaceD3DDevice; // Our rendering device
+typedef LPDIRECT3DDEVICE9		LPGRAPHICSDEVICE;
+#endif
 typedef IDirect3DVertexBuffer9	IGRAPHICSVERTEXBUFFER;
 typedef IDirect3DIndexBuffer9   IGRAPHICSINDEXBUFFER;
 typedef LPDIRECT3DTEXTURE9		LPGRAPHICSTEXTURE;
-typedef LPDIRECT3DDEVICE9		LPGRAPHICSDEVICE;
 typedef D3DMATERIAL9			GRAPHICSMATERIAL;
 typedef IDirect3DSurface9*		LPGRAPHICSSURFACE;
 typedef D3DCAPS9				GRAPHICSCAPS;
@@ -88,6 +95,9 @@ extern void		EngineRenderTargetsTrackingListAllocated( char* );
 
 extern void		EngineMathsInitSinTable( void );
 extern void		EngineMathsFreeSinTable( void );
+
+extern TEXTURE_HANDLE		EngineCreateTextureHandleFromRawTexture( LPGRAPHICSTEXTURE pTexture );
+extern void					EngineSetTextureHandleDirect( TEXTURE_HANDLE hTex, LPGRAPHICSTEXTURE pTexture );
 
 extern BOOL	 msbEngineMaterialBlendOverride;
 

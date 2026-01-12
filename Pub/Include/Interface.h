@@ -54,7 +54,8 @@ typedef unsigned int			uint;
 extern INTERFACE_API void	InterfaceInitWindow( const char* pcWindowTitle, void* pWinClass, BOOL bAllowResize  );
 
 // First initialisation call - intialises the display device (e.g. Direct3d)
-extern INTERFACE_API void	InterfaceInitDisplayDevice( BOOL boMinRenderPageSize );
+extern INTERFACE_API void	InterfaceInitDisplayDevice( BOOL boMinRenderPageSize, int nBackBufferMinW = 0, int nBackBufferMinH = 0 );
+
 
 extern INTERFACE_API void	InterfaceSetInitialSize( BOOL bFullscreen, int windowedWidth, int windowedHeight, BOOL bSmallFlag );
 
@@ -65,6 +66,7 @@ extern INTERFACE_API void	InterfaceFreeAllD3D( void );
 extern INTERFACE_API void	InterfaceFree( void );
 
 extern BOOL					InterfaceIsOversized( void );
+
 
 /***************************************************
  ******  Interface - Main Update Functions  ********
@@ -104,7 +106,7 @@ extern INTERFACE_API void	InterfaceTextScaled( int nLayer, int nX, int nY, const
 
 //extern INTERFACE_API void	InterfaceTextCentre( int nLayer, int nX, int nY, const char* szString, uint32 ulCol, int font );
 
-extern INTERFACE_API char*	InterfaceTextLimitWidth( int nLayer, int nX, int nY, const char* szString, int ulCol, int font, int nMaxWidth );
+extern INTERFACE_API const char*	InterfaceTextLimitWidth( int nLayer, int nX, int nY, const char* szString, int ulCol, int font, int nMaxWidth );
 extern INTERFACE_API char* InterfaceTextLimitWidthCentred( int nLayer, int nX, int nY, const char* szString, int ulCol, int nFont, int nMaxWidth );
 
 extern INTERFACE_API int	InterfaceTextBox( int nLayer, int nX, int nY, const char* szString, int ulCol, int font, int nMaxWidth, BOOL bLeftAlign );
@@ -196,6 +198,12 @@ extern INTERFACE_API void				InterfaceReleaseImage( IMAGEHANDLE );
 
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// For handling multiple interface devices
+typedef int		INTERFACE_DEVICE_HANDLE;
+
+extern INTERFACE_API INTERFACE_DEVICE_HANDLE	InterfaceAdditionalDisplayDevice( HWND hWindow );
+extern INTERFACE_API void	InterfaceSwitchDevice( INTERFACE_DEVICE_HANDLE hNewDevice );
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -360,22 +368,7 @@ extern INTERFACE_API HWND				InterfaceGetWindow( void );
 extern INTERFACE_API void				InterfaceSetWindow( HWND hwndMain );
 #endif
 
-#ifdef DIRECT3D_VERSION		// Only include this if directX has been previously included
-#if (DIRECT3D_VERSION>=0x0900)
-typedef LPDIRECT3DDEVICE9		LPGRAPHICSDEVICE;
-typedef LPDIRECT3D9				LPGRAPHICS;
-typedef LPDIRECT3DTEXTURE9		LPGRAPHICSTEXTURE;
-typedef IDirect3DSurface9		IGRAPHICSSURFACE;
-#else
-typedef LPDIRECT3DDEVICE8		LPGRAPHICSDEVICE;
-typedef LPDIRECT3D8				LPGRAPHICS;
-typedef LPDIRECT3DTEXTURE8		LPGRAPHICSTEXTURE;
-#endif
 
-extern INTERFACE_API LPGRAPHICSDEVICE	InterfaceInitD3D( BOOL boMinRenderPageSize );
-extern INTERFACE_API LPGRAPHICSDEVICE	InterfaceGetD3DDevice( void );
-extern INTERFACE_API LPGRAPHICS		InterfaceGetD3D( void );
-#endif
 //-----------------------------------------------------------------------------------------------------------------------------------
 
 extern INTERFACE_API void	InterfaceSetVRMode( BOOL bVRModeActive );
@@ -402,20 +395,6 @@ extern void		PanicImpl( const char* szErrorString );
 
 
 /********************************************************
- ************	   Options Functions     ****************
- **													   **
- ** These routines are used to set & get video options **
- ********************************************************/
-extern INTERFACE_API int InterfaceGetOption( int );
-extern INTERFACE_API void InterfaceSetOption( int, int );
-
-extern INTERFACE_API BOOL InterfaceIsZBufferLockable( void );
-extern INTERFACE_API void InterfaceSetZBufferLockable( BOOL );
-
-extern INTERFACE_API void InterfaceSetMipMapBias( float );
-extern INTERFACE_API void InterfaceSetFilteringModes( int );
-
-/********************************************************
  ************** Other Functions  ************************
  **													   **
  ** Various old misc stuff that probably should be	   **
@@ -426,39 +405,11 @@ extern INTERFACE_API int GetStringWidth( const char* pcString, int nFont );
 extern INTERFACE_API int GetStringHeight( const char* pcString, int nFont );
 extern INTERFACE_API void InterfaceEnableTextureFiltering( BOOL bFlag );
 
-// These are values for the game vid-options dialog. Also can be accessed through InterfaceGetOptions / InterfaceSetOptions
-enum
-{
-	TEXTURE_FILTERING = 0,
-	BACK_BUFFER,
-	VSYNC,
-	OLD_STARTUP,
-	MINIMUM_SURFACE_RES,
-	FOG_MODE,
-	FSAA,
-	MAX_OPTIONS,
-};
-
-
-#ifdef WINUSERAPI	// Only include this if winuser.h has been previously included
-extern INTERFACE_API void InterfaceInitVidOptions( HINSTANCE hInst, HWND hDialogWind ); 
-extern INTERFACE_API INT_PTR CALLBACK InterfaceVidOptionsDlgProc( HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam );
-#endif
-
-typedef struct
-{
-	long	left;
-    long    top;
-    long    right;
-    long	bottom;
-} WINDOW_DIMENSIONS;
-
-extern INTERFACE_API WINDOW_DIMENSIONS InterfaceGetWindowDimensions( void );
 
 // Old version of the texture overlay sys that used explicit references to direct3d textures
 #ifdef DIRECT3D_VERSION
 extern INTERFACE_API int	CreateTexturedOverlay( LPDIRECT3DTEXTURE9 );
-extern INTERFACE_API IDirect3DTexture9* InterfaceLoadTextureDX( const char* szFilename, int, int );
+extern INTERFACE_API IDirect3DTexture9* InterfaceLoadTextureDX( const char* szFilename, int, int , BOOL );
 #endif
 
 
@@ -542,6 +493,28 @@ enum // Preset colour enums for font draw
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef DIRECT3D_VERSION		// Only include this if directX has been previously included
+#include "../LibCode/Interface/DirectX/InterfaceTypesDX.h"
+
+#ifdef __cplusplus
+extern "C"				// All interfaces use a C-linkage
+{
+#endif
+
+extern INTERFACE_API LPGRAPHICSDEVICE	InterfaceInitD3D( BOOL boMinRenderPageSize );
+extern INTERFACE_API LPGRAPHICSDEVICE	InterfaceGetD3DDevice( void );
+extern INTERFACE_API LPGRAPHICS		InterfaceGetD3D( void );
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif		// ifdef DIRECT3D_VERSION
+
+class InterfaceInstance;
+
+extern InterfaceInstance* 		InterfaceInstanceMain();
 
 
 /*

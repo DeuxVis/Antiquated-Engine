@@ -656,20 +656,44 @@ int		boMipFilter = 1;
 #endif
 }
 
-
-TEXTURE_HANDLE	EngineLoadTextureFromMem( byte* pbMem, int nMemSize, int width, int height, int format, int nMipMode, int* pnErrorFlag )
+TEXTURE_HANDLE		EngineGetFreeTextureHandle( )
 {
-int	nRet;
 int		nLoop = 1;
-LPGRAPHICSTEXTURE	pxTexture = NULL;
-int		nMipLevels = 1;
-//char	acString[256];
-
 	while ( maTextureReferences[nLoop].nUsed != 0 )
 	{
 		nLoop++;
 		if ( nLoop == MAX_TEXTURES_IN_MANAGER ) return( 0 );
 	}
+	return( nLoop );
+}
+
+void					EngineSetTextureHandleDirect( TEXTURE_HANDLE hTex, LPGRAPHICSTEXTURE pTexture )
+{
+	maTextureReferences[hTex].pTexture = pTexture;
+}
+
+TEXTURE_HANDLE		EngineCreateTextureHandleFromRawTexture( LPGRAPHICSTEXTURE pTexture )
+{
+int		nLoop = EngineGetFreeTextureHandle();
+
+	maTextureReferences[nLoop].pTexture = pTexture;
+	maTextureReferences[nLoop].nUsed = 1;
+	maTextureReferences[nLoop].nState = TEXTURE_STATE_LOADED;
+	strcpy( maTextureReferences[nLoop].szFilename, "<ExternTex>" );
+	maTextureReferences[nLoop].boTextureHasAlpha = TRUE;
+	maTextureReferences[nLoop].boIsRenderTarget = FALSE;
+	maTextureReferences[nLoop].pDepthStencilSurface = NULL;
+	return( nLoop );
+}
+
+
+TEXTURE_HANDLE	EngineLoadTextureFromMem( byte* pbMem, int nMemSize, int width, int height, int format, int nMipMode, int* pnErrorFlag )
+{
+int	nRet;
+int		nLoop = EngineGetFreeTextureHandle();
+LPGRAPHICSTEXTURE	pxTexture = NULL;
+int		nMipLevels = 1;
+//char	acString[256];
 
 #ifdef TUD11
 	PANIC_IF( TRUE, "DX11 EngineLoadTextureFromMem TBI" );
@@ -934,7 +958,7 @@ void			EngineSetShadowMultitexture( BOOL bFlag )
 	}
 }
 
-
+void*		mapxEngineLastSetTextures[8] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 
 void	EngineSetTexture( int nTex, TEXTURE_HANDLE nTexHandle )
 {
@@ -956,16 +980,24 @@ void	EngineSetTexture( int nTex, TEXTURE_HANDLE nTexHandle )
 				EngineShadowMapActivateTexture( FALSE );
 			}
 		}
+		else
+		{
+			mapxEngineLastSetTextures[nTex] = maTextureReferences[ nTexHandle ].pTexture;
+		}
 		mpEngineDevice->SetTexture( nTex, maTextureReferences[ nTexHandle ].pTexture );
+	}
+	else if ( nTex > 0 )
+	{
+		if ( mapxEngineLastSetTextures[nTex] != NULL )
+		{
+			mapxEngineLastSetTextures[nTex] = NULL;
+			mpEngineDevice->SetTextureStageState( nTex, D3DTSS_COLOROP,   D3DTOP_DISABLE );
+			mpEngineDevice->SetTextureStageState( nTex, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
+		}	
 	}
 	else
 	{
 		mpEngineDevice->SetTexture( nTex, NULL );
-		if ( nTex > 0 )
-		{
-			mpEngineDevice->SetTextureStageState( nTex, D3DTSS_COLOROP,   D3DTOP_DISABLE );
-			mpEngineDevice->SetTextureStageState( nTex, D3DTSS_ALPHAOP,   D3DTOP_DISABLE );
-		}
 	}
 #endif
 }
@@ -1185,6 +1217,11 @@ int	nRet = 0;
 
 	if ( mpbLoadThreadBuffer )
 	{
+	_D3DPOOL	nPoolType = D3DPOOL_MANAGED;
+#ifdef USE_D3DEX_INTERFACE
+		nPoolType = D3DPOOL_DEFAULT;
+#endif
+
 #ifdef TUD11
 		PANIC_IF( TRUE, "DX11 TextureLoadFromThreadBuffer TBI" );
 #else
@@ -1206,8 +1243,9 @@ int	nRet = 0;
 				d3dtextureFormat = D3DFMT_A8R8G8B8;
 			}
 
+
 			nRet = D3DXCreateTextureFromFileInMemoryEx( mpEngineDevice, mpbLoadThreadBuffer, mnLoadThreadBufferSize,
-													0,0,mnLoadThreadBufferMipLevels,0, d3dtextureFormat, D3DPOOL_MANAGED,mnLoadThreadBufferFilter, mnLoadThreadBufferMipFilter,
+													0,0,mnLoadThreadBufferMipLevels,0, d3dtextureFormat, nPoolType,mnLoadThreadBufferFilter, mnLoadThreadBufferMipFilter,
 													ulChromaKeyCol, NULL, NULL,
 													&pxTexture );
 
@@ -1256,7 +1294,7 @@ int	nRet = 0;
 						LPGRAPHICSTEXTURE	pxTextureResized = NULL;
 
 						nRet = D3DXCreateTextureFromFileInMemoryEx(mpEngineDevice, mpbLoadThreadBuffer, mnLoadThreadBufferSize,
-							xDesc.Width / 2, xDesc.Height / 2, mnLoadThreadBufferMipLevels, 0, EngineDXGetGraphicsFormat(mnLoadThreadBufferFormat), D3DPOOL_MANAGED, mnLoadThreadBufferFilter, mnLoadThreadBufferMipFilter,
+							xDesc.Width / 2, xDesc.Height / 2, mnLoadThreadBufferMipLevels, 0, EngineDXGetGraphicsFormat(mnLoadThreadBufferFormat), nPoolType, mnLoadThreadBufferFilter, mnLoadThreadBufferMipFilter,
 							0xFF0000FF, NULL, NULL,
 							&pxTextureResized);
 
@@ -1306,7 +1344,7 @@ int	nRet = 0;
 			mpEngineDevice->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_POINT);	
 
 			nRet = D3DXCreateTextureFromFileInMemoryEx( mpEngineDevice, mpbLoadThreadBuffer,mnLoadThreadBufferSize,
-												0,0,mnLoadThreadBufferMipLevels,0, EngineDXGetGraphicsFormat( mnLoadThreadBufferFormat ), D3DPOOL_MANAGED,mnLoadThreadBufferFilter, mnLoadThreadBufferMipFilter,
+												0,0,mnLoadThreadBufferMipLevels,0, EngineDXGetGraphicsFormat( mnLoadThreadBufferFormat ), nPoolType,mnLoadThreadBufferFilter, mnLoadThreadBufferMipFilter,
 												0xFF0000FF, NULL, NULL,
 												&pxTexture );
 #endif

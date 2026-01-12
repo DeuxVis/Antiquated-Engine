@@ -231,6 +231,40 @@ const char*		acMonthNames[12] =
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
+void		RemovePathFromStartOfFileName( const char* szFilenameIn, const char* szPathToRemove, char* pcOut )
+{
+const char*		pcDirRunner = szPathToRemove;
+const char*		pcFilenameRunner = szFilenameIn;
+
+	while( ( *pcDirRunner == *pcFilenameRunner ) &&
+		   ( *pcDirRunner != 0 ) &&
+		   ( *pcFilenameRunner != 0 ) )
+	{
+		pcDirRunner++;
+		pcFilenameRunner++;
+	}
+
+	strcpy( pcOut, pcFilenameRunner );
+}
+
+void		RemoveCurrentPathFromFileName( const char* szFilenameIn, char* pcOut )
+{
+char	acCurrentDir[256];
+const char*		pcDirRunner = acCurrentDir;
+const char*		pcFilenameRunner = szFilenameIn;
+	SysGetCurrentDir( 256, acCurrentDir );
+
+	while( ( *pcDirRunner == *pcFilenameRunner ) &&
+		   ( *pcDirRunner != 0 ) &&
+		   ( *pcFilenameRunner != 0 ) )
+	{
+		pcDirRunner++;
+		pcFilenameRunner++;
+	}
+
+	strcpy( pcOut, pcFilenameRunner );
+}
+
 void		GetDateString( uint32 ulUnixTime, char* pcOut )
 {
 SYS_LOCALTIME		xLocalTime;

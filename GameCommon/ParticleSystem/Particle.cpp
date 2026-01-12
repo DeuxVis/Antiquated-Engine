@@ -23,13 +23,17 @@ Particle::~Particle()
 
 }
 
+void	Particle::SetGraphicHandle( TEXTURE_HANDLE hTex, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )
+{
+	mnParticleGraphicsNum = ParticleGraphicsCreateHandle( hTex, fGridScale, bUseRotation, renderFlags );
+}
 
 void	Particle::SetGraphic( const char* szSpriteTextureName, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )
 {
 	mnParticleGraphicsNum = ParticleGraphicsCreate( szSpriteTextureName, fGridScale, bUseRotation, renderFlags );
 }
 	
-void	Particle::Init( int typeID, const VECT* pxPos, const VECT* pxVel, uint32 ulCol, float fLongevity, int nInitParam )
+void	Particle::Init( int typeID, const VECT* pxPos, const VECT* pxVel, uint32 ulCol, float fLongevity, int nInitParam, uint32 ulInitParamChannel, void* pUserObject )
 {
 	mType = typeID;
 	if ( pxPos )
@@ -41,8 +45,9 @@ void	Particle::Init( int typeID, const VECT* pxPos, const VECT* pxVel, uint32 ul
 		mxVel = *pxVel;
 	}
 	mulCol = ulCol;
+	mulParamChannel = ulInitParamChannel;
 	mfLongevity = fLongevity;
-	OnInit(nInitParam);
+	OnInit(nInitParam, pUserObject);
 }
 
 
@@ -59,6 +64,10 @@ void	Particle::Update( float fDelta )
 	
 		VectScale( &xVelThisFrame, &mxVel, fDelta );
 		VectAdd( &mxPos, &mxPos, &xVelThisFrame );
+
+		mfRot += mfRotSpeed * fDelta;
+		if ( mfRot > A180 ) mfRot -= A360;
+		if ( mfRot < -A180 ) mfRot += A360;
 	}
 	else
 	{
@@ -75,12 +84,18 @@ void	Particle::DefaultRender( void )
 	SPRITE_GROUP		hSpriteGroup = ParticleGraphicsGetSpriteGroup( mnParticleGraphicsNum );
 	float	fScale = 1.0f;
 	uint32	ulCol;
-	float	fAlpha = 1.0f;
-	float	fHalfLife = mfLongevity * 0.5f;
+	float	fAlpha = GetAlphaOverride();
 
-		if ( mfTimeAlive > fHalfLife  )
-		{	
-			fAlpha = 1.0f - ( ( mfTimeAlive - fHalfLife) / fHalfLife );
+		if ( fAlpha < 0.0f )
+		{
+		float	fHalfLife = mfLongevity * 0.5f;
+			
+			fAlpha = 1.0f;
+		
+			if ( mfTimeAlive > fHalfLife  )
+			{	
+				fAlpha = 1.0f - ( ( mfTimeAlive - fHalfLife) / fHalfLife );
+			}
 		}
 
 		if ( fAlpha < 1.0f )
@@ -88,12 +103,12 @@ void	Particle::DefaultRender( void )
 			if ( fAlpha > 0.0f )
 			{
 				ulCol = GetColWithModifiedAlpha( mulCol, fAlpha );
-				Sprites3DAddSprite( hSpriteGroup, GetPos(), mfSpriteScale, ulCol, mnSpriteFrameNum, 0 );
+				Sprites3DAddSpriteRot( hSpriteGroup, GetPos(), mfSpriteScale, ulCol, mnSpriteFrameNum, 0, GetRot() );
 			}
 		}
 		else
 		{
-			Sprites3DAddSprite( hSpriteGroup, GetPos(), mfSpriteScale, mulCol, mnSpriteFrameNum, 0 );
+			Sprites3DAddSpriteRot( hSpriteGroup, GetPos(), mfSpriteScale, mulCol, mnSpriteFrameNum, 0, GetRot() );
 		}
 	}
 }

@@ -10,13 +10,12 @@ extern "C"				// All interfaces use a C-linkage
 
 // Some dodgy looking externed variables :]
 
-extern int		mnRenderSurfaceWidth;
-extern int		mnRenderSurfaceHeight;  
-
 extern int		mnDesiredWidth;
 extern int		mnDesiredHeight;
 
 extern BOOL InterfaceShowFullscreenPanic( char* szErrorString );
+
+extern LPGRAPHICSDEVICE InterfaceCreateNewGraphicsDevice( HWND hWindow, BOOL boMinPageSize );
 
 
 #ifdef __cplusplus
