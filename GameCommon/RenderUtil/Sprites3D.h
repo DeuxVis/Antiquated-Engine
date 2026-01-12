@@ -15,6 +15,7 @@ enum eSpriteGroupRenderFlags
 	kSpriteRender_Orientation_XAxis = 0x8,
 	kSpriteRender_ColourBlend = 0x10,
 	kSpriteRender_Orientation_YAxis = 0x20,
+	kSpriteRender_SoftEdges = 0x40,
 };
 
 typedef int		SPRITE_GROUP;
@@ -28,9 +29,9 @@ extern void Sprites3DReleaseGraphicsDeviceResources( void );
 
 extern SPRITE_GROUP	 Sprites3DGetGroup( int nTextureHandle, float fGridScale, eSpriteGroupRenderFlags nRenderFlags );
 
-extern void	Sprites3DAddSprite( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, int nFlags );
-extern void	Sprites3DAddSpriteRot( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, int nFlags, float fRotation );
-extern void	Sprites3DAddSpriteScaleZ( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, int nFlags, float fScaleZ );
+extern void	Sprites3DAddSprite( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags );
+extern void	Sprites3DAddSpriteRot( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags, float fRotation );
+extern void	Sprites3DAddSpriteScaleZ( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags, float fScaleZ );
 
 extern void	Sprites3DFreeGroup( SPRITE_GROUP hGroup );
 

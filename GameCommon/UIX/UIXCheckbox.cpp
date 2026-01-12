@@ -30,6 +30,37 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
 	switch( mMode )
 	{
+	case HILIGHT_CHECKBOX:
+		{
+		uint32	ulCol = 0xd0202020;
+		uint32	ulTextCol = 0xD0A0A0A0;
+
+			if ( mbIsChecked )
+			{
+				ulCol = 0xe0383840;
+				ulTextCol = 0xF0D0D0D0;
+			}
+			pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, ulCol );
+
+			// TODO - Properly centre the title
+			pInterface->Text( 1, drawRect.x + 6, drawRect.y + 1, ulTextCol, 0, mText.c_str() );
+		}
+		break;
+	case ICON_CHECKBOX:
+		{
+		int		nIcon = mnOffIcon;
+		uint32	ulCol = 0xd0202020;
+
+			if ( mbIsChecked )
+			{
+				nIcon = mnOnIcon;
+				ulCol = 0xe0383840;
+			}
+			pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, ulCol );
+		
+			UIX::DrawIcon( pInterface, nIcon, UIXRECT(drawRect.x + 1, drawRect.y + 1, drawRect.w - 2, drawRect.h - 2), 0xE0A0A0A0 );
+		}
+		break;
 	case STANDARD_CHECKBOX:
 		pInterface->OutlineBox( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0xC0505050 );
 
@@ -63,7 +94,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 	UIX::CheckForPress( this, drawRect, UIX_CHECKBOX, 0 );
 	
 	displayRect.h = 0;
-	displayRect.y = GetDisplayRect().y + GetDisplayRect().h;		// displayRect.y returns the lowest point we drew to
+	displayRect.y = GetDisplayRect().y + GetDisplayRect().h + 1;		// displayRect.y returns the lowest point we drew to
 	return displayRect;
 }
 

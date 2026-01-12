@@ -3,6 +3,7 @@
 #include "InterfaceEx.h"
 
 #include "../UI/UI.h"
+#include "UIXTextBox.h"
 #include "UIXSlider.h"
 
 
@@ -20,6 +21,24 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 	if ( szText )
 	{
 		mText = szText;
+	}
+
+	switch( mMode )
+	{
+	case VALUERANGE:
+		{
+		char	acVal[128];
+		int		nTextSectionW = 120;
+		int		nTextBoxW = (nTextSectionW / 2) - 8;
+		UIXRECT		textboxRect = UIXRECT(0, 0, nTextBoxW, GetDisplayRect().h - 2);
+			sprintf( acVal, "%.3f", mfMinVal );
+			mpRangeMinTextBox = UIX::AddTextBox( this, textboxRect, 0, acVal );
+
+			textboxRect.x += nTextBoxW + 14;
+			sprintf( acVal, "%.3f", mfMaxVal );
+			mpRangeMaxTextBox = UIX::AddTextBox( this, textboxRect, 0, acVal );
+		}
+		break;
 	}
 }
 
@@ -98,10 +117,47 @@ uint32		ulCol = 0xf0505070;
 	{
 	case VALUERANGE:
 		{
-		int		nBarMaxW = renderRect.w;
-		int		nMinBarPos = (int)(((mfMinVal-mfInitialMinVal) * nBarMaxW) / (mfInitialMaxVal-mfInitialMinVal));
-		int		nMaxBarPos = (int)(((mfMaxVal-mfInitialMinVal) * nBarMaxW) / (mfInitialMaxVal-mfInitialMinVal));
+		int		nTextAreaW = 120;
 
+			// TODO - Might want to make this optional or part of a different mode..?
+			// Show the text values to the left
+			UIXRECT		drawRect = renderRect;
+			int			nTextBoxW = (nTextAreaW / 2) - 8;
+			drawRect.w = nTextAreaW;
+			char		acVal[128];
+			uint32		ulTextCol = 0xC0C0C0C0;
+
+			drawRect.y += 1;
+			drawRect.h -= 2;
+
+			sprintf( acVal, "%.3f", mfMinVal );
+			mpRangeMinTextBox->SetText( acVal );
+			mpRangeMinTextBox->OnRender( pInterface, drawRect );
+//			drawRect.x += nTextBoxW + 2;
+			pInterface->Text( 1, drawRect.x + nTextBoxW + 4, drawRect.y + 4, ulTextCol, 3, "-" );
+//			drawRect.x += 14;
+			sprintf( acVal, "%.3f", mfMaxVal );
+			mpRangeMaxTextBox->SetText( acVal );
+			mpRangeMaxTextBox->OnRender( pInterface, drawRect );
+
+/*			
+			pInterface->OutlineBox( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x40404040 );
+			pInterface->Text( 1, drawRect.x + 2, drawRect.y + 4, ulTextCol, 3, acVal );
+			drawRect.x += drawRect.w + 2;
+			pInterface->Text( 1, drawRect.x + 2, drawRect.y + 4, ulTextCol, 3, "-" );
+
+			drawRect.x += 14;
+			sprintf( acVal, "%.3f", mfMaxVal );
+			pInterface->OutlineBox( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x40404040 );
+			pInterface->Text( 1, drawRect.x + 2, drawRect.y + 4, ulTextCol, 3, acVal );
+			*/
+
+			int		nBarMaxW = renderRect.w - nTextAreaW;
+			int		nMinBarPos = (int)(((mfMinVal-mfInitialMinVal) * nBarMaxW) / (mfInitialMaxVal-mfInitialMinVal));
+			int		nMaxBarPos = (int)(((mfMaxVal-mfInitialMinVal) * nBarMaxW) / (mfInitialMaxVal-mfInitialMinVal));
+
+			mRenderRect.x += nTextAreaW;
+			mRenderRect.w -= nTextAreaW;
 			// Background
 			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, nBarMaxW, mRenderRect.h, 0xf0080808 );
 			// INDICATOR (MIN)

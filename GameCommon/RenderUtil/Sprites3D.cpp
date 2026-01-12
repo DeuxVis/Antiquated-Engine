@@ -1,4 +1,5 @@
 
+#include "../LibCode/Engine/DirectX/EngineDX.h"
 #include "StandardDef.h"
 #include "Engine.h"
 
@@ -18,6 +19,7 @@ public:
 
 	void		Render( MultiVertexBuffers* pxDrawBuffer, float fGridScale, eSpriteGroupRenderFlags nRenderFlags );
 	void		RenderRot( MultiVertexBuffers* pxDrawBuffer, float fGridScale, eSpriteGroupRenderFlags nRenderFlags );
+	void		RenderRotSoftEdges( MultiVertexBuffers* pxDrawBuffer, float fGridScale, eSpriteGroupRenderFlags nRenderFlags );
 
 	VECT		mxPos;
 	float		mfRot;
@@ -60,6 +62,184 @@ VECT		maxFlatSpriteOffsets[6];
 VECT		maxXAxisSpriteOffsets[6];
 VECT		maxYAxisSpriteOffsets[6];
 
+
+void	Sprite::RenderRotSoftEdges( MultiVertexBuffers* pxDrawBuffer, float fGridScale, eSpriteGroupRenderFlags nRenderFlags )
+{
+float		fUBase,	fVBase;
+float		fUWidth, fVHeight;
+uint32		ulCol = mulCol;
+VECT		xPos = mxPos;
+VECT		xOffset;
+int			nNumPerRow = (int)( 1.0f / fGridScale );
+VECT		xRotAxis;
+VECT*		pxSpriteOffsets = maxCamFacingSpriteOffsets;
+VECT*		pxRotateAxis = EngineCameraGetDirection();
+ENGINEMATRIX	xRotMat;
+uint32		ulSoftEdgeCol = GetColWithModifiedAlpha( mulCol, 0.0f );
+
+	if ( nRenderFlags & kSpriteRender_Orientation_Flat )
+	{
+		pxSpriteOffsets = maxFlatSpriteOffsets;
+		xRotAxis.x = 0.0f;
+		xRotAxis.y = 0.0f;
+		xRotAxis.z = 1.0f;
+		pxRotateAxis = &xRotAxis;
+	}
+	else if ( nRenderFlags & kSpriteRender_Orientation_XAxis )
+	{
+		pxSpriteOffsets = maxXAxisSpriteOffsets;
+		xRotAxis.x = 0.0f;
+		xRotAxis.y = 1.0f;
+		xRotAxis.z = 0.0f;
+		pxRotateAxis = &xRotAxis;
+	}
+	else if ( nRenderFlags & kSpriteRender_Orientation_YAxis )
+	{
+		pxSpriteOffsets = maxYAxisSpriteOffsets;
+		xRotAxis.x = 1.0f;
+		xRotAxis.y = 0.0f;
+		xRotAxis.z = 0.0f;
+		pxRotateAxis = &xRotAxis;
+	}
+	
+	EngineMatrixRotationAxis( &xRotMat, &xRotAxis, mfRot );
+
+	fUBase = (mnFrameNum % nNumPerRow) * fGridScale;
+	fVBase = (mnFrameNum / nNumPerRow) * fGridScale;
+	fUWidth = fGridScale;
+	fVHeight = fGridScale;
+
+	// Tri 1 - vert 1
+	*pxDrawBuffer->mpulColStream = ulSoftEdgeCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	xOffset.x = pxSpriteOffsets[0].x * mfScale;
+	xOffset.y = pxSpriteOffsets[0].y * mfScale;
+	xOffset.z = pxSpriteOffsets[0].z * mfScaleZ;	
+	VectTransform( &xOffset, &xOffset, &xRotMat );
+	VectAdd( pxDrawBuffer->mpxPosStream, pxDrawBuffer->mpxPosStream, &xOffset );
+	pxDrawBuffer->mpfUVStream[0] = fUBase;
+	pxDrawBuffer->mpfUVStream[1] = fVBase;
+	pxDrawBuffer->AddVert();
+
+	// Tri 1 - vert 2
+	*pxDrawBuffer->mpulColStream = ulSoftEdgeCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	xOffset.x = pxSpriteOffsets[1].x * mfScale;
+	xOffset.y = pxSpriteOffsets[1].y * mfScale;
+	xOffset.z = pxSpriteOffsets[1].z * mfScaleZ;	
+	VectTransform( &xOffset, &xOffset, &xRotMat );
+	VectAdd( pxDrawBuffer->mpxPosStream, pxDrawBuffer->mpxPosStream, &xOffset );
+	pxDrawBuffer->mpfUVStream[0] = fUBase + fUWidth;
+	pxDrawBuffer->mpfUVStream[1] = fVBase;
+	pxDrawBuffer->AddVert();
+
+	// Tri 1 - vert 3 - midpoint
+	*pxDrawBuffer->mpulColStream = ulCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	pxDrawBuffer->mpfUVStream[0] = fUBase + (fUWidth*0.5f);
+	pxDrawBuffer->mpfUVStream[1] = fVBase + (fVHeight*0.5f);
+	pxDrawBuffer->AddVert();
+	
+	//-------------------------------------------------
+
+	// Tri 2 - vert 1
+	*pxDrawBuffer->mpulColStream = ulSoftEdgeCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	xOffset.x = pxSpriteOffsets[3].x * mfScale;
+	xOffset.y = pxSpriteOffsets[3].y * mfScale;
+	xOffset.z = pxSpriteOffsets[3].z * mfScaleZ;	
+	VectTransform( &xOffset, &xOffset, &xRotMat );
+	VectAdd( pxDrawBuffer->mpxPosStream, pxDrawBuffer->mpxPosStream, &xOffset );
+	pxDrawBuffer->mpfUVStream[0] = fUBase + fUWidth;
+	pxDrawBuffer->mpfUVStream[1] = fVBase;
+	pxDrawBuffer->AddVert();
+
+	// Tri 2 - vert 2
+	*pxDrawBuffer->mpulColStream = ulSoftEdgeCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	xOffset.x = pxSpriteOffsets[4].x * mfScale;
+	xOffset.y = pxSpriteOffsets[4].y * mfScale;
+	xOffset.z = pxSpriteOffsets[4].z * mfScaleZ;	
+	VectTransform( &xOffset, &xOffset, &xRotMat );
+	VectAdd( pxDrawBuffer->mpxPosStream, pxDrawBuffer->mpxPosStream, &xOffset );
+	pxDrawBuffer->mpfUVStream[0] = fUBase + fUWidth;
+	pxDrawBuffer->mpfUVStream[1] = fVBase + fVHeight;
+	pxDrawBuffer->AddVert();
+
+	// Tri 2 - vert 3
+	*pxDrawBuffer->mpulColStream = ulCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	pxDrawBuffer->mpfUVStream[0] = fUBase + (fUWidth*0.5f);
+	pxDrawBuffer->mpfUVStream[1] = fVBase + (fVHeight*0.5f);
+	pxDrawBuffer->AddVert();
+
+	//------------------------------------
+	
+	// Tri 3 - vert 1
+	*pxDrawBuffer->mpulColStream = ulSoftEdgeCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	xOffset.x = pxSpriteOffsets[4].x * mfScale;
+	xOffset.y = pxSpriteOffsets[4].y * mfScale;
+	xOffset.z = pxSpriteOffsets[4].z * mfScaleZ;	
+	VectTransform( &xOffset, &xOffset, &xRotMat );
+	VectAdd( pxDrawBuffer->mpxPosStream, pxDrawBuffer->mpxPosStream, &xOffset );
+	pxDrawBuffer->mpfUVStream[0] = fUBase + fUWidth;
+	pxDrawBuffer->mpfUVStream[1] = fVBase + fVHeight;
+	pxDrawBuffer->AddVert();
+
+	// Tri 3 - vert 2
+	*pxDrawBuffer->mpulColStream = ulSoftEdgeCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	xOffset.x = pxSpriteOffsets[5].x * mfScale;
+	xOffset.y = pxSpriteOffsets[5].y * mfScale;
+	xOffset.z = pxSpriteOffsets[5].z * mfScaleZ;	
+	VectTransform( &xOffset, &xOffset, &xRotMat );
+	VectAdd( pxDrawBuffer->mpxPosStream, pxDrawBuffer->mpxPosStream, &xOffset );
+	pxDrawBuffer->mpfUVStream[0] = fUBase;
+	pxDrawBuffer->mpfUVStream[1] = fVBase + fVHeight;
+	pxDrawBuffer->AddVert();
+
+	// Tri 3 - vert 3
+	*pxDrawBuffer->mpulColStream = ulCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	pxDrawBuffer->mpfUVStream[0] = fUBase + (fUWidth*0.5f);
+	pxDrawBuffer->mpfUVStream[1] = fVBase + (fVHeight*0.5f);
+	pxDrawBuffer->AddVert();
+
+	//---------------------------
+	// Tri 4 - vert 1
+	*pxDrawBuffer->mpulColStream = ulSoftEdgeCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	xOffset.x = pxSpriteOffsets[2].x * mfScale;
+	xOffset.y = pxSpriteOffsets[2].y * mfScale;
+	xOffset.z = pxSpriteOffsets[2].z * mfScaleZ;	
+	VectTransform( &xOffset, &xOffset, &xRotMat );
+	VectAdd( pxDrawBuffer->mpxPosStream, pxDrawBuffer->mpxPosStream, &xOffset );
+	pxDrawBuffer->mpfUVStream[0] = fUBase;
+	pxDrawBuffer->mpfUVStream[1] = fVBase + fVHeight;
+	pxDrawBuffer->AddVert();
+
+	// Tri 4 - vert 2
+	*pxDrawBuffer->mpulColStream = ulSoftEdgeCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	xOffset.x = pxSpriteOffsets[0].x * mfScale;
+	xOffset.y = pxSpriteOffsets[0].y * mfScale;
+	xOffset.z = pxSpriteOffsets[0].z * mfScaleZ;	
+	VectTransform( &xOffset, &xOffset, &xRotMat );
+	VectAdd( pxDrawBuffer->mpxPosStream, pxDrawBuffer->mpxPosStream, &xOffset );
+	pxDrawBuffer->mpfUVStream[0] = fUBase;
+	pxDrawBuffer->mpfUVStream[1] = fVBase;
+	pxDrawBuffer->AddVert();
+
+	// Tri 4 - vert 3
+	*pxDrawBuffer->mpulColStream = ulCol;
+	*pxDrawBuffer->mpxPosStream = xPos;
+	pxDrawBuffer->mpfUVStream[0] = fUBase + (fUWidth*0.5f);
+	pxDrawBuffer->mpfUVStream[1] = fVBase + (fVHeight*0.5f);
+	pxDrawBuffer->AddVert();
+
+	pxDrawBuffer->FlushWhenFull( 12, TRUE );
+}
 
 void	Sprite::RenderRot( MultiVertexBuffers* pxDrawBuffer, float fGridScale, eSpriteGroupRenderFlags nRenderFlags )
 {
@@ -180,7 +360,7 @@ ENGINEMATRIX	xRotMat;
 	pxDrawBuffer->mpfUVStream[1] = fVBase + fVHeight;
 	pxDrawBuffer->AddVert();
 
-	pxDrawBuffer->FlushWhenFull( 6, TRUE );
+	pxDrawBuffer->FlushWhenFull( 12, TRUE );
 }
 
 
@@ -280,7 +460,7 @@ VECT*		pxSpriteOffsets = maxCamFacingSpriteOffsets;
 	pxDrawBuffer->mpfUVStream[1] = fVBase + fVHeight;
 	pxDrawBuffer->AddVert();
 
-	pxDrawBuffer->FlushWhenFull( 6, TRUE );
+	pxDrawBuffer->FlushWhenFull( 12, TRUE );
 }
 
 //-----------------------------------------------------------------------------
@@ -294,6 +474,10 @@ Sprite*		pNext;
 	if ( mRenderFlags & kSpriteRender_Additive )
 	{
 		EngineSetBlendMode( BLEND_MODE_SRCALPHA_ADDITIVE );
+			mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
+			mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
+			mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
+		EngineSetColourMode( 0, COLOUR_MODE_TEXTURE_MODULATE );
 	}
 	else if ( mRenderFlags & kSpriteRender_ColourBlend )
 	{
@@ -312,7 +496,14 @@ Sprite*		pNext;
 		pNext = pSprites->mpNext;
 		if ( mRenderFlags & kSpriteRender_Rotated )
 		{
-			pSprites->RenderRot( &mxSprites3dBuffers, mfGridScale, mRenderFlags );
+			if ( mRenderFlags & kSpriteRender_SoftEdges )
+			{
+				pSprites->RenderRotSoftEdges( &mxSprites3dBuffers, mfGridScale, mRenderFlags );		
+			}
+			else
+			{
+				pSprites->RenderRot( &mxSprites3dBuffers, mfGridScale, mRenderFlags );
+			}
 		}
 		else
 		{
@@ -431,7 +622,7 @@ SpriteGroup*	pSpriteGroups = mspSpriteGroups;
 	return( pSpriteGroups->mhGroupNum );
 }
 
-void	Sprites3DAddSpriteScaleZ( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, int nFlags, float fScaleZ )
+void	Sprites3DAddSpriteScaleZ( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags, float fScaleZ )
 {
 SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
 
@@ -451,7 +642,7 @@ SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
 }
 
 
-void	Sprites3DAddSprite( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, int nFlags )
+void	Sprites3DAddSprite( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags )
 {
 SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
 
@@ -471,7 +662,7 @@ SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
 }
 
 
-void	Sprites3DAddSpriteRot( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, int nFlags, float fRotation )
+void	Sprites3DAddSpriteRot( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags, float fRotation )
 {
 SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
 

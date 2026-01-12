@@ -43,6 +43,11 @@ UIXObject::UIXObject( uint32 uID, UIXRECT rect )
 
 }
 
+UIXObject::~UIXObject()
+{
+	// todo - Get rid of this by using smart(er) pointers for things like the mousewheel hover
+	if ( UIX::mspMousewheelHoverObject == this ) UIX::mspMousewheelHoverObject = NULL;
+}
 
 void	UIXObject::Update( float delta )
 {
@@ -81,6 +86,19 @@ UIXRECT		renderRect = GetDisplayRect();		// This is our local position, relative
 	return renderRect;
 }
 
+void	UIXObject::PostRender( InterfaceInstance* pInterface )
+{
+	OnPostRender( pInterface, mLastRenderDisplayRect );
+	if ( !mContainsList.empty() && ShouldDisplayChildren() )
+	{
+		for ( UIXObject* pContainedObject : mContainsList )
+		{
+			pContainedObject->PostRender( pInterface );
+		}
+	}
+}
+
+
 UIXRECT	UIXObject::Render( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
 UIXRECT		xUsedRect = displayRect;
@@ -90,6 +108,7 @@ UIXRECT		xMaxRect;
 	xUsedRect.y = 0;
 	xUsedRect.h = 0;
 
+	mLastRenderDisplayRect = displayRect;
 	xRect = OnRender( pInterface, displayRect );
 	UIX::msSelectionPriority += GetSelectionPriorityLayer();
 
@@ -173,7 +192,9 @@ void	UIXObject::Shutdown()
 	for ( UIXObject* pContainedObject : mContainsList )
 	{
 		pContainedObject->Shutdown();
+		delete pContainedObject;
 	}
+	mContainsList.clear();
 }
 
 void		UIXObject::OnReceiveDragItem( int dragType, UIXObject* pxSourceObject, uint32 ulDragParam )
@@ -361,11 +382,22 @@ UIXRECT		pageDisplayRect;
 		pageDisplayRect = pxObjects->GetDisplayRect();
 		pxObjects->Render( pxInterface, pageDisplayRect );
 	}
+
+	pxInterface->Draw();
+	for( UIXObject* pxObjects : msPagesList )
+	{
+		pxObjects->PostRender( pxInterface );
+	}
 }
 
 void		UIX::Shutdown()
 {
-
+	for( UIXObject* pxObjects : msPagesList )
+	{
+		pxObjects->Shutdown();
+		delete pxObjects;
+	}
+	msPagesList.clear();
 }
 
 void		UIX::DeleteObject( UIXObject* pObject )
@@ -473,11 +505,11 @@ UIXButton*		pNewButton = new UIXButton( msulNextObjectID++, rect );
 	return( pNewButton );
 }
 
-UIXCustomRender*	UIX::AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam1, uint32 ulUserParam2 )
+UIXCustomRender*	UIX::AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam )
 {
 UIXCustomRender*		pNewCustomRender = new UIXCustomRender( msulNextObjectID++, rect );
 
-	pNewCustomRender->Initialise( renderFunc, ulUserParam1, ulUserParam2 );
+	pNewCustomRender->Initialise( renderFunc, ulUserParam );
 	pxContainer->mContainsList.push_back( pNewCustomRender );
 	return( pNewCustomRender );
 }

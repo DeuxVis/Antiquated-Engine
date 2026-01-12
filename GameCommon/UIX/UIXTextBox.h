@@ -7,6 +7,7 @@
 class UIXTextBox : public UIXObject
 {
 friend class UIX;
+friend class UIXSlider;
 public:
 	void	SetText( const char* szText, ... );
 protected:
@@ -14,7 +15,7 @@ protected:
 
 	void	Initialise( int mode, const char* szTitle );
 	
-	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
+	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT pDisplayRect );
 
 private:
 	std::string			mText;

@@ -15,7 +15,7 @@ typedef struct
 
 } TEXTURE_MANAGER_STATS;
 
-											
+							
 extern	void	EngineTextureManagerInitDX( void );
 extern	void	EngineTextureManagerUpdateDX( void );
 

@@ -16,6 +16,15 @@ UIXDropdownEntry::UIXDropdownEntry( UIXDropdown* pParent, const char* szTitle, u
 
 //-------------------------------------
 
+UIXDropdown::~UIXDropdown()
+{
+	for ( UIXDropdownEntry* pListEntry : mDropdownEntries )
+	{
+		delete pListEntry;
+	}
+	mDropdownEntries.clear();
+}
+
 
 void	UIXDropdown::Initialise( int mode )
 {
@@ -42,9 +51,8 @@ UIXRECT		UIXDropdown::OnRender( InterfaceInstance* pInterface, UIXRECT rect )
 {
 UIXRECT		renderRect = GetActualRenderRect( rect );
 UIXRECT		occupyRect = rect;
-int			entryIndex = 0;
 
-	pInterface->Rect( 1, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0xa0202020 );
+pInterface->Rect( 1, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0xa0202020 );
 	pInterface->OutlineBox( 1, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0xa0606060 );
 	pInterface->Triangle( 1, renderRect.x + renderRect.w - 9, renderRect.y + 3, renderRect.x + renderRect.w - 3, renderRect.y + 3, renderRect.x + renderRect.w - 6, renderRect.y + 9, 0xA0A0A0A0, 0xA0A0A0A0, 0xA0A0A0A0 );
 
@@ -52,12 +60,23 @@ int			entryIndex = 0;
 	{
 		pInterface->Text( 1, renderRect.x + 3, renderRect.y + 3, 0xD0D0D0D0, 3, mpSelectedEntry->GetText().c_str() );
 	}
-		
+	
 //	if ( ( UIX::GetModalObject() == NULL ) ||
 //		 ( UIX::GetModalObject() == this ) ) 
 //	{
 		UIX::CheckForPress( this, renderRect, UIX_DROPDOWN_HEADER, 0 );
 //	}
+
+
+	occupyRect.h = 0;//GetDisplayRect().h + 1;
+	occupyRect.y = GetDisplayRect().y + GetDisplayRect().h + 1;
+	return occupyRect;
+}
+
+void		UIXDropdown::OnPostRender( InterfaceInstance* pInterface, UIXRECT rect )
+{
+UIXRECT		renderRect = GetActualRenderRect( rect );
+int			entryIndex = 0;
 	
 	if ( mbIsExpanded )
 	{
@@ -86,10 +105,6 @@ int			entryIndex = 0;
 			entryIndex++;
 		}
 	}
-
-	occupyRect.h = 0;
-	occupyRect.y = renderRect.h + 1;
-	return occupyRect;
 }
 
 void	UIXDropdown::SetSelectedElementName( const char* szName )

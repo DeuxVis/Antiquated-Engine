@@ -23,6 +23,7 @@ public:
 	virtual void	Render( void );
 	
 	void	SetGraphic( const char* szSpriteTextureName, float fGridScale, BOOL bUseRotation = FALSE, eSpriteGroupRenderFlags renderFlags = kSpriteRender_Default );
+	void	SetGraphicHandle( int hTex, float fGridScale, BOOL bUseRotation = FALSE, eSpriteGroupRenderFlags renderFlags = kSpriteRender_Default );
 
 	const VECT*	GetPos( void ) { return( &mxPos ); }
 	const VECT*	GetVel( void ) { return( &mxVel ); }

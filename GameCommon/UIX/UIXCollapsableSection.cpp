@@ -49,8 +49,8 @@ BOOL	bMouseIsOverSectionHeader = FALSE;
 		ulCol = 0x90404040;
 		ulTextCol = 0xd0f0c080;
 		nHeaderOffsetX = 5;
-		nHeaderW -= 44;
-		headerH = 21;
+//		nHeaderW -= 44;
+//		headerH = 20;
 		break;
 	default:
 		break;

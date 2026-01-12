@@ -31,7 +31,7 @@ UIXRECT		UIXTextBox::OnRender( InterfaceInstance* pInterface, UIXRECT displayRec
 UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
 	pInterface->OutlineBox( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x40404040 );
-	pInterface->Text( 1, drawRect.x + 4, drawRect.y + 7, 0xd0e0e0e0, 3, mText.c_str() );
+	pInterface->Text( 1, drawRect.x + 4, drawRect.y + (drawRect.h-10)/2, 0xd0e0e0e0, 3, mText.c_str() );
 
 	// TODO - Use mFontFlags if set
 	// TODO - Make this TextLimitWidth

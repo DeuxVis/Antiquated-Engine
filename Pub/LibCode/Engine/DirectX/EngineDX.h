@@ -96,6 +96,9 @@ extern void		EngineRenderTargetsTrackingListAllocated( char* );
 extern void		EngineMathsInitSinTable( void );
 extern void		EngineMathsFreeSinTable( void );
 
+extern TEXTURE_HANDLE		EngineCreateTextureHandleFromRawTexture( LPGRAPHICSTEXTURE pTexture );
+extern void					EngineSetTextureHandleDirect( TEXTURE_HANDLE hTex, LPGRAPHICSTEXTURE pTexture );
+
 extern BOOL	 msbEngineMaterialBlendOverride;
 
 #ifdef __cplusplus

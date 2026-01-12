@@ -68,6 +68,8 @@ enum UIX_CHECKBOX_MODE
 {
 	STANDARD_CHECKBOX,
 	POPUP_MENU_LIST,
+	ICON_CHECKBOX,
+	HILIGHT_CHECKBOX,
 };
 
 enum UIX_VALUE_CALLBACK_FLAGS
@@ -104,12 +106,14 @@ struct UIXRECT
 	int h;
 };
 
-typedef	UIXRECT(*fnCustomRenderCallback)( InterfaceInstance* pInterface, UIXRECT rect, uint32 ulUserParam1, uint32 ulUserParam2 );
+typedef	UIXRECT(*fnCustomRenderCallback)( UIXObject* pObj, InterfaceInstance* pInterface, UIXRECT rect, uint32 ulUserParam );
 
 class UIXObject
 {
 friend class UIX;
 public:
+	~UIXObject();
+
 	uint32			GetID() { return( mulID ); }
 
 	void		SetDragReceiveCallback( int dragType, fnDragReceiveCallback func, uint32 ulDestParam );
@@ -127,12 +131,14 @@ protected:
 
 	virtual void		OnUpdate( float delta ) {}
 	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT rect ) { rect.h = 0; return rect; }
+	virtual void		OnPostRender( InterfaceInstance* pInterface, UIXRECT rect ) {}
 	virtual void		OnShutdown() {}
 	virtual void		OnPostChildrenRender( InterfaceInstance* pInterface ) { }
 	virtual void		OnMouseWheel( float fAmount ) {}
 
 	void		Update( float delta );
 	UIXRECT		Render( InterfaceInstance* pInterface, UIXRECT rect );
+	void		PostRender(InterfaceInstance* pInterface);	
 	void		Shutdown();
 
 	BOOL		CheckDragHoverRegion( UIXRECT dragReceiveRegion );
@@ -159,6 +165,7 @@ private:
 	UIXRECT			mDisplayRect;
 	void*			mpUserObject = NULL;
 	int				mChildContentsHeight = 0;
+	UIXRECT			mLastRenderDisplayRect;
 };
 
 
@@ -168,6 +175,7 @@ class UIX
 {
 friend class UIXObject;
 public:
+
 	static void		Initialise( int mode );
 	static void		Update( float delta );
 	static void		Render( InterfaceInstance* pInterface );
@@ -191,7 +199,7 @@ public:
 	static UIXDropdown*					AddDropdown( UIXObject* pxContainer, UIXRECT rect );
 	static UIXText*						AddText( UIXObject* pxContainer, UIXRECT rect, uint32 ulCol = 0xc0c0c0c0, int font = 0, UIX_TEXT_FLAGS fontFlags = NONE,  const char* szTitle = NULL, ... );
 	static UIXShape*					AddShape( UIXObject* pxContainer, UIXRECT rect, int mode = 0, BOOL bBlocks = FALSE, uint32 ulCol1 = 0xC0C0C0C0, uint32 ulCol2 = 0xC0C0C0C0, uint32 ulButtonID = 0, uint32 ulButtonParam = 0 );
-	static UIXCustomRender*				AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam1 = 0, uint32 ulUserParam2 = 0  );
+	static UIXCustomRender*				AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam = 0  );
 	static UIXCheckbox*					AddCheckbox( UIXObject* pxContainer, UIXRECT rect, UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc );
 	static UIXModalPopup*				AddModalPopup( UIXObject* pxContainer, UIXRECT rect );
 

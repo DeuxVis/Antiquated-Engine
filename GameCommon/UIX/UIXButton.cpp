@@ -57,7 +57,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 		int		nFont = 3;
 		int		stringHeight = pInterface->GetStringHeight( mTitle.c_str(), nFont );
 		
-			pInterface->TextRight( 0, drawRect.x + drawRect.w, drawRect.y + ((drawRect.h-stringHeight)/2), 0xD0E0E0E0, 3, mTitle.c_str() );
+			pInterface->TextRight( 0, drawRect.x + drawRect.w, drawRect.y + ((drawRect.h-stringHeight)/2), 0xD0c0c0d0, 3, mTitle.c_str() );
 
 			if ( UIX::CheckForPress( this, drawRect, mulButtonID, mulButtonParam ) )
 			{

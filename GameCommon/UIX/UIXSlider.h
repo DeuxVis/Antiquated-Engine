@@ -4,6 +4,8 @@
 #include <string>
 #include "UIX.h"
 
+class UIXTextBox;
+
 class UIXSlider : public UIXObject
 {
 friend class UIX;
@@ -24,6 +26,8 @@ protected:
 	virtual void		OnUpdate( float fDelta );
 
 private:
+	virtual bool		ShouldDisplayChildren() { return false; }
+
 	float				GetCursorValue();
 	UIXRECT				mRenderRect;
 	UIX_SLIDER_MODE		mMode;
@@ -39,6 +43,9 @@ private:
 	std::string			mText;
 
 	fnValueUpdateCallback	mValueUpdateFunc = NULL;
+
+	UIXTextBox*			mpRangeMinTextBox = NULL;
+	UIXTextBox*			mpRangeMaxTextBox = NULL;
 };
 
 

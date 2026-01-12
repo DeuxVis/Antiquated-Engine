@@ -24,7 +24,7 @@ void		UIXScrollableSection::OnMouseWheel( float fOffset )
 
 UIXRECT		UIXScrollableSection::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
-int		childContentsHeight = GetChildContentsHeight();
+int		childContentsHeight = GetChildContentsHeight() + 4;
 
 	if ( childContentsHeight > displayRect.h )
 	{
@@ -47,7 +47,7 @@ int		childContentsHeight = GetChildContentsHeight();
 		mPageRenderRect = drawRect;
 
 		int		nScrollbarBoxW = 12;
-		int		nScrollbarBoxH = drawRect.h - 2;
+		int		nScrollbarBoxH = drawRect.h - 1;
 		int		nBarW = nScrollbarBoxW - 4;
 		int		nMaxBarH = nScrollbarBoxH - 2;
 

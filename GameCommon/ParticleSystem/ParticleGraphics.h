@@ -6,6 +6,8 @@
 
 extern int		ParticleGraphicsCreate( const char* szTextureNum, float fGridScale, BOOL bUseRotation = FALSE, eSpriteGroupRenderFlags renderFlags = kSpriteRender_Default );
 
+extern int		ParticleGraphicsCreateHandle( int hTex, float fGridScale, BOOL bUseRotation = FALSE, eSpriteGroupRenderFlags renderFlags = kSpriteRender_Default );
+
 extern SPRITE_GROUP		ParticleGraphicsGetSpriteGroup( int nParticleGraphicID );
 
 
