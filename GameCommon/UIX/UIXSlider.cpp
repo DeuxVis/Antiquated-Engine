@@ -23,20 +23,30 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 		mText = szText;
 	}
 
+	char	acVal[128];
+
 	switch( mMode )
 	{
 	case VALUERANGE:
 		{
-		char	acVal[128];
 		int		nTextSectionW = 120;
 		int		nTextBoxW = (nTextSectionW / 2) - 8;
 		UIXRECT		textboxRect = UIXRECT(0, 0, nTextBoxW, GetDisplayRect().h - 2);
+			
 			sprintf( acVal, "%.3f", mfMinVal );
 			mpRangeMinTextBox = UIX::AddTextBox( this, textboxRect, 0, acVal );
 
 			textboxRect.x += nTextBoxW + 14;
 			sprintf( acVal, "%.3f", mfMaxVal );
 			mpRangeMaxTextBox = UIX::AddTextBox( this, textboxRect, 0, acVal );
+		}
+		break;
+	case SLIDER_PLUSMINUS_VALUE:
+		{
+			UIXRECT		textboxRect = UIXRECT(0, 0, 60, GetDisplayRect().h - 2);
+
+			sprintf(acVal, "%.2f", mfCurrentVal);
+			mpValueTextBox = UIX::AddTextBox(this, textboxRect, 0, acVal);
 		}
 		break;
 	}
@@ -123,10 +133,10 @@ uint32		ulCol = 0xf0505070;
 			// Show the text values to the left
 			UIXRECT		drawRect = renderRect;
 			int			nTextBoxW = (nTextAreaW / 2) - 8;
-			drawRect.w = nTextAreaW;
 			char		acVal[128];
 			uint32		ulTextCol = 0xC0C0C0C0;
 
+			drawRect.w = nTextAreaW;
 			drawRect.y += 1;
 			drawRect.h -= 2;
 
@@ -246,6 +256,54 @@ uint32		ulCol = 0xf0505070;
 			pInterface->TextCentre( 1, mRenderRect.x + (mRenderRect.w / 2), textY, 0xD0F0F0F0, 3, mText.c_str() );
 		}
 		break;
+	case SLIDER_PLUSMINUS_VALUE:
+		{
+			int		nBarMaxW = mRenderRect.w;
+			int		nBarPos;
+			float	angleMod = (mfCurrentVal * 360.0f) / A360;
+			int		nBarHalfW = (nBarMaxW / 2);
+			UIXRECT		drawRect = renderRect;
+			char		acVal[128];
+			if (angleMod > 180.0f) angleMod -= 360.0f;
+
+			drawRect.w = 60;
+			drawRect.y += 1;
+			drawRect.h -= 2;
+
+			sprintf(acVal, "%.3f", mfCurrentVal );
+			mpValueTextBox->SetText(acVal);
+			mpValueTextBox->OnRender(pInterface, drawRect);
+			
+			mRenderRect.x += 60;
+			mRenderRect.w -= 60;
+
+			// TODO - MinVal might not be -MaxVal 
+			// (This currently assumes middle is at 0 and its always, like, -10 -> 10 or something
+			nBarPos = (int)(nBarHalfW + ((mfCurrentVal * nBarHalfW) / mfMaxVal));
+
+			//			pInterface->Text( 1, X + 110, lineY + 4, 0xd0e0e0e0, 3, "%.1f", angleMod );
+						// BACKGROUND
+			pInterface->Rect(0, mRenderRect.x, mRenderRect.y, nBarMaxW, mRenderRect.h, 0xf0010101);
+			if (UIHoverItem(mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h) == TRUE)
+			{
+				UIHoverIDSet(UIX_SLIDER_BAR, 0, GetID());
+			}
+			if (nBarPos < nBarHalfW)
+			{
+				pInterface->Rect(0, mRenderRect.x + nBarPos, mRenderRect.y, nBarHalfW - nBarPos, mRenderRect.h, 0xf0202020);
+			}
+			else
+			{
+				pInterface->Rect(0, mRenderRect.x + nBarHalfW, mRenderRect.y, nBarPos - nBarHalfW, mRenderRect.h, 0xf0202020);
+			}
+			// INDICATOR
+			pInterface->Rect(0, mRenderRect.x + nBarPos - 2, mRenderRect.y, 4, mRenderRect.h, 0xf0303040);
+			// Notches
+			pInterface->Rect(1, mRenderRect.x, mRenderRect.y + mRenderRect.h - 3, 1, 3, 0xa0909090);
+			pInterface->Rect(1, mRenderRect.x + (nBarMaxW / 2), mRenderRect.y + mRenderRect.h - 5, 1, 5, 0xa0909090);
+			pInterface->Rect(1, mRenderRect.x + nBarMaxW, mRenderRect.y + mRenderRect.h - 3, 1, 3, 0xa0909090);
+		}
+		break;
 //	case SCALER10:
 	case VALUE:
 	default:
@@ -271,6 +329,7 @@ uint32		ulCol = 0xf0505070;
 			pInterface->Rect( 1, mRenderRect.x + nBarMaxW, mRenderRect.y + mRenderRect.h - 5, 1, 5, 0xa0909090 );
 			// Bar
 			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, nBarW, mRenderRect.h, 0xf0202020 );
+			// Value/Grab bar
 			pInterface->Rect( 0, mRenderRect.x + nBarW - 2, mRenderRect.y, 4, mRenderRect.h, 0xf0303040 );
 		}
 		break;

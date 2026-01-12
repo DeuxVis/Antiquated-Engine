@@ -30,6 +30,7 @@ UIXObject*					UIX::mspMousewheelHoverObject = NULL;
 UIXObject*					UIX::mspModalObject = NULL;
 int							UIX::msSelectionPriority = 0;
 int							UIX::msPressedSelectionPriority = 0;
+int							UIX::msMouseWheelHoverPriority = 0;
 int							UIX::mshUIXIconOverlays[MAX_NUM_UIX_ICONS] = { NOTFOUND };
 int							UIX::mshUIXIconsList[MAX_NUM_UIX_ICONS] = { NOTFOUND };
 
@@ -309,6 +310,17 @@ UIXSlider*		pSlider;
 	}
 }
 
+void		UIX::SetMousewheelHoverObject(UIXObject* pObject)
+{
+	if (msSelectionPriority >= msMouseWheelHoverPriority)
+	{
+		mspMousewheelHoverObject = pObject;
+		msMouseWheelHoverPriority = msSelectionPriority;
+	}
+
+
+}
+
 BOOL		UIX::CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam )
 {
 	if ( msSelectionPriority >= msPressedSelectionPriority )
@@ -376,6 +388,7 @@ UIXRECT		pageDisplayRect;
 
 	msSelectionPriority = 0;
 	msPressedSelectionPriority = 0;
+	msMouseWheelHoverPriority = 0;
 
 	for( UIXObject* pxObjects : msPagesList )
 	{
@@ -503,6 +516,11 @@ UIXButton*		pNewButton = new UIXButton( msulNextObjectID++, rect );
 	pNewButton->Initialise( mode, szTitle, ulButtonID, ulButtonParam, bIsBlocking, ulCol, iconNum );
 	pxContainer->mContainsList.push_back( pNewButton );
 	return( pNewButton );
+}
+
+uint32		UIX::GetNextObjectID()
+{
+	return(msulNextObjectID++);
 }
 
 UIXCustomRender*	UIX::AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam )

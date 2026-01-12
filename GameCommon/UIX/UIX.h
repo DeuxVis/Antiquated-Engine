@@ -37,6 +37,7 @@ enum
 	UIX_DROPDOWN_ENTRY,
 	UIX_CHECKBOX,
 	UIX_LISTBOX_SELECT,
+	UIX_SCROLLBAR,
 };
 
 enum eUIXBUTTON_MODE
@@ -62,6 +63,7 @@ enum UIX_SLIDER_MODE
 	ANGLE,
 	VALUERANGE,
 	VERTICAL_VALUE,
+	SLIDER_PLUSMINUS_VALUE,
 };
 
 enum UIX_CHECKBOX_MODE
@@ -212,7 +214,7 @@ public:
 	static void							HoverAcceptDragItem( UIXObject* pxObject ) { mspDragDestinationHover = pxObject; }
 	static void							EndDragItemType( int type );
 
-	static void							SetMousewheelHoverObject( UIXObject* pObject ) { mspMousewheelHoverObject = pObject; }
+	static void							SetMousewheelHoverObject(UIXObject* pObject);
 	static BOOL							IsMouseHover( UIXRECT rect );
 
 	static BOOL							CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam );
@@ -222,6 +224,8 @@ public:
 	static void							DrawIcon( InterfaceInstance* pInterface, int iconNum, UIXRECT rect, uint32 ulCol );
 	static void							LoadIcon( InterfaceInstance* pInterface, int iconNum, const char* szFilename );
 	static void							LoadIconSheet( InterfaceInstance* pInterface, int sheetNum, const char* szFilename );
+
+	static uint32						GetNextObjectID();
 protected:
 
 	static std::map<uint32, UIXObject*>		msComponentIDMap;
@@ -236,6 +240,7 @@ private:
 	static UIXObject*					mspModalObject;
 	static int							msSelectionPriority;
 	static int							msPressedSelectionPriority;
+	static int							msMouseWheelHoverPriority;
 	static int					mshUIXIconsList[MAX_NUM_UIX_ICONS];
 	static int					mshUIXIconOverlays[MAX_NUM_UIX_ICONS];
 };

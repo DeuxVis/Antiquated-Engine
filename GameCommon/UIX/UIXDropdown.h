@@ -5,6 +5,8 @@
 #include <vector>
 #include "UIX.h"
 
+#include "UIXScrollableSection.h"
+
 class UIXDropdown;
 
 typedef	void(*fnDropdownSelectionChangedCallback)( UIXObject* pxSourceObject, uint32 ulElementParam );
@@ -43,6 +45,8 @@ public:
 	void		SetSelectionChangedCallback( fnDropdownSelectionChangedCallback func ) { mSelectionChangedCallback = func; }
 	void		RegisterValueUpdateHandler( fnDropdownUpdateHandler func ) { mValueUpdateFunc = func; }
 
+	virtual void	OnMouseWheel(float fOffset);
+
 protected:
 	UIXDropdown( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
 
@@ -68,6 +72,8 @@ private:
 	fnDropdownUpdateHandler	mValueUpdateFunc = NULL;
 	int		mnSelectedIndex = NOTFOUND;
 
+
+	UIXScrollbar* mpScrollbar = NULL;
 };
 
 

@@ -44,6 +44,7 @@ private:
 
 	fnValueUpdateCallback	mValueUpdateFunc = NULL;
 
+	UIXTextBox*			mpValueTextBox = NULL;
 	UIXTextBox*			mpRangeMinTextBox = NULL;
 	UIXTextBox*			mpRangeMaxTextBox = NULL;
 };

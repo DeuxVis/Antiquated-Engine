@@ -5,20 +5,124 @@
 #include "UIXScrollableSection.h"
 
 
-void	UIXScrollableSection::Initialise(  )
+
+void	UIXScrollbar::RenderDirect(InterfaceInstance* pInterface, UIXRECT rect, int nViewPageHeight, int nFullContentsHeight )
 {
+int		nScrollbarBoxW = rect.w;
+int		nScrollbarBoxH = rect.h;
+int		nBarW = nScrollbarBoxW - 4;
+int		nMaxBarH = nScrollbarBoxH - 2;
+int		nScrollbarBoxX = rect.x;
+int		nScrollbarBoxY = rect.y;
+
+	float	fBarScale = (float)(nViewPageHeight) / (float)(nFullContentsHeight);
+	if (fBarScale > 1.0f) fBarScale = 1.0f;
+	mfBarScale = fBarScale;
+	mFullBarHeight = nMaxBarH;
+
+	mfHeightPerUnit = (float)rect.h / (float)nFullContentsHeight;
+
+	// Background
+	pInterface->Rect(1, nScrollbarBoxX, nScrollbarBoxY, nScrollbarBoxW, nScrollbarBoxH, 0xd0202020);
+
+	int		nBarX = nScrollbarBoxX + 2;
+	int		nBarY = nScrollbarBoxY + 1;
+
+	nBarY += (int)(mScrollPositionScreen);
+	int nBarH = (int)(nMaxBarH * fBarScale);
+
+	// Bar 
+	pInterface->Rect(1, nBarX, nBarY, nBarW, nBarH, 0xc0505050);
+
+	if (UIHoverItem(nBarX, nBarY, nBarW, nBarH) == TRUE)
+	{
+		int		nMouseX, nMouseY;
+
+		UIGetCurrentCursorPosition(&nMouseX, &nMouseY);
+		UIHoverIDSet(UIX_SCROLLBAR, 0, GetID());
+		mHoverOffsetY = nMouseY - nBarY;
+	}
+
+}
+
+void		UIXScrollbar::HoldHandler(uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress)
+{
+	int		nMouseX, nMouseY;
+
+	UIGetCurrentCursorPosition(&nMouseX, &nMouseY);
+	if (bFirstPress)
+	{
+		mbDidGrabScrollbar = TRUE;
+		mPressPosOffsetY = mHoverOffsetY;
+		mPressPosScreenY = nMouseY;
+		mHoldStartScrollPosScreen = mScrollPositionScreen;
+	}
+	else if (bIsHeld)
+	{
+		mHoldMoveDistanceY = (int)((nMouseY - mPressPosScreenY));
+		mScrollPositionScreen = mHoldStartScrollPosScreen + mHoldMoveDistanceY;
+
+		if (mScrollPositionScreen < 0) mScrollPositionScreen = 0;
+
+		int nBarH = (int)(mFullBarHeight * mfBarScale);
+		if (mScrollPositionScreen + nBarH > mFullBarHeight) mScrollPositionScreen = mFullBarHeight - nBarH;
+
+		mScrollPosition = (int)(mScrollPositionScreen / mfHeightPerUnit);
+	}
+	else  // Just released
+	{
+		mbDidGrabScrollbar = FALSE;
+	}
+}
+
+void		UIXScrollbar::HoldHandlerStatic(int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress)
+{
+	UIXScrollbar* pScrollbar = (UIXScrollbar*)UIX::GetUIXObjectByID(ulIDParam);
+
+	if (pScrollbar)
+	{
+		pScrollbar->HoldHandler(ulParam, bIsHeld, bFirstPress);
+	}
+
+
+}
+
+void		UIXScrollbar::RegisterControlHandlers()
+{
+	UIRegisterHoldHandler(UIX_SCROLLBAR, HoldHandlerStatic);
+
+}
+
+int		UIXScrollbar::GetScrollPosition()
+{
+	return( mScrollPosition );
+}
+
+void	UIXScrollbar::OnMouseWheel(float fOffset)
+{
+	mScrollPositionScreen += (int)(fOffset);
+	if (mScrollPositionScreen < 0) mScrollPositionScreen = 0;
+
+	int nBarH = (int)(mFullBarHeight * mfBarScale);
+	if (mScrollPositionScreen + nBarH > mFullBarHeight) mScrollPositionScreen = mFullBarHeight - nBarH;
+
+	mScrollPosition = (int)(mScrollPositionScreen / mfHeightPerUnit);
+}
+
+//------------------------------------------------------------------------------------------------
+
+
+void	UIXScrollableSection::Initialise()
+{
+	mpScrollbar = new UIXScrollbar(UIX::GetNextObjectID(), UIXRECT(0, 0, 0, 0));
 }
 
 
-	//		extern int		UIScrollablePageGetPosition( int nHandle );
+//		extern int		UIScrollablePageGetPosition( int nHandle );
 // todo extern void		UIScrollablePageDestroy( int nHandle );
-void		UIXScrollableSection::OnMouseWheel( float fOffset )
+void		UIXScrollableSection::OnMouseWheel(float fOffset)
 {
-	mScrollPosition += (int)( fOffset );
-	if ( mScrollPosition < 0 ) mScrollPosition = 0;
-	int nBarH = (int)( mFullBarHeight * mfBarScale );
-	if ( mScrollPosition + nBarH > mFullBarHeight ) mScrollPosition = mFullBarHeight - nBarH;
-
+	mpScrollbar->OnMouseWheel(fOffset);
 }
 
 
@@ -46,42 +150,12 @@ int		childContentsHeight = GetChildContentsHeight() + 4;
 
 		mPageRenderRect = drawRect;
 
-		int		nScrollbarBoxW = 12;
-		int		nScrollbarBoxH = drawRect.h - 1;
-		int		nBarW = nScrollbarBoxW - 4;
-		int		nMaxBarH = nScrollbarBoxH - 2;
+		mScrollbarLastRender.x = drawRect.x + drawRect.w - 12;
+		mScrollbarLastRender.y = drawRect.y + 1;;
+		mScrollbarLastRender.w = 12;
+		mScrollbarLastRender.h = displayRect.h;
 
-		int		nScrollbarBoxX = drawRect.x + drawRect.w - 12;
-		int		nScrollbarBoxY = drawRect.y + 1;
-
-		float	fBarScale = (float)( displayRect.h ) / (float)( childContentsHeight );
-		if ( fBarScale > 1.0f ) fBarScale = 1.0f;
-		mfBarScale = fBarScale;
-		mFullBarHeight = nMaxBarH;
-
-		pInterface->Rect( 0, nScrollbarBoxX, nScrollbarBoxY, nScrollbarBoxW, nScrollbarBoxH, 0xd0202020 );
-
-		mLastRender.x = nScrollbarBoxX;
-		mLastRender.y = nScrollbarBoxY;
-		mLastRender.w = nScrollbarBoxW;
-		mLastRender.h = nScrollbarBoxH;
-
-		int		nBarX = nScrollbarBoxX + 2;
-		int		nBarY = nScrollbarBoxY + 1;
-
-		nBarY += (int)( mScrollPosition );
-		int nBarH = (int)( nMaxBarH * fBarScale );
-
-		pInterface->Rect( 1, nBarX, nBarY, nBarW, nBarH, 0xc0505050 );
-
-		if ( UIHoverItem( nBarX, nBarY, nBarW, nBarH ) == TRUE )
-		{
-		int		nMouseX, nMouseY;
-				
-			UIGetCurrentCursorPosition( &nMouseX, &nMouseY );
-			UIHoverIDSet( UIX_SCROLLABLE_SECTION_SCROLLBAR, 0, GetID() );
-			mHoverOffsetY = nMouseY - nBarY;
-		}
+		mpScrollbar->RenderDirect(pInterface, mScrollbarLastRender, displayRect.h, childContentsHeight);
 
 		occupyRect.h = 0;
 		occupyRect.y = 0;
@@ -91,7 +165,7 @@ int		childContentsHeight = GetChildContentsHeight() + 4;
 	else
 	{
 		mbIsUsingClippingCanvas = FALSE;
-		mScrollPosition = 0;
+//		mScrollPosition = 0;
 		return( UIXRECT( displayRect.x, 0, displayRect.w, 0) );
 	}
 }
@@ -107,53 +181,12 @@ void	UIXScrollableSection::OnPostChildrenRender( InterfaceInstance* pInterface )
 
 int			UIXScrollableSection::GetScrollPosition()
 {
-	if ( mfBarScale > 0.0f )
-	{
-		return( (int)( mScrollPosition / mfBarScale ) ); 
-	}
-	return 0;
-}
-
-void	UIXScrollableSection::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress )
-{
-int		nMouseX, nMouseY;
-				
-	UIGetCurrentCursorPosition( &nMouseX, &nMouseY );
-	if ( bFirstPress )
-	{
-		mbDidGrabScrollbar = TRUE;
-		mPressPosOffsetY = mHoverOffsetY;
-		mPressPosScreenY = nMouseY;
-	}
-	else if ( bIsHeld ) 
-	{
-		mScrollPosition = (int)( (nMouseY - mPressPosScreenY) / mfBarScale );
-		if ( mScrollPosition < 0 ) mScrollPosition = 0;
-		int nBarH = (int)( mFullBarHeight * mfBarScale );
-		
-		if ( mScrollPosition + nBarH > mFullBarHeight ) mScrollPosition = mFullBarHeight - nBarH;
-	}
-	else  // Just released
-	{
-		mbDidGrabScrollbar = FALSE;
-	}
-
-}
-
-
-void	UIXScrollableSection::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
-{
-UIXScrollableSection*		pSection = (UIXScrollableSection*)UIX::GetUIXObjectByID( ulIDParam );
-
-	if ( pSection )
-	{
-		pSection->HoldHandler( ulParam, bIsHeld, bFirstPress );
-	}
+	return( mpScrollbar->GetScrollPosition() );
 }
 
 
 void		UIXScrollableSection::RegisterControlHandlers()
 {
-	UIRegisterHoldHandler( UIX_SCROLLABLE_SECTION_SCROLLBAR, HoldHandlerStatic );
+	UIXScrollbar::RegisterControlHandlers();
 
 }

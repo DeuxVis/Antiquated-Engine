@@ -28,6 +28,13 @@ UIXDropdown::~UIXDropdown()
 
 void	UIXDropdown::Initialise( int mode )
 {
+	mpScrollbar = new UIXScrollbar(UIX::GetNextObjectID(), UIXRECT(0, 0, 0, 0));
+
+}
+
+void		UIXDropdown::OnMouseWheel(float fOffset)
+{
+	mpScrollbar->OnMouseWheel(fOffset);
 }
 
 void	UIXDropdown::ToggleExpanded()
@@ -81,27 +88,60 @@ int			entryIndex = 0;
 	if ( mbIsExpanded )
 	{
 	UIXRECT		expandedRect = renderRect;
+	int			nMaxDropdownH;
+	bool		bScrollbarRequired = false;
+	int			nMaxNumEntriesInView = 1;
+
 
 		expandedRect.y += renderRect.h + 1;
 		expandedRect.h = (mDropdownEntries.size() * 14) + 4;
 		// Show list..
 
-		pInterface->Rect( 2, expandedRect.x, expandedRect.y, expandedRect.w, expandedRect.h, 0xF0202020 );
-		pInterface->OutlineBox( 2, expandedRect.x, expandedRect.y, expandedRect.w, expandedRect.h, 0xF0606060 );
+		nMaxDropdownH = pInterface->GetHeight() - (expandedRect.y + 4);
+		nMaxNumEntriesInView = (nMaxDropdownH - 4) / 14;
+		if (nMaxNumEntriesInView < 1) nMaxNumEntriesInView = 1;
 
 		UIXRECT		lineRect = expandedRect;
 		lineRect.y += 2;
 		lineRect.h = 14;
 
+		if (expandedRect.h > nMaxDropdownH)
+		{
+			bScrollbarRequired = true;
+
+			UIXRECT		scrollbarRect;
+
+			scrollbarRect.x = expandedRect.x + expandedRect.w - 14;
+			scrollbarRect.w = 13;
+			scrollbarRect.y = expandedRect.y + 1;
+			scrollbarRect.h = nMaxDropdownH - 2;
+
+			mpScrollbar->RenderDirect(pInterface, scrollbarRect, nMaxNumEntriesInView, mDropdownEntries.size() );
+
+			lineRect.w -= 13;
+			expandedRect.h = nMaxDropdownH;
+		}
+
+		if (UIHoverItem(expandedRect.x, expandedRect.y, expandedRect.w, expandedRect.h) == TRUE)
+		{
+			UIX::SetMousewheelHoverObject(this);
+		}
+		pInterface->Rect( 0, expandedRect.x, expandedRect.y, expandedRect.w, expandedRect.h, 0xF0202020 );
+		pInterface->OutlineBox( 0, expandedRect.x, expandedRect.y, expandedRect.w, expandedRect.h, 0xF0606060 );
+
 		for ( auto listEntry : mDropdownEntries )
 		{
-			pInterface->Text( 2, lineRect.x + 3, lineRect.y, 0xc0d0d0d0, 3, listEntry->GetText().c_str() );
+			if ((entryIndex >= mpScrollbar->GetScrollPosition()) &&
+				(entryIndex < mpScrollbar->GetScrollPosition() + nMaxNumEntriesInView))
+			{
+				pInterface->TextLimitWidth(2, lineRect.x + 3, lineRect.y, lineRect.w, 0xc0d0d0d0, 3, listEntry->GetText().c_str());
 
-			if ( UIX::CheckForPress( this, lineRect, UIX_DROPDOWN_ENTRY, entryIndex ) )
-			{		
-				pInterface->Rect( 2, lineRect.x, lineRect.y, lineRect.w, lineRect.h, 0xa0808080 );
+				if (UIX::CheckForPress(this, lineRect, UIX_DROPDOWN_ENTRY, entryIndex))
+				{
+					pInterface->Rect(1, lineRect.x, lineRect.y, lineRect.w, lineRect.h, 0xa0808080);
+				}
+				lineRect.y += 14;
 			}
-			lineRect.y += 14;
 			entryIndex++;
 		}
 	}
