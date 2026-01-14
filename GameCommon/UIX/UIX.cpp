@@ -25,9 +25,9 @@ std::vector<UIXObject*>		UIX::msPagesList;
 std::map<uint32, UIXObject*>	UIX::msComponentIDMap;
 int							UIX::msDragItemType = 0;
 UIXObject*					UIX::mspDragDestinationHover = NULL;
-UIXObject*					UIX::mspDragSource = NULL;
-UIXObject*					UIX::mspMousewheelHoverObject = NULL;
+UIXObject*					UIX::mspDragSource = NULL;	
 UIXObject*					UIX::mspModalObject = NULL;
+UIXObject*					UIX::mspMousewheelHoverObject = NULL;
 int							UIX::msSelectionPriority = 0;
 int							UIX::msPressedSelectionPriority = 0;
 int							UIX::msMouseWheelHoverPriority = 0;
@@ -48,6 +48,23 @@ UIXObject::~UIXObject()
 {
 	// todo - Get rid of this by using smart(er) pointers for things like the mousewheel hover
 	if ( UIX::mspMousewheelHoverObject == this ) UIX::mspMousewheelHoverObject = NULL;
+}
+
+void	UIXObject::KeyUp(int keyCode)
+{
+	switch (keyCode)
+	{
+	case KEY_ESCAPE:
+		OnEscape();
+		break;
+	default:
+		break;
+	}
+
+	for (UIXObject* pContainedObject : mContainsList)
+	{
+		pContainedObject->KeyUp(keyCode);
+	}
 }
 
 void	UIXObject::Update( float delta )
@@ -270,6 +287,22 @@ void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam )
 	}
 }
 	
+void	UIX::OnKeyUp(int keyCode)
+{
+	switch (keyCode)
+	{
+	case KEY_ESCAPE:
+		for (UIXObject* pxObjects : msPagesList)
+		{
+			pxObjects->KeyUp( keyCode );
+		}
+		break;
+	default:
+		break;
+	}
+
+}
+
 void		UIX::OnMouseWheel( float fOffset )
 {
 	if ( mspMousewheelHoverObject )

@@ -389,6 +389,8 @@ KeyLookupTable	maKeyLookupTable[KEY_CODES_MAX ] =
 	{ KEY_NUMPAD8,			VK_NUMPAD8, 0 },
 	{ KEY_NUMPAD9,			VK_NUMPAD9, 0 },
 	{ KEY_CAPSLOCK,			VK_CAPITAL, 0 },
+	{ KEY_C,				'C', 0 },
+	{ KEY_V,				'V', 0 },
 	
 };
 

@@ -72,6 +72,7 @@ enum UIX_CHECKBOX_MODE
 	POPUP_MENU_LIST,
 	ICON_CHECKBOX,
 	HILIGHT_CHECKBOX,
+	HILIGHT_CHECKBOX2,
 };
 
 enum UIX_VALUE_CALLBACK_FLAGS
@@ -142,6 +143,7 @@ protected:
 	UIXRECT		Render( InterfaceInstance* pInterface, UIXRECT rect );
 	void		PostRender(InterfaceInstance* pInterface);	
 	void		Shutdown();
+	void		KeyUp(int keyCode);
 
 	BOOL		CheckDragHoverRegion( UIXRECT dragReceiveRegion );
 
@@ -155,6 +157,7 @@ protected:
 	virtual int			GetScrollPosition() { return( 0 ); }
 	virtual int		GetSelectionPriorityLayer() { return( 0 ); }
 
+	virtual void			OnEscape() {}
 private:
 	virtual bool		ShouldDisplayChildren() { return true; }
 
@@ -186,6 +189,7 @@ public:
 	static void		ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam );
 	static void		SliderHoldHandler( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
 	static void		OnMouseWheel( float fOffset );
+	static void		OnKeyUp( int keyCode );
 
 	static void			SetModalObject( UIXObject* pObject ) { mspModalObject = pObject; }
 	static UIXObject*	GetModalObject() { return( mspModalObject ); }

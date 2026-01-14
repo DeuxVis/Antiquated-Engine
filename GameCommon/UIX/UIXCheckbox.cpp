@@ -30,6 +30,26 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
 	switch( mMode )
 	{
+	case HILIGHT_CHECKBOX2:
+		{
+			uint32	ulCol = 0x90303040;
+			uint32	ulTextCol = 0xD0A0A0A0;
+
+			if (mbIsChecked)
+			{
+				ulCol = 0xC0C08010;
+				ulTextCol = 0xF0F0c080;
+			}
+			pInterface->Rect(0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, ulCol);
+
+			// TODO - Properly centre the title
+			pInterface->Text(1, drawRect.x + 6, drawRect.y + 2, ulTextCol, 0, mText.c_str());
+			if (UIX::IsMouseHover(drawRect))
+			{
+				pInterface->Rect(0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x40c0b0a0);
+			}
+		}
+		break;
 	case HILIGHT_CHECKBOX:
 		{
 		uint32	ulCol = 0xd0202020;
@@ -44,6 +64,10 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
 			// TODO - Properly centre the title
 			pInterface->Text( 1, drawRect.x + 6, drawRect.y + 1, ulTextCol, 0, mText.c_str() );
+			if (UIX::IsMouseHover(drawRect))
+			{
+				pInterface->Rect(0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x40c0b0a0);
+			}
 		}
 		break;
 	case ICON_CHECKBOX:

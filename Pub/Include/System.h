@@ -113,6 +113,8 @@ enum					// See SysCheckKeyState, SysWasJustPressed
 	KEY_NUMPAD8,
 	KEY_NUMPAD9,
 	KEY_CAPSLOCK,
+	KEY_C,
+	KEY_V,
 	KEY_CODES_MAX		// EOL
 };
 

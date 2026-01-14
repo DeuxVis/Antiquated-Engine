@@ -60,6 +60,7 @@ protected:
 	void			ToggleExpanded(); 
 	uint32			GetNextIndex( UIXDropdownEntry* pDropdownEntry ) { mDropdownEntries.push_back( pDropdownEntry ); return( mulNextElementIndex++ ); }
 	virtual int		GetSelectionPriorityLayer() { return( 1 ); }
+	virtual void			OnEscape();
 
 private:
 

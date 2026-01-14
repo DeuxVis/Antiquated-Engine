@@ -53,6 +53,16 @@ void	UIXDropdown::ToggleExpanded()
 	}
 }
 
+void	UIXDropdown::OnEscape()
+{
+	mbIsExpanded = FALSE;
+	if (UIX::GetModalObject() == this)
+	{
+		UIX::SetModalObject(NULL);
+	}
+}
+
+
 
 UIXRECT		UIXDropdown::OnRender( InterfaceInstance* pInterface, UIXRECT rect )
 {
@@ -93,6 +103,7 @@ int			entryIndex = 0;
 	int			nMaxNumEntriesInView = 1;
 
 
+		
 		expandedRect.y += renderRect.h + 1;
 		expandedRect.h = (mDropdownEntries.size() * 14) + 4;
 		// Show list..
@@ -100,6 +111,16 @@ int			entryIndex = 0;
 		nMaxDropdownH = pInterface->GetHeight() - (expandedRect.y + 4);
 		nMaxNumEntriesInView = (nMaxDropdownH - 4) / 14;
 		if (nMaxNumEntriesInView < 1) nMaxNumEntriesInView = 1;
+
+		if (nMaxNumEntriesInView < 5)
+		{
+			expandedRect.h = (mDropdownEntries.size() * 14) + 4;
+			expandedRect.y = renderRect.y - expandedRect.h;
+			if (expandedRect.y < 10) expandedRect.y = 10;
+			nMaxDropdownH = renderRect.y - expandedRect.y;
+			nMaxNumEntriesInView = (nMaxDropdownH - 4) / 14;
+			if (nMaxNumEntriesInView < 1) nMaxNumEntriesInView = 1;
+		}
 
 		UIXRECT		lineRect = expandedRect;
 		lineRect.y += 2;

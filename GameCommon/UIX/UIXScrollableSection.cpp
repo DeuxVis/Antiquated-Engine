@@ -21,6 +21,7 @@ int		nScrollbarBoxY = rect.y;
 	mFullBarHeight = nMaxBarH;
 
 	mfHeightPerUnit = (float)rect.h / (float)nFullContentsHeight;
+	if (mfHeightPerUnit == 0.0f) mfHeightPerUnit = 1.0f;
 
 	// Background
 	pInterface->Rect(1, nScrollbarBoxX, nScrollbarBoxY, nScrollbarBoxW, nScrollbarBoxH, 0xd0202020);
@@ -106,7 +107,11 @@ void	UIXScrollbar::OnMouseWheel(float fOffset)
 	int nBarH = (int)(mFullBarHeight * mfBarScale);
 	if (mScrollPositionScreen + nBarH > mFullBarHeight) mScrollPositionScreen = mFullBarHeight - nBarH;
 
-	mScrollPosition = (int)(mScrollPositionScreen / mfHeightPerUnit);
+	if (mfHeightPerUnit > 0.0f)
+	{
+		mScrollPosition = (int)(mScrollPositionScreen / mfHeightPerUnit);
+	}
+	
 }
 
 //------------------------------------------------------------------------------------------------

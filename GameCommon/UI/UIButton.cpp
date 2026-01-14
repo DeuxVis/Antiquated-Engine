@@ -156,6 +156,7 @@ int		nFont = 1;
 	{
 		nFont = 3;
 	}
+	
 	uint32	ulTextCol = GetColWithModifiedAlpha( 0xD0F0E0C0, fAlphaVal );
 	int		nTextH = pInterface->GetStringHeight( szText, nFont );
 	int		nTextY;
@@ -167,7 +168,15 @@ int		nFont = 1;
 
 	nTextY = Y + ( ( H - (nTextH-1) ) / 2 );
 	InterfaceSetFontFlags( FONT_FLAG_DROP_SHADOW );
-	pInterface->TextCentre( 1, X + (W/2) + 1, nTextY, ulTextCol, nFont, szText );
+	if (pInterface->GetStringWidth(szText, nFont) < (W - 4))
+	{
+		pInterface->TextCentre(1, X + (W / 2) + 1, nTextY, ulTextCol, nFont, szText);
+	}
+	else
+	{
+		pInterface->TextLimitWidth(1, X + 3, nTextY, (W - 4), ulTextCol, nFont, szText);
+	}
+
 	InterfaceSetFontFlags( 0 );
 
 }
