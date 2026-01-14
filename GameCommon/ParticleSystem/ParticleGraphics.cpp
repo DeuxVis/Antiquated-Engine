@@ -162,6 +162,17 @@ ParticleGraphic*		pParticleGraphic = ParticleGraphicsFindTexHandle( hTex );
 	
 }
 
+int		ParticleGraphicsGetTextureHandle(int nParticleGraphicID)
+{
+	ParticleGraphic* pParticleGraphic = ParticleGraphicsFindFromID(nParticleGraphicID);
+
+	if (pParticleGraphic)
+	{
+		return( pParticleGraphic->GetTextureHandle() ); 
+	}
+	return(NOTFOUND);
+}
+
 int		ParticleGraphicsCreate( const char* szTextureName, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )
 {
 ParticleGraphic*		pParticleGraphic = ParticleGraphicsFind( szTextureName );

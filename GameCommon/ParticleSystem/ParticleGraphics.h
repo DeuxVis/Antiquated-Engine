@@ -10,6 +10,6 @@ extern int		ParticleGraphicsCreateHandle( int hTex, float fGridScale, BOOL bUseR
 
 extern SPRITE_GROUP		ParticleGraphicsGetSpriteGroup( int nParticleGraphicID );
 
-
+extern int		ParticleGraphicsGetTextureHandle(int nParticleGraphicID);
 
 #endif

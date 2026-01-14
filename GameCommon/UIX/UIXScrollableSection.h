@@ -16,6 +16,7 @@ public:
 	static void		RegisterControlHandlers();
 
 	virtual int		GetScrollPosition();
+	void			SetScrollPosition(int value) { mScrollPosition = value; }
 	virtual void	OnMouseWheel(float fOffset);
 
 private:

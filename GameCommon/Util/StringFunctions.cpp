@@ -231,6 +231,29 @@ const char*		acMonthNames[12] =
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
+void		RemoveExtensionFromEndOfFileName(const char* szFilenameIn, const char* szExtensionToRemove, char* pcOut)
+{
+	const char* pcFilenameRunner = szFilenameIn;
+	char* pcOutRunner = pcOut;
+
+	while (*pcFilenameRunner != 0)
+	{
+		if (*pcFilenameRunner == '.')
+		{
+			if (stricmp(pcFilenameRunner + 1, szExtensionToRemove) == 0)
+			{
+				*pcOutRunner = 0;
+				return;
+			}
+		}
+		*pcOutRunner = *pcFilenameRunner;
+		pcFilenameRunner++;
+		pcOutRunner++;
+
+	}
+}
+
+
 void		RemovePathFromStartOfFileName( const char* szFilenameIn, const char* szPathToRemove, char* pcOut )
 {
 const char*		pcDirRunner = szPathToRemove;

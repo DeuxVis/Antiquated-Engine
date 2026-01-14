@@ -165,7 +165,7 @@ int		childContentsHeight = GetChildContentsHeight() + 4;
 	else
 	{
 		mbIsUsingClippingCanvas = FALSE;
-//		mScrollPosition = 0;
+		mpScrollbar->SetScrollPosition(0);
 		return( UIXRECT( displayRect.x, 0, displayRect.w, 0) );
 	}
 }
