@@ -30,7 +30,7 @@ private:
 
 	float				GetCursorValue();
 	UIXRECT				mRenderRect;
-	UIX_SLIDER_MODE		mMode;
+	UIX_SLIDER_MODE		mMode = VALUE;
 	float				mfMinVal = 0.0f;
 	float				mfMaxVal = 1.0f;
 	float				mfInitialMinVal = 0.0f;

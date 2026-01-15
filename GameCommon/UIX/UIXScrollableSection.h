@@ -27,11 +27,11 @@ private:
 	int					mHoverOffsetY = 0;
 	int					mHoldMoveDistanceY = 0;
 	int					mHoldStartScrollPosScreen = 0;
-	int					mPressPosScreenY;
-	int					mPressPosOffsetY;
-	float				mfBarScale;
-	float				mfHeightPerUnit;
-	int					mFullBarHeight;
+	int					mPressPosScreenY = 0;
+	int					mPressPosOffsetY = 0;
+	float				mfBarScale = 1.0f;
+	float				mfHeightPerUnit = 1.0f;
+	int					mFullBarHeight = 100;
 
 	BOOL				mbDidGrabScrollbar = FALSE;
 

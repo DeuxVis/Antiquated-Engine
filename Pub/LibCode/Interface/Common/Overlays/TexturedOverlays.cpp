@@ -146,24 +146,15 @@ int		nDrawHowMany;
 		case RENDER_TYPE_NORMAL:
 			mpInterfaceD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 			mpInterfaceD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
 			break;
 		case RENDER_TYPE_SUBTRACTIVE:
 			mpInterfaceD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
 			mpInterfaceD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
 			break;
 		case RENDER_TYPE_ALPHA_SUBTRACTIVE:
 			mpInterfaceD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
 //			mpInterfaceD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
 			mpInterfaceD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
 			break;
 		case RENDER_TYPE_ADDITIVE_NOCLAMP:
 			mpInterfaceD3DDevice->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
@@ -172,15 +163,14 @@ int		nDrawHowMany;
 		case RENDER_TYPE_ADDITIVE:
 			mpInterfaceD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 			mpInterfaceD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_DIFFUSE );
+			break;
+		case RENDER_TYPE_NEGATIVE:
+			mpInterfaceD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVSRCCOLOR);
+			mpInterfaceD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 			break;
 		case RENDER_TYPE_COLORBLEND:
 			mpInterfaceD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCCOLOR);
 			mpInterfaceD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE );
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-			mpInterfaceD3DDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
 			break;
 		}
 
