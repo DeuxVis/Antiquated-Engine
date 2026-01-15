@@ -40,17 +40,7 @@ void		UIXDropdown::OnMouseWheel(float fOffset)
 void	UIXDropdown::ToggleExpanded()
 { 
 	mbIsExpanded = !mbIsExpanded;
-	if ( mbIsExpanded )
-	{
-		UIX::SetModalObject( this );
-	}	
-	else
-	{
-		if ( UIX::GetModalObject() == this )
-		{
-			UIX::SetModalObject( NULL );
-		}
-	}
+
 }
 
 void	UIXDropdown::OnEscape()

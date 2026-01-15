@@ -434,6 +434,13 @@ UIXRECT		pageDisplayRect;
 	{
 		pxObjects->PostRender( pxInterface );
 	}
+	// Debug stuff
+
+	UIXObject* pModal = UIX::GetModalObject();
+	if ( pModal )
+	{
+		pxInterface->Text( 0, 5, 20, 0xd0f02010, 0, "press-pri: %d, modal: %08x", msPressedSelectionPriority, pModal->GetID() );
+	}
 }
 
 void		UIX::Shutdown()
