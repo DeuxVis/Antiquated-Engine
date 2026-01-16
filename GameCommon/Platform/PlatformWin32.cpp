@@ -261,6 +261,28 @@ const char*		PlatformKeyboardGetInputString( BOOL bIncludeCursor )
 	}
 }
 				
+void	PlatformCopyFromConsoleToClipboard( void )
+{
+	if ( OpenClipboard( ghPlatformWin32wndMain ) == TRUE )
+	{
+		if ( IsClipboardFormatAvailable(CF_TEXT) == TRUE )
+		{
+			// TODO - Having handler doesnt always mean we have an active source.. needs reviewing
+			if ( mfnKeyboardHandler )
+			{
+			const char* output = mszKeyboardInputString;
+			const size_t len = strlen(output) + 1;
+			HGLOBAL hMem =  GlobalAlloc(GMEM_MOVEABLE, len);
+			
+				memcpy(GlobalLock(hMem), output, len);
+				GlobalUnlock(hMem);
+				EmptyClipboard();
+				SetClipboardData(CF_TEXT, hMem);
+				CloseClipboard();
+			}
+		}
+	}
+}
 
 void	PlatformPasteFromClipboardToConsole( void )
 {
@@ -275,13 +297,26 @@ void	PlatformPasteFromClipboardToConsole( void )
   
 			if ( pszText != NULL )
 			{
+
 			int		nPasteStrLen = strlen( pszText );
 			int		nCurrentStrLen = strlen( mszKeyboardInputString );
 
 				if ( nPasteStrLen + nCurrentStrLen < 250 ) 
 				{
-					strcat( mszKeyboardInputString, pszText );
+					if ( mbKeyboardInputWholeStringSelected )
+					{
+						strcpy( mszKeyboardInputString, pszText );				
+					}
+					else
+					{
+						strcat( mszKeyboardInputString, pszText );
+					}
 					mnKeyboardInputCursor = nPasteStrLen + nCurrentStrLen;
+
+					if ( mfnKeyboardHandler)
+					{
+						mfnKeyboardHandler( KEYBOARD_ON_PRESS_ENTER, mszKeyboardInputString, mpKeyboardHandlerCallbackUserObj );
+					}
 				}
 				GlobalUnlock( ret );
 
@@ -346,8 +381,18 @@ void	PlatformKeyboardHandleSpecialKeyUp( int nKeyCode )
 	case KEY_SHIFT:
 		mbKeyboardShiftOn = FALSE;
 		return;
+	case 'C':
+	case 'c':
+	case KEY_C:
+		if ( SysCheckKeyState( KEY_CTRL ) == TRUE )
+		{
+			PlatformCopyFromConsoleToClipboard();
+			return;
+		}
+		break;
 	case 'V':
 	case 'v':
+	case KEY_V:
 		if ( SysCheckKeyState( KEY_CTRL ) == TRUE )
 		{
 			PlatformPasteFromClipboardToConsole();

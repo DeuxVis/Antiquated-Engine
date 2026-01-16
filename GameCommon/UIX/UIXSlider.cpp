@@ -71,7 +71,7 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 			textboxRect.x += nTextBoxW + 14;
 			sprintf( acVal, "%.3f", mfMaxVal );
 			mpRangeMaxTextBox = UIX::AddTextBox( this, textboxRect, 0, acVal );
-		}
+		} 
 		break;
 	case SLIDER_PLUSMINUS_VALUE:
 		{

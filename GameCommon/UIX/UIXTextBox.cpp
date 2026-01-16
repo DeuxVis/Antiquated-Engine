@@ -55,12 +55,13 @@ void	UIXTextBox::EndEdit()
 
 int		UIXTextBox::OnKeyboardMessage( int nResponseCode, const char* szInputText )
 {
+
 	switch( nResponseCode )
 	{
-	case 1:	// press enter
+	case KEYBOARD_ON_PRESS_ENTER:	// press enter
 		EndEdit();
 		break;
-	case 2:		// press TAB
+	case KEYBOARD_ON_PRESS_TAB:		// press TAB
 		EndEdit();
 		// TODO - Select next textbox
 		break;

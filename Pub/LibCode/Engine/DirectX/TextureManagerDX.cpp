@@ -672,6 +672,92 @@ void					EngineSetTextureHandleDirect( TEXTURE_HANDLE hTex, LPGRAPHICSTEXTURE pT
 	maTextureReferences[hTex].pTexture = pTexture;
 }
 
+
+void		EngineTextureResize( TEXTURE_HANDLE nHandle, int nNewTexW, int nNewTexH )
+{
+LPGRAPHICSTEXTURE pTexture = EngineGetTextureDirectDX( nHandle );
+LPGRAPHICSTEXTURE pNewTexture;
+IDirect3DSurface9*		pSourceSurface;
+IDirect3DSurface9*		pOutSurface;
+HRESULT	hr;
+
+	
+	D3DXCreateTexture( mpEngineDevice, nNewTexW, nNewTexH, 1, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &pNewTexture );
+
+	pTexture->GetSurfaceLevel( 0, &pSourceSurface );
+	pNewTexture->GetSurfaceLevel( 0, &pOutSurface );
+
+	hr = mpEngineDevice->StretchRect( pSourceSurface, NULL, pOutSurface, NULL, D3DTEXF_NONE );//D3DTEXF_ANISOTROPIC );
+	if ( hr != D3D_OK)
+	{
+	int		error = 0;
+		error++;
+	}
+	pSourceSurface->Release();
+	pOutSurface->Release();
+	pTexture->Release();
+	maTextureReferences[nHandle].pTexture = pNewTexture;
+
+}
+
+
+TEXTURE_HANDLE	EngineCreateTextureFromBackBuffer( int nNewTexW, int nNewTexH )
+{
+IDirect3DSurface9*		pBackBuffer;
+IDirect3DSurface9*		pOutSurface;
+D3DSURFACE_DESC		backBufferSurfaceDesc;
+RECT		sourceRect = { 0, 0, 0, 0 };
+RECT		destRect = { 0, 0, 0, 0 };
+POINT		destPoint = { 0, 0 };
+LPGRAPHICSTEXTURE pTexture = NULL;
+HRESULT	hr;
+
+	int		nHandle;
+
+	mpEngineDevice->GetBackBuffer( 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
+
+	pBackBuffer->GetDesc(&backBufferSurfaceDesc);
+
+	LPDIRECT3DSURFACE9 pOffscreenSurface = NULL;
+	mpEngineDevice->CreateOffscreenPlainSurface(backBufferSurfaceDesc.Width, backBufferSurfaceDesc.Height, backBufferSurfaceDesc.Format, D3DPOOL_SYSTEMMEM, &pOffscreenSurface, NULL);
+
+	if ( pOffscreenSurface != NULL )
+	{
+		  // Copy from video memory to system memory
+		hr = mpEngineDevice->GetRenderTargetData(pBackBuffer, pOffscreenSurface);
+			if ( hr != D3D_OK)
+			{
+			int		error = 0;
+				error++;
+			}
+
+		sourceRect.right = backBufferSurfaceDesc.Width;
+		sourceRect.bottom = backBufferSurfaceDesc.Height;	
+
+		D3DXCreateTexture( mpEngineDevice, backBufferSurfaceDesc.Width, backBufferSurfaceDesc.Height, 1, 0, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &pTexture );
+
+		if ( pTexture != NULL )
+		{
+			nHandle = EngineCreateTextureHandleFromRawTexture( pTexture );
+
+			pTexture->GetSurfaceLevel( 0, &pOutSurface );
+		
+			hr = mpEngineDevice->UpdateSurface( pOffscreenSurface, &sourceRect, pOutSurface, &destPoint );
+
+			pOutSurface->Release();
+			pBackBuffer->Release();
+			pOffscreenSurface->Release();
+
+			EngineTextureResize( nHandle, nNewTexW, nNewTexH );
+			return( nHandle );
+		}
+		pOffscreenSurface->Release();
+	}
+	pBackBuffer->Release();
+	return( NOTFOUND );
+}
+
+
 TEXTURE_HANDLE		EngineCreateTextureHandleFromRawTexture( LPGRAPHICSTEXTURE pTexture )
 {
 int		nLoop = EngineGetFreeTextureHandle();

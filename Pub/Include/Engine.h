@@ -457,6 +457,7 @@ extern	void*	EngineGetTextureDirect( int nTex );
 extern	void	EngineSetTextureDirect( int nTex, void* pTexture );
 
 extern void		EngineDebugNoTextures( BOOL );
+TEXTURE_HANDLE	EngineCreateTextureFromBackBuffer( int nNewTexW, int nNewTexH );
 
 //-------------------------------------------------------------------------
 // DX Specific functions 

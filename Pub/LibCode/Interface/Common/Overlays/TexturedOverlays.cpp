@@ -612,6 +612,28 @@ int		nHandle;
 	return( nHandle );
 }
 
+int		TexturedOverlays::CreateOverlayForEngineTexture( int nLayer, int hEngineTexture)
+{
+int	nRet;
+
+	nRet = mnNumActiveTexOverlays++;
+
+	if ( mnNumActiveTexOverlays == MAX_DIFFERENT_TEXTURED_OVERLAYS )
+	{
+		PANIC_IF( TRUE,"Too many different textured overlays added" );
+		mnNumActiveTexOverlays--;
+		return( nRet );
+	}
+
+	maxOverlayData[ nRet ].pTexture = EngineGetTextureDirectDX( hEngineTexture );
+	maxOverlayData[ nRet ].nRenderType = RENDER_TYPE_NORMAL;
+	maxOverlayData[ nRet ].nLayerNum = nLayer;
+//	maxOverlayData[ nRet ].hEngineTexture = hEngineTexture;
+	return( nRet );
+
+}
+
+
 int	TexturedOverlays::CreateOverlayDirect( int nLayer, void* pTexture, int hEngineTexture )
 {
 int	nRet;

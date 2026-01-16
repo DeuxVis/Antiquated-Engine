@@ -5,10 +5,20 @@
 #include "../UI/UI.h"
 #include "UIXButton.h"
 
+UIXButton::~UIXButton()
+{
+	if (mhImageTexture != NOTFOUND)
+	{
+		InterfaceReleaseTexture(mhImageTexture);
+	}
+}
 
 void	UIXButton::Initialise( eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL bIsBlocking, uint32 ulCol, int iconNum )
 {
-	mTitle = szTitle;
+	if ( szTitle )
+	{
+		mTitle = szTitle;
+	}
 	mMode = mode;
 	mulButtonID = ulButtonID;
 	mulButtonParam = ulButtonParam;
@@ -27,6 +37,26 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 	case UIXBUTTON_NORMAL:
 	default:
 		UIButtonDraw( mulButtonID, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mTitle.c_str(), 5, mulButtonParam, GetID() );
+		break;
+	case UIXBUTTON_IMAGE:
+		{
+			if ( mhImageTexture == NOTFOUND )
+			{
+				// TODO - Switch to async
+				mhImageTexture = pInterface->GetTexture( mTitle.c_str(), 0 );
+			}
+			
+			int		nOverlay = pInterface->CreateNewTexturedOverlay( 0, mhImageTexture );
+			pInterface->TexturedRect( nOverlay, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol, 0.0f, 0.0f, 1.0f, 1.0f );
+
+			if ( mulButtonID != 0 )
+			{	
+				if ( UIX::CheckForPress( this, drawRect, mulButtonID, mulButtonParam ) )
+				{		
+					pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x20FFFFFF );				
+				}
+			}
+		}
 		break;
 	case UIXBUTTON_RECT_ICON:
 		pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol );

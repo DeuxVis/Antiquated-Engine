@@ -39,6 +39,7 @@ public:
 	// Textured Overlays
 	int			CreateNewTexturedOverlay( int nLayer, int nTextureHandle );
 	void		TexturedRect( int nOverlayNum, int nX, int nY, int nWidth, int nHeight, uint32 ulCol, float fU, float fV, float fU2, float fV2 );
+	int			CreateNewTexturedOverlayForEngineTexture( int nLayer, int nTextureHandle );
 
 	// Overlays
 	void	OutlineBox( int nLayer, int nX, int nY, int nWidth, int nHeight, uint32 ulCol);

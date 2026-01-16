@@ -84,6 +84,7 @@ public:
 
 	int			CreateOverlay( int nLayer, TEXTURE_HANDLE hTexture );
 	int			CreateOverlayDirect( int nLayer, void* pTexture, int hEngineTexture );
+	int			CreateOverlayForEngineTexture( int nLayer, int hEngineTexture);
 
 
 	void		SetRenderType( int nOverlayNum, INTF_RENDER_TYPES nRenderType );

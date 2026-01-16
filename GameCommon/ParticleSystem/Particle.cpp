@@ -55,10 +55,11 @@ void	Particle::Init( int typeID, const VECT* pxPos, const VECT* pxVel, uint32 ul
 
 void	Particle::Update( float fDelta )
 {
-	mfTimeAlive += fDelta;
-	if ( mfTimeAlive < mfLongevity )
+	if ( mfTimeAlive <= mfLongevity )
 	{
 	VECT	xVelThisFrame;
+
+		mfTimeAlive += fDelta;
 
 		OnUpdate( fDelta );
 	
@@ -90,6 +91,11 @@ void	Particle::DefaultRender( void )
 		{
 		float	fHalfLife = mfLongevity * 0.5f;
 			
+			if ( fHalfLife < 0.1f )
+			{
+				fHalfLife = 0.1f;
+			}
+
 			fAlpha = 1.0f;
 		
 			if ( mfTimeAlive > fHalfLife  )

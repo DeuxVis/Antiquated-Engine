@@ -398,13 +398,11 @@ void	InterfaceInternalsDX::SetRenderCanvas()
 
 		hr = mpInterfaceD3DDevice->SetRenderTarget( 0, mspInterfaceRenderCanvas );
 		mpInterfaceD3DDevice->Clear( 0, NULL, D3DCLEAR_TARGET, 0, 0.0f, 0 );
-		if ( FAILED( hr ))
-		{
-		int			error = 0;
-			error++;
-		}
 	}
 }
+
+
+
 
 void	InterfaceInternalsDX::CopyRenderCanvasToBackBuffer( int X, int Y, int W, int H )
 {

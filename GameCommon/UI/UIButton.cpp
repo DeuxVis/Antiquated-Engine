@@ -134,6 +134,8 @@ int		nFont = 1;
 		break;
 	case 5:		// Always small font
 	case 7:		// Always small font (hovered)
+	case 8:		// As 5 but dont display text		
+	case 10:		
 		nFont = 3;
 		ulBackgroundCol = GetColWithModifiedAlpha( 0xF0E0E0E0, fAlphaVal );
 		break;
@@ -151,33 +153,36 @@ int		nFont = 1;
 	pInterface->TexturedRect( mahUIButtonOverlays[7], X+nButtonImageW, Y+H-nButtonImageH, W-(nButtonImageW*2), nButtonImageH, ulBackgroundCol, 0.0f, 0.0f, 1.0f, 1.0f );
 	pInterface->TexturedRect( mahUIButtonOverlays[8], X+W-nButtonImageW, Y+H-nButtonImageH, nButtonImageW, nButtonImageH, ulBackgroundCol, 0.0f, 0.0f, 1.0f, 1.0f );
 
-
 	if ( pInterface->GetStringWidth( szText, nFont ) > W )
 	{
 		nFont = 3;
 	}
 	
-	uint32	ulTextCol = GetColWithModifiedAlpha( 0xD0F0E0C0, fAlphaVal );
-	int		nTextH = pInterface->GetStringHeight( szText, nFont );
-	int		nTextY;
-
-	if ( mode != 0 )
+	if ( ( mode != 8 ) &&
+		 ( mode != 10 ) )
 	{
-		ulTextCol = GetColWithModifiedAlpha( 0x90F0E0C0, fAlphaVal );
-	}
+		uint32	ulTextCol = GetColWithModifiedAlpha( 0xD0F0E0C0, fAlphaVal );
+		int		nTextH = pInterface->GetStringHeight( szText, nFont );
+		int		nTextY;
 
-	nTextY = Y + ( ( H - (nTextH-1) ) / 2 );
-	InterfaceSetFontFlags( FONT_FLAG_DROP_SHADOW );
-	if (pInterface->GetStringWidth(szText, nFont) < (W - 4))
-	{
-		pInterface->TextCentre(1, X + (W / 2) + 1, nTextY, ulTextCol, nFont, szText);
-	}
-	else
-	{
-		pInterface->TextLimitWidth(1, X + 3, nTextY, (W - 4), ulTextCol, nFont, szText);
-	}
+		if ( mode != 0 )
+		{
+			ulTextCol = GetColWithModifiedAlpha( 0x90F0E0C0, fAlphaVal );
+		}
 
-	InterfaceSetFontFlags( 0 );
+		nTextY = Y + ( ( H - (nTextH-1) ) / 2 );
+		InterfaceSetFontFlags( FONT_FLAG_DROP_SHADOW );
+		if (pInterface->GetStringWidth(szText, nFont) < (W - 4))
+		{
+			pInterface->TextCentre(1, X + (W / 2) + 1, nTextY, ulTextCol, nFont, szText);
+		}
+		else
+		{
+			pInterface->TextLimitWidth(1, X + 3, nTextY, (W - 4), ulTextCol, nFont, szText);
+		}
+
+		InterfaceSetFontFlags( 0 );
+	}
 
 }
 
