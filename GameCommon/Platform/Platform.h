@@ -74,7 +74,7 @@ enum   // sent as nResponseCode in KeyboardMessageHandler callback
 	KEYBOARD_ON_PRESS_TAB,
 };
 
-typedef	int		(*PlatformKeyboardMessageHandler)( int nResponseCode, const char* szInputText );
+typedef	int		(*PlatformKeyboardMessageHandler)( int nResponseCode, const char* szInputText, void* pUserObj );
 typedef	int		(*PlatformKeyboardSpecialKeyPressHandler)( int nKeyCode );
 typedef	int		(*PlatformControlZoomHandler)( float fZoomAmount );
 
@@ -82,7 +82,7 @@ extern BOOL				PlatformHasKeyboard( void );
 extern void				PlatformKeyboardActivate( int mode, const char* szStartText, const char* szPrompt );
 extern void				PlatformKeyboardDeactivate( void );
 extern BOOL				PlatformKeyboardOSKIsActive( void );
-extern void				PlatformKeyboardRegisterHandler( PlatformKeyboardMessageHandler fnHandler );
+extern void				PlatformKeyboardRegisterHandler( PlatformKeyboardMessageHandler fnHandler, void* pUserObj = NULL);
 extern const char*		PlatformKeyboardGetInputString( BOOL bIncludeCursor );
 extern void				PlatformKeyboardSetInputString( const char* szNewInputString );
 extern void				PlatformKeyboardRegisterSpecialKeyUpHandler( PlatformKeyboardSpecialKeyPressHandler fnHandler ); // For detecting keyup events for things like F-keys etc
@@ -117,6 +117,11 @@ extern void				PlatformRequestApplicationShutdown( void );
 
 // set directly (used by Atractor)
 extern void		PlatformSetWindow( int handle );
+
+// If you need to insert the platform keyboard handler into your own windows message handler
+extern void	PlatformKeyboardHandleSpecialKeyDown( int nKeyCode );
+extern void	PlatformKeyboardHandleSpecialKeyUp( int nKeyCode );
+extern void	PlatformKeyboardHandleChar( short wChar );
 
 #ifdef __cplusplus
 }

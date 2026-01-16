@@ -303,7 +303,7 @@ UITextBox*		pNext;
 	}
 }
 
-int		UITextBoxKeyboardMessageHandler( int nResponseCode, const char* szInputText )
+int		UITextBoxKeyboardMessageHandler( int nResponseCode, const char* szInputText, void* pUserObj )
 {
 	switch( nResponseCode )
 	{

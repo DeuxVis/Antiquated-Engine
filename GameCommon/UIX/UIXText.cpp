@@ -13,6 +13,7 @@ void	UIXText::Initialise( const char* szTitle, uint32 ulCol, int font, UIX_TEXT_
 	mFontFlags = fontFlags;
 }
 	
+
 UIXRECT		UIXText::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
 UIXRECT		drawRect = GetActualRenderRect( displayRect );

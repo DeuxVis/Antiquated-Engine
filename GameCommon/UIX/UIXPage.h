@@ -7,7 +7,7 @@
 class UIXPage : public UIXObject
 {
 public:
-	UIXPage( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXPage( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void		Initialise( const char* szTitle, BOOL bUseClipping );
 	

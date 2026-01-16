@@ -8,7 +8,7 @@ class UIXButton : public UIXObject
 {
 friend class UIX;
 protected:
-	UIXButton( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXButton( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL bIsBlocking = TRUE, uint32 ulCol = 0xD0404040, int iconNum = 0 );
 	

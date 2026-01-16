@@ -46,7 +46,7 @@ public:
 	const UIXListBoxEntry*		GetElementByListIndex( int index ) const;
 
 protected:
-	UIXListBox( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXListBox( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( int mode, BOOL bContentsDraggable, int dragItemType );
 

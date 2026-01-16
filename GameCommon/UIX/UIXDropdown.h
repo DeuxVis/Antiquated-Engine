@@ -48,7 +48,7 @@ public:
 	virtual void	OnMouseWheel(float fOffset);
 
 protected:
-	UIXDropdown( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXDropdown( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( int mode );
 

@@ -6,6 +6,38 @@
 #include "UIXTextBox.h"
 #include "UIXSlider.h"
 
+float	UIXSlider::OnValueChange( UIXObject* pxSourceObj, float fNewValue )		// Triggered by (e.g) child text boxes when a new value is entered there directly
+{
+	if ( pxSourceObj == mpRangeMinTextBox)
+	{
+		mfMinVal = fNewValue;
+		if (mfMinVal > mfMaxVal)
+		{
+			mfMinVal = mfMaxVal;
+		}
+		// Expand the handled range if our new value is higher
+		if ( mfMinVal < mfInitialMinVal )
+		{
+			mfInitialMinVal = mfMinVal;
+		}
+		return mfMinVal;
+	}
+	else if ( pxSourceObj == mpRangeMaxTextBox )
+	{
+		mfMaxVal = fNewValue;
+		if (mfMaxVal < mfMinVal)
+		{
+			mfMaxVal = mfMinVal;
+		}
+		// Expand the handled range if our new value is higher
+		if ( mfMaxVal > mfInitialMaxVal )
+		{
+			mfInitialMaxVal = mfMaxVal;
+		}
+		return mfMaxVal;	
+	}
+	return( fNewValue );
+}
 
 void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitialVal, float fMinStep, const char* szText )
 {

@@ -9,7 +9,7 @@ friend class UIX;
 public:
 
 protected:
-	UIXModalPopup( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXModalPopup( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( );
 

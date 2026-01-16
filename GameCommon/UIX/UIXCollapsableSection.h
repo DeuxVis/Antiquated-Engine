@@ -11,7 +11,7 @@ public:
 	void	UpdateUIStateData( UIStateData* pData );
 	void	SetNotCollapsable() { mbCollapsable = FALSE; mbIsCollapsed = FALSE;}
 protected:
-	UIXCollapsableSection( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXCollapsableSection( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType = 0 );
 	void	ToggleCollapsed();

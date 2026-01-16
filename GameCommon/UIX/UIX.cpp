@@ -28,6 +28,7 @@ UIXObject*					UIX::mspDragDestinationHover = NULL;
 UIXObject*					UIX::mspDragSource = NULL;	
 UIXObject*					UIX::mspModalObject = NULL;
 UIXObject*					UIX::mspMousewheelHoverObject = NULL;
+UIXObject*					UIX::mspTextEditFocusObject = NULL;
 int							UIX::msSelectionPriority = 0;
 int							UIX::msPressedSelectionPriority = 0;
 int							UIX::msMouseWheelHoverPriority = 0;
@@ -36,8 +37,9 @@ int							UIX::mshUIXIconsList[MAX_NUM_UIX_ICONS] = { NOTFOUND };
 
 uint32						UIX::msDragSourceParam = 0;
 //--------------------------------------------------------------------------------------
-UIXObject::UIXObject( uint32 uID, UIXRECT rect )
+UIXObject::UIXObject( UIXObject* pParent, uint32 uID, UIXRECT rect )
 {
+	mpParent = pParent;
 	mulID = uID;
 	mDisplayRect = rect;
 	UIX::msComponentIDMap.emplace( uID, this );
@@ -237,6 +239,15 @@ void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam )
 {
 	switch( nButtonID )
 	{
+	case UIX_TEXTBOX:
+		{
+		UIXTextBox*		pTextBox = (UIXTextBox*)msComponentIDMap[ulIDParam];
+			if ( pTextBox )
+			{
+				pTextBox->OnPressed( ulParam );
+			}
+		}	
+		break;
 	case UIX_LISTBOX_SELECT:
 		{
 		UIXListBox*		pListBox = (UIXListBox*)msComponentIDMap[ulIDParam];
@@ -376,6 +387,7 @@ void		UIX::Initialise( int mode )
 	UIRegisterButtonPressHandler( UIX_DROPDOWN_ENTRY, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_CHECKBOX, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_LISTBOX_SELECT, ButtonPressHandler );
+	UIRegisterButtonPressHandler( UIX_TEXTBOX, ButtonPressHandler );
 	
 		
 	UIRegisterHoldHandler( UIX_SLIDER_BAR, SliderHoldHandler );
@@ -384,6 +396,7 @@ void		UIX::Initialise( int mode )
 	UIXListBox::RegisterControlHandlers();
 	UIXCollapsableSection::RegisterControlHandlers();
 	UIXScrollableSection::RegisterControlHandlers();
+	UIXTextBox::RegisterControlHandlers();
 }
 
 void		UIX::Update( float delta )
@@ -497,7 +510,7 @@ void		UIX::LoadIcon( InterfaceInstance* pInterface, int iconNum, const char* szF
 
 UIXObject*		UIX::AddSubPage( UIXObject* pxContainer, UIXRECT rect, const char* szTitle, BOOL bUseClipping )
 {
-UIXPage*		pNewPage = new UIXPage( msulNextObjectID++, rect );
+UIXPage*		pNewPage = new UIXPage( pxContainer, msulNextObjectID++, rect );
 
 	pNewPage->Initialise( szTitle, bUseClipping );
 	pxContainer->mContainsList.push_back( pNewPage );
@@ -506,7 +519,7 @@ UIXPage*		pNewPage = new UIXPage( msulNextObjectID++, rect );
 
 UIXObject*		UIX::AddPage( UIXRECT rect, const char* szTitle, BOOL bUseClipping )
 {
-UIXPage*		pNewPage = new UIXPage( msulNextObjectID++, rect );
+UIXPage*		pNewPage = new UIXPage( NULL, msulNextObjectID++, rect );
 
 	pNewPage->Initialise( szTitle, bUseClipping );
 	msPagesList.push_back( pNewPage );
@@ -515,7 +528,7 @@ UIXPage*		pNewPage = new UIXPage( msulNextObjectID++, rect );
 
 UIXText*		UIX::AddText( UIXObject* pxContainer, UIXRECT rect, uint32 ulCol, int font, UIX_TEXT_FLAGS fontFlags, const char* szTitle, ... )
 {
-UIXText*		pNewText = new UIXText( msulNextObjectID++, rect );
+UIXText*		pNewText = new UIXText( pxContainer, msulNextObjectID++, rect );
 char		acString[1024];
 va_list		marker;
 uint32*		pArgs;
@@ -533,7 +546,7 @@ uint32*		pArgs;
 
 UIXScrollableSection*		UIX::AddScrollableSection( UIXObject* pxContainer, UIXRECT rect )
 {
-UIXScrollableSection*		pNewScrollableSection = new UIXScrollableSection( msulNextObjectID++, rect );
+UIXScrollableSection*		pNewScrollableSection = new UIXScrollableSection( pxContainer, msulNextObjectID++, rect );
 
 	pNewScrollableSection->Initialise();
 	pxContainer->mContainsList.push_back( pNewScrollableSection );
@@ -542,7 +555,7 @@ UIXScrollableSection*		pNewScrollableSection = new UIXScrollableSection( msulNex
 
 UIXCollapsableSection*		UIX::AddCollapsableSection( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType )
 {
-UIXCollapsableSection*		pNewCollapsableSection = new UIXCollapsableSection( msulNextObjectID++, rect );
+UIXCollapsableSection*		pNewCollapsableSection = new UIXCollapsableSection( pxContainer, msulNextObjectID++, rect );
 
 	pNewCollapsableSection->Initialise( mode, szTitle, bStartCollapsed, draggableType );
 	pxContainer->mContainsList.push_back( pNewCollapsableSection );
@@ -551,7 +564,7 @@ UIXCollapsableSection*		pNewCollapsableSection = new UIXCollapsableSection( msul
 
 UIXButton*			UIX::AddButton( UIXObject* pxContainer, UIXRECT rect, eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL bIsBlocking, uint32 ulCol, int iconNum  )
 {
-UIXButton*		pNewButton = new UIXButton( msulNextObjectID++, rect );
+UIXButton*		pNewButton = new UIXButton( pxContainer, msulNextObjectID++, rect );
 
 	pNewButton->Initialise( mode, szTitle, ulButtonID, ulButtonParam, bIsBlocking, ulCol, iconNum );
 	pxContainer->mContainsList.push_back( pNewButton );
@@ -565,7 +578,7 @@ uint32		UIX::GetNextObjectID()
 
 UIXCustomRender*	UIX::AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam )
 {
-UIXCustomRender*		pNewCustomRender = new UIXCustomRender( msulNextObjectID++, rect );
+UIXCustomRender*		pNewCustomRender = new UIXCustomRender( pxContainer, msulNextObjectID++, rect );
 
 	pNewCustomRender->Initialise( renderFunc, ulUserParam );
 	pxContainer->mContainsList.push_back( pNewCustomRender );
@@ -575,7 +588,7 @@ UIXCustomRender*		pNewCustomRender = new UIXCustomRender( msulNextObjectID++, re
 
 UIXModalPopup*		UIX::AddModalPopup( UIXObject* pxContainer, UIXRECT rect )
 {
-UIXModalPopup*		pNewModalPopup = new UIXModalPopup( msulNextObjectID++, rect );
+UIXModalPopup*		pNewModalPopup = new UIXModalPopup( pxContainer, msulNextObjectID++, rect );
 
 	pNewModalPopup->Initialise(  );
 	pxContainer->mContainsList.push_back( pNewModalPopup );
@@ -585,7 +598,7 @@ UIXModalPopup*		pNewModalPopup = new UIXModalPopup( msulNextObjectID++, rect );
 
 UIXCheckbox*		UIX::AddCheckbox( UIXObject* pxContainer, UIXRECT rect, UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc )
 {
-UIXCheckbox*		pNewCheckbox = new UIXCheckbox( msulNextObjectID++, rect );
+UIXCheckbox*		pNewCheckbox = new UIXCheckbox( pxContainer, msulNextObjectID++, rect );
 
 	pNewCheckbox->Initialise( mode, bIsChecked, szText, selectedFunc );
 	pxContainer->mContainsList.push_back( pNewCheckbox );
@@ -595,7 +608,7 @@ UIXCheckbox*		pNewCheckbox = new UIXCheckbox( msulNextObjectID++, rect );
 
 UIXShape*			UIX::AddShape( UIXObject* pxContainer, UIXRECT rect, int mode, BOOL bBlocks, uint32 ulCol1, uint32 ulCol2, uint32 ulButtonID, uint32 ulButtonParam )
 {
-UIXShape*		pNewShape = new UIXShape( msulNextObjectID++, rect );
+UIXShape*		pNewShape = new UIXShape( pxContainer, msulNextObjectID++, rect );
 
 	pNewShape->Initialise( mode, bBlocks, ulCol1, ulCol2, ulButtonID, ulButtonParam );
 	pxContainer->mContainsList.push_back( pNewShape );
@@ -605,7 +618,7 @@ UIXShape*		pNewShape = new UIXShape( msulNextObjectID++, rect );
 
 UIXTextBox*			UIX::AddTextBox( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szDefaultText )
 {
-UIXTextBox*		pNewTextBox = new UIXTextBox( msulNextObjectID++, rect );
+UIXTextBox*		pNewTextBox = new UIXTextBox( pxContainer, msulNextObjectID++, rect );
 
 	pNewTextBox->Initialise( mode, szDefaultText );
 	pxContainer->mContainsList.push_back( pNewTextBox );
@@ -614,7 +627,7 @@ UIXTextBox*		pNewTextBox = new UIXTextBox( msulNextObjectID++, rect );
 
 UIXListBox*			UIX::AddListBox( UIXObject* pxContainer, UIXRECT rect, int mode, BOOL bContentsDraggable, int dragItemType )
 {
-UIXListBox*		pNewListbox = new UIXListBox( msulNextObjectID++, rect );
+UIXListBox*		pNewListbox = new UIXListBox( pxContainer, msulNextObjectID++, rect );
 
 	pNewListbox->Initialise( mode, bContentsDraggable, dragItemType );
 	pxContainer->mContainsList.push_back( pNewListbox );
@@ -623,7 +636,7 @@ UIXListBox*		pNewListbox = new UIXListBox( msulNextObjectID++, rect );
 
 UIXSlider*			UIX::AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitial, float fMinStep, const char* szText )
 {
-UIXSlider*		pNewSlider = new UIXSlider( msulNextObjectID++, rect );
+UIXSlider*		pNewSlider = new UIXSlider( pxContainer, msulNextObjectID++, rect );
 
 	pNewSlider->Initialise( mode, ulUserParam, fMin, fMax, fInitial, fMinStep, szText );
 	pxContainer->mContainsList.push_back( pNewSlider );
@@ -632,7 +645,7 @@ UIXSlider*		pNewSlider = new UIXSlider( msulNextObjectID++, rect );
 
 UIXDropdown*		UIX::AddDropdown( UIXObject* pxContainer, UIXRECT rect )
 {
-UIXDropdown*		pNewDropdown = new UIXDropdown( msulNextObjectID++, rect );
+UIXDropdown*		pNewDropdown = new UIXDropdown( pxContainer, msulNextObjectID++, rect );
 
 	pNewDropdown->Initialise( 0 );
 	pxContainer->mContainsList.push_back( pNewDropdown );

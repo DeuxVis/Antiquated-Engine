@@ -7,7 +7,7 @@
 class UIXScrollbar : public UIXObject
 {
 public:
-	UIXScrollbar(uint32 uID, UIXRECT rect) : UIXObject(uID, rect) {}
+	UIXScrollbar(UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	RenderDirect(InterfaceInstance* pInterface, UIXRECT pDisplayRect, int nViewPageHeight, int nFullContentsHeight );
 
@@ -43,7 +43,7 @@ friend class UIX;
 public:
 
 protected:
-	UIXScrollableSection( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXScrollableSection( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( );
 

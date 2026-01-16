@@ -38,6 +38,7 @@ enum
 	UIX_CHECKBOX,
 	UIX_LISTBOX_SELECT,
 	UIX_SCROLLBAR,
+	UIX_TEXTBOX,
 };
 
 enum eUIXBUTTON_MODE
@@ -129,8 +130,9 @@ public:
 	void				SetUserParamEx( const char* szKey, int nValue ) { mUserParamExList[szKey] = nValue; }
 
 	virtual void		UpdateUIStateData( UIStateData* pData ) {}
+	virtual float		OnValueChange( UIXObject* pxSourceObj, float fNewValue ) { return( fNewValue ); }
 protected:
-	UIXObject( uint32 uID, UIXRECT rect );
+	UIXObject( UIXObject* pParent, uint32 uID, UIXRECT rect );
 
 	virtual void		OnUpdate( float delta ) {}
 	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT rect ) { rect.h = 0; return rect; }
@@ -158,6 +160,7 @@ protected:
 	virtual int		GetSelectionPriorityLayer() { return( 0 ); }
 
 	virtual void			OnEscape() {}
+	UIXObject* GetParent() const { return(mpParent); }
 private:
 	virtual bool		ShouldDisplayChildren() { return true; }
 
@@ -171,6 +174,7 @@ private:
 	void*			mpUserObject = NULL;
 	int				mChildContentsHeight = 0;
 	UIXRECT			mLastRenderDisplayRect;
+	UIXObject*		mpParent;
 };
 
 
@@ -219,6 +223,10 @@ public:
 	static void							EndDragItemType( int type );
 
 	static void							SetMousewheelHoverObject(UIXObject* pObject);
+
+	static void							SetTextEditFocus( UIXObject* pObject ) { mspTextEditFocusObject = pObject; }
+	static UIXObject*					GetTextEditFocus() { return( mspTextEditFocusObject ); }
+
 	static BOOL							IsMouseHover( UIXRECT rect );
 
 	static BOOL							CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam );
@@ -240,6 +248,7 @@ private:
 	static UIXObject*					mspDragDestinationHover;
 	static UIXObject*					mspDragSource;
 	static UIXObject*					mspMousewheelHoverObject;
+	static UIXObject*					mspTextEditFocusObject;
 	static uint32						msDragSourceParam ;
 	static UIXObject*					mspModalObject;
 	static int							msSelectionPriority;

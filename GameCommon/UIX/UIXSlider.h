@@ -13,8 +13,9 @@ public:
 
 	void	RegisterValueUpdateHandler( fnValueUpdateCallback func ) { mValueUpdateFunc = func; }
 	void	SetRangeLimit( float min, float max ) { mfInitialMinVal = min; mfInitialMaxVal = max; }
+	virtual float		OnValueChange( UIXObject* pxSourceObj, float fNewValue );		// Triggered by (e.g) child text boxes when a new value is entered there directly
 protected:
-	UIXSlider( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXSlider( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( UIX_SLIDER_MODE mode,uint32 ulUserParam, float fMin, float fMax, float fInitialVal, float fMinStep, const char* szText );
 	

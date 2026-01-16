@@ -51,12 +51,15 @@ FILE*	mspLoadFile = NULL;
 #define		KEYBOARD_INPUT_BUFFER_SIZE	512
 
 PlatformKeyboardMessageHandler			mfnKeyboardHandler = NULL;
+void* mpKeyboardHandlerCallbackUserObj = NULL;			
 PlatformKeyboardSpecialKeyPressHandler	mfnSpecialKeyUpHandler = NULL;
 PlatformControlZoomHandler				mfnZoomControlHandler = NULL;
 
 int		mnKeyboardInputMaxLen = KEYBOARD_INPUT_BUFFER_SIZE;
 char	mszKeyboardInputString[KEYBOARD_INPUT_BUFFER_SIZE] = "";
 char	mszKeyboardDisplayString[KEYBOARD_INPUT_BUFFER_SIZE] = "";
+BOOL	mbKeyboardInputWholeStringSelected = FALSE;
+
 int		mnKeyboardInputCursor = 0;
 BOOL	mbKeyboardShiftOn = FALSE;
 BOOL	mbKeyboardCursorFlashOn = FALSE;
@@ -199,6 +202,7 @@ void		PlatformKeyboardActivate( int mode, const char* szStartText, const char* s
 {
 	strcpy( mszKeyboardInputString, szStartText );
 	mnKeyboardInputCursor = strlen( szStartText );
+	mbKeyboardInputWholeStringSelected = TRUE;
 } 
 
 void		PlatformKeyboardDeactivate( void )
@@ -222,9 +226,10 @@ void				PlatformKeyboardRegisterSpecialKeyUpHandler( PlatformKeyboardSpecialKeyP
 	mfnSpecialKeyUpHandler = fnHandler;
 }
 
-void		PlatformKeyboardRegisterHandler( PlatformKeyboardMessageHandler fnHandler )
+void		PlatformKeyboardRegisterHandler( PlatformKeyboardMessageHandler fnHandler, void* pUserObj )
 {
 	mfnKeyboardHandler = fnHandler;
+	mpKeyboardHandlerCallbackUserObj = pUserObj;
 }
 
 void				PlatformKeyboardSetInputString( const char* szNewInputString )
@@ -310,9 +315,21 @@ char	cTextType = 0;
 		}
 		else if ( mnKeyboardInputCursor < KEYBOARD_INPUT_BUFFER_SIZE - 2 )
 		{
-			mszKeyboardInputString[ mnKeyboardInputCursor ] = cCharToAddToString;
-			mnKeyboardInputCursor++;
-			mszKeyboardInputString[mnKeyboardInputCursor] = 0;
+			// If whole string is currently selected, and this is our first char input, we replace the string with
+			// the new one rather than editing
+			if ( mbKeyboardInputWholeStringSelected )
+			{
+				mszKeyboardInputString[0] = cCharToAddToString;
+				mszKeyboardInputString[1] = 0;
+				mnKeyboardInputCursor = 1;
+				mbKeyboardInputWholeStringSelected = FALSE;
+			}
+			else
+			{
+				mszKeyboardInputString[ mnKeyboardInputCursor ] = cCharToAddToString;
+				mnKeyboardInputCursor++;
+				mszKeyboardInputString[mnKeyboardInputCursor] = 0;
+			}
 		}
 		else
 		{
@@ -338,6 +355,7 @@ void	PlatformKeyboardHandleSpecialKeyUp( int nKeyCode )
 		}
 		break;
 	default:
+		mbKeyboardInputWholeStringSelected = FALSE;
 		if ( mfnSpecialKeyUpHandler )
 		{
 			mfnSpecialKeyUpHandler( nKeyCode );
@@ -369,13 +387,13 @@ void	PlatformKeyboardHandleSpecialKeyDown( int nKeyCode )
 		}
 		else if ( mfnKeyboardHandler )
 		{
-			mfnKeyboardHandler( KEYBOARD_ON_PRESS_ENTER, mszKeyboardInputString );
+			mfnKeyboardHandler( KEYBOARD_ON_PRESS_ENTER, mszKeyboardInputString, mpKeyboardHandlerCallbackUserObj );
 		}
 		break;
 	case KEY_TAB:
 		if ( mfnKeyboardHandler )
 		{
-			mfnKeyboardHandler( KEYBOARD_ON_PRESS_TAB, mszKeyboardInputString );
+			mfnKeyboardHandler( KEYBOARD_ON_PRESS_TAB, mszKeyboardInputString, mpKeyboardHandlerCallbackUserObj );
 		}
 		break;
 	default:

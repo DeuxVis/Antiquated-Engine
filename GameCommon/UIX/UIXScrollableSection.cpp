@@ -119,7 +119,7 @@ void	UIXScrollbar::OnMouseWheel(float fOffset)
 
 void	UIXScrollableSection::Initialise()
 {
-	mpScrollbar = new UIXScrollbar(UIX::GetNextObjectID(), UIXRECT(0, 0, 0, 0));
+	mpScrollbar = new UIXScrollbar(this, UIX::GetNextObjectID(), UIXRECT(0, 0, 0, 0));
 }
 
 

@@ -8,7 +8,7 @@ class UIXText : public UIXObject
 {
 friend class UIX;
 protected:
-	UIXText( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXText( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( const char* szTitle, uint32 ulCol, int font, UIX_TEXT_FLAGS fontFlags );
 	

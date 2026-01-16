@@ -8,7 +8,7 @@ class UIXCustomRender : public UIXObject
 {
 friend class UIX;
 protected:
-	UIXCustomRender( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXCustomRender( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( fnCustomRenderCallback renderFunc, uint32 ulUserParam );
 	

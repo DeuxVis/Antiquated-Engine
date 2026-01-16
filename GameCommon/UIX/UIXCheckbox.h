@@ -14,7 +14,7 @@ public:
 	void	SetBackgroundCol( uint32 ulBgCol ) { mulBgCol = ulBgCol; }
 	void	SetText( const char* szText ) { mText = szText; }
 protected:
-	UIXCheckbox( uint32 uID, UIXRECT rect ) : UIXObject( uID, rect ) {}
+	UIXCheckbox( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc );
 	

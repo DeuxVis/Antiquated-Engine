@@ -28,7 +28,7 @@ UIXDropdown::~UIXDropdown()
 
 void	UIXDropdown::Initialise( int mode )
 {
-	mpScrollbar = new UIXScrollbar(UIX::GetNextObjectID(), UIXRECT(0, 0, 0, 0));
+	mpScrollbar = new UIXScrollbar(this, UIX::GetNextObjectID(), UIXRECT(0, 0, 0, 0));
 
 }
 
