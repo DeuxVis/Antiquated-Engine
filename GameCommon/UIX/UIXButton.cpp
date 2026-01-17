@@ -2,6 +2,7 @@
 #include "StandardDef.h"
 #include "InterfaceEx.h"
 
+#include "../Platform/Platform.h"
 #include "../UI/UI.h"
 #include "UIXButton.h"
 
@@ -11,6 +12,44 @@ UIXButton::~UIXButton()
 	{
 		InterfaceReleaseTexture(mhImageTexture);
 	}
+}
+
+int		UIXButton::OnKeyboardMessage( int nResponseCode, const char* szInputText )
+{
+	switch( nResponseCode )
+	{
+	case 1:	// press enter
+		if ( mfnLabelEditCallback )
+		{
+			mTitle = szInputText;
+			PlatformKeyboardSetInputString( "" );
+			if ( mfnLabelEditCallback(this, mTitle.c_str() ) == false )
+			{
+				mTitle = mPreEditTitle;
+			}
+		}
+		break;
+	case 2:		// press TAB
+
+		break;
+	}
+	return( 0 );
+}
+
+int		UIXButton::ButtonEditLabelKeyboardMessageHandlerStatic( int nResponseCode, const char* szInputText, void* pUserObj )
+{
+	UIXButton*		pButton = (UIXButton*)pUserObj;
+	return(pButton->OnKeyboardMessage(nResponseCode, szInputText));
+}
+
+
+void	UIXButton::EnableLabelEdit( fnLabelEditCallback callbackFunc )
+{
+	mfnLabelEditCallback = callbackFunc; 
+	mPreEditTitle = mTitle;
+	UIX::SetTextEditFocus( this );
+	PlatformKeyboardRegisterHandler( ButtonEditLabelKeyboardMessageHandlerStatic, this );
+	PlatformKeyboardActivate( 0, mTitle.c_str(), "" );
 }
 
 void	UIXButton::Initialise( eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL bIsBlocking, uint32 ulCol, int iconNum )
@@ -25,6 +64,7 @@ void	UIXButton::Initialise( eUIXBUTTON_MODE mode, const char* szTitle, uint32 ul
 	mbIsBlocking = bIsBlocking;
 	mulCol = ulCol;
 	mIconNum = iconNum;
+
 }
 	
 UIXRECT		UIXButton::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
@@ -43,7 +83,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 			{
 				modeFlags = (eUIBUTTON_MODE_FLAGS)(modeFlags | UIBUTTON_FLAG_LABEL_EDIT);
 			}
-		
+	
 			UIButtonDraw( mulButtonID, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mTitle.c_str(), modeFlags, mulButtonParam, GetID() );
 		}
 		break;

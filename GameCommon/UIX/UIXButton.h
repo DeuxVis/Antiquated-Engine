@@ -9,6 +9,10 @@ typedef	bool(*fnLabelEditCallback)( UIXObject* pObject, const char* szInputText 
 class UIXButton : public UIXObject
 {
 friend class UIX;
+public:
+
+	void	EnableLabelEdit( fnLabelEditCallback callbackFunc );
+
 protected:
 	UIXButton( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 	~UIXButton();
@@ -17,10 +21,12 @@ protected:
 	
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
 
-	void	EnableLabelEdit( fnLabelEditCallback callbackFunc ) { mfnLabelEditCallback = callbackFunc; }
-
 private:
+	static int		ButtonEditLabelKeyboardMessageHandlerStatic( int nResponseCode, const char* szInputText, void* pUserObj );
+	int		OnKeyboardMessage( int nResponseCode, const char* szInputText );
+
 	std::string			mTitle;
+	std::string			mPreEditTitle;
 	uint32				mulButtonID = 0;
 	uint32				mulButtonParam = 0;
 	eUIXBUTTON_MODE		mMode = UIXBUTTON_NORMAL;
