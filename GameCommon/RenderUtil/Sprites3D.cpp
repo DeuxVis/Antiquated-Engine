@@ -470,50 +470,63 @@ void	SpriteGroup::Render( void )
 Sprite*		pSprites = mpSpriteList;
 Sprite*		pNext;
 
-	EngineSetTexture( 0, mhTexture );
-	if ( mRenderFlags & kSpriteRender_Additive )
+	// DONT render if the texture hasn't loaded yet. We'd prefer nothing than big white squares
+	if ( EngineTextureIsFullyLoaded( mhTexture ) == TRUE )
 	{
-		EngineSetBlendMode( BLEND_MODE_SRCALPHA_ADDITIVE );
-			mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
-			mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-			mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
-		EngineSetColourMode( 0, COLOUR_MODE_TEXTURE_MODULATE );
-	}
-	else if ( mRenderFlags & kSpriteRender_ColourBlend )
-	{
-		EngineSetBlendMode( BLEND_MODE_COLOUR_BLEND );
-		EngineSetColourMode( 0, COLOUR_MODE_TEXTURE_MODULATE );
-	}
-	else
-	{
-		EngineSetBlendMode( BLEND_MODE_ALPHABLEND );
-	}
-	
-	mxSprites3dBuffers.Lock();
-	
-	while( pSprites )
-	{
-		pNext = pSprites->mpNext;
-		if ( mRenderFlags & kSpriteRender_Rotated )
+		EngineSetTexture( 0, mhTexture );
+		if ( mRenderFlags & kSpriteRender_Additive )
 		{
-			if ( mRenderFlags & kSpriteRender_SoftEdges )
-			{
-				pSprites->RenderRotSoftEdges( &mxSprites3dBuffers, mfGridScale, mRenderFlags );		
-			}
-			else
-			{
-				pSprites->RenderRot( &mxSprites3dBuffers, mfGridScale, mRenderFlags );
-			}
+			EngineSetBlendMode( BLEND_MODE_SRCALPHA_ADDITIVE );
+				mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
+				mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
+				mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
+			EngineSetColourMode( 0, COLOUR_MODE_TEXTURE_MODULATE );
+		}
+		else if ( mRenderFlags & kSpriteRender_ColourBlend )
+		{
+			EngineSetBlendMode( BLEND_MODE_COLOUR_BLEND );
+			EngineSetColourMode( 0, COLOUR_MODE_TEXTURE_MODULATE );
 		}
 		else
 		{
-			pSprites->Render( &mxSprites3dBuffers, mfGridScale, mRenderFlags );
+			EngineSetBlendMode( BLEND_MODE_ALPHABLEND );
 		}
-		delete pSprites;
-		pSprites = pNext;
-	}
 	
-	mxSprites3dBuffers.FlushWhenFull( 0, FALSE );
+		mxSprites3dBuffers.Lock();
+	
+		while( pSprites )
+		{
+			pNext = pSprites->mpNext;
+			if ( mRenderFlags & kSpriteRender_Rotated )
+			{
+				if ( mRenderFlags & kSpriteRender_SoftEdges )
+				{
+					pSprites->RenderRotSoftEdges( &mxSprites3dBuffers, mfGridScale, mRenderFlags );		
+				}
+				else
+				{
+					pSprites->RenderRot( &mxSprites3dBuffers, mfGridScale, mRenderFlags );
+				}
+			}
+			else
+			{
+				pSprites->Render( &mxSprites3dBuffers, mfGridScale, mRenderFlags );
+			}
+			delete pSprites;
+			pSprites = pNext;
+		}
+	
+		mxSprites3dBuffers.FlushWhenFull( 0, FALSE );
+	}
+	else  // Texture not loaded.. just discard all the sprites for now
+	{
+		while( pSprites )
+		{
+			pNext = pSprites->mpNext;
+			delete pSprites;
+			pSprites = pNext;
+		}			
+	}
 
 	mpSpriteList = NULL;
 }

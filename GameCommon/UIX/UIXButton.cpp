@@ -36,7 +36,16 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 	{
 	case UIXBUTTON_NORMAL:
 	default:
-		UIButtonDraw( mulButtonID, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mTitle.c_str(), 5, mulButtonParam, GetID() );
+		{
+		eUIBUTTON_MODE_FLAGS		modeFlags = UIBUTTON_FLAG_SMALL_FONT;
+
+			if (mfnLabelEditCallback != NULL)
+			{
+				modeFlags = (eUIBUTTON_MODE_FLAGS)(modeFlags | UIBUTTON_FLAG_LABEL_EDIT);
+			}
+		
+			UIButtonDraw( mulButtonID, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mTitle.c_str(), modeFlags, mulButtonParam, GetID() );
+		}
 		break;
 	case UIXBUTTON_IMAGE:
 		{

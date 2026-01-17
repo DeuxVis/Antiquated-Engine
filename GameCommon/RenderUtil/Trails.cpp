@@ -297,9 +297,19 @@ int		nNumVerts = 2;
 VECT	xCamDir = *EngineCameraGetDirection();
 VECT	xTangent;
 VECT	xRight = { 0.0f, 1.0f, 0.0f };
+VECT	xBlendRight = { 0.0f, 1.0f, 0.0f };
+int		nBlendHistoryCount = 4;
+VECT	axLastRight[4];
 float	fScale = mfScale;
 uint32	ulLastCol;
 BOOL	bStillAlive = FALSE;
+float	fDot;
+int		blendCycle = 0;
+
+	for( int blendLoop = 0; blendLoop < nBlendHistoryCount; blendLoop++ )
+	{
+		axLastRight[blendLoop] = xRight;
+	}
 
 	if ( mhTrailVertexBuffer != NOTFOUND )
 	{
@@ -327,24 +337,35 @@ BOOL	bStillAlive = FALSE;
 							mxLastValidTangent = xTangent;
 						}
 						VectNormalize( &xTangent );
+						fDot = VectDot( &xTangent, &xCamDir );
 						VectCross( &xRight, &xTangent, &xCamDir );
-						VectNormalize( &xRight );
-		
+						VectNormalize( &xRight );	
 					}
 					ulLastCol= GetColour( nLoop );
 					if ( ulLastCol != 0 )
 					{
 						bStillAlive = TRUE;
 					}
+
+					xBlendRight = xRight;
+					for( int blendLoop = 0; blendLoop < nBlendHistoryCount; blendLoop++ )
+					{
+						VectAdd( &xBlendRight, &xBlendRight, &axLastRight[blendLoop] );
+					}
+					VectScale( &xBlendRight, &xBlendRight, 1.0f / (float)nBlendHistoryCount );
+
 					pxVertices->color = ulLastCol;
-					pxVertices->position.x = xPos.x + (xRight.x * fScale);
-					pxVertices->position.y = xPos.y + (xRight.y * fScale);
-					pxVertices->position.z = xPos.z + (xRight.z * fScale);
+					pxVertices->position.x = xPos.x + (xBlendRight.x * fScale);
+					pxVertices->position.y = xPos.y + (xBlendRight.y * fScale);
+					pxVertices->position.z = xPos.z + (xBlendRight.z * fScale);
 					pxVertices++;
 					pxVertices->color = ulLastCol;
-					pxVertices->position.x = xPos.x - (xRight.x * fScale);
-					pxVertices->position.y = xPos.y - (xRight.y * fScale);
-					pxVertices->position.z = xPos.z - (xRight.z * fScale);
+					pxVertices->position.x = xPos.x - (xBlendRight.x * fScale);
+					pxVertices->position.y = xPos.y - (xBlendRight.y * fScale);
+					pxVertices->position.z = xPos.z - (xBlendRight.z * fScale);
+
+					axLastRight[blendCycle++] = xRight;
+					blendCycle %= 4;
 					pxVertices++;
 					nNumPolysToDraw += 2;
 					nNumVerts += 2;

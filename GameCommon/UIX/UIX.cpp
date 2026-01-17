@@ -108,7 +108,9 @@ UIXRECT		renderRect = GetDisplayRect();		// This is our local position, relative
 
 void	UIXObject::PostRender( InterfaceInstance* pInterface )
 {
+	UIX::msSelectionPriority += GetSelectionPriorityLayer();
 	OnPostRender( pInterface, mLastRenderDisplayRect );
+
 	if ( !mContainsList.empty() && ShouldDisplayChildren() )
 	{
 		for ( UIXObject* pContainedObject : mContainsList )
@@ -116,6 +118,7 @@ void	UIXObject::PostRender( InterfaceInstance* pInterface )
 			pContainedObject->PostRender( pInterface );
 		}
 	}
+	UIX::msSelectionPriority -= GetSelectionPriorityLayer();
 }
 
 
@@ -129,8 +132,10 @@ UIXRECT		xMaxRect;
 	xUsedRect.h = 0;
 
 	mLastRenderDisplayRect = displayRect;
-	xRect = OnRender( pInterface, displayRect );
+
 	UIX::msSelectionPriority += GetSelectionPriorityLayer();
+
+	xRect = OnRender( pInterface, displayRect );
 
 	xUsedRect.w = xRect.w;		// w is reduced by things like scrollbars occupying space within the page
 	xUsedRect.h = xRect.h;

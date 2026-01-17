@@ -16,14 +16,23 @@ typedef	void(*UIHoldHandler)( int nButtonID, uint32 ulParam, uint32 ulIndex, BOO
 typedef	void(*fnValueChangeCallback)( int hDropdownHandle, int nNewSelectedParam, void* pUserParam );
 
 
+enum eUIBUTTON_MODE_FLAGS
+{
+	UIBUTTON_FLAG_DISABLED = 0x01,
+	UIBUTTON_FLAG_HOVERED = 0x02,
+	UIBUTTON_FLAG_LABEL_EDIT = 0x4,
+	UIBUTTON_FLAG_NO_LABEL = 0x8,
+	UIBUTTON_FLAG_SMALL_FONT = 0x10,
+	UIBUTTON_FLAG_FLAT_STYLE = 0x20,
+};
 //-------------------------------------- UIButton
 
 extern void		UIRegisterButtonPressHandler( int nButtonID, UIButtonHandler fnButtonHandler );
 extern void		UIRegisterHoldHandler( int nButtonID, UIHoldHandler fnHoldHandler );
 
-extern void		UIButtonDraw( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, uint32 ulIDParam = 0 );
+extern void		UIButtonDraw( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, eUIBUTTON_MODE_FLAGS modeFlags, uint32 ulParam, uint32 ulIDParam = 0 );
 extern BOOL		UIButtonRegion( int nButtonID, int nX, int nY, int nWidth, int nHeight, uint32 ulParam, uint32 ulIDParam = 0  );
-extern void		UIButtonDrawAlpha( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, uint32 ulIDParam = 0,  float fAlpha = 0.5f );
+extern void		UIButtonDrawAlpha( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, eUIBUTTON_MODE_FLAGS modeFlags, uint32 ulParam, uint32 ulIDParam = 0,  float fAlpha = 0.5f );
 
 
 //---------------------------------------- UISlider

@@ -3,6 +3,7 @@
 #include "StandardDef.h"
 #include "InterfaceEx.h"
 
+#include "../Platform/Platform.h"
 #include "UI.h"
 #include "UIButton.h"
 
@@ -15,7 +16,7 @@ public:
 
 	void	NewFrame( void );
 
-	void	Render( int X, int Y, int W, int H, const char* szText, int mode, float fAlpha );
+	void	Render( int X, int Y, int W, int H, const char* szText, uint32 modeFlags, float fAlpha );
 
 	void	Free( void );
 
@@ -106,7 +107,7 @@ int		nLoop;
 }
 
 
-void	ButtonStyle::Render( int X, int Y, int W, int H, const char* szText, int mode, float fAlpha )
+void	ButtonStyle::Render( int X, int Y, int W, int H, const char* szText, uint32 modeFlags, float fAlpha )
 {
 InterfaceInstance* pInterface = UIInterfaceInstance();
 int		nButtonImageW = 8;
@@ -120,25 +121,22 @@ int		nFont = 1;
 		InitOverlays();
 	}
 
-	switch ( mode )
+	if ( modeFlags & UIBUTTON_FLAG_DISABLED )
 	{
-	case 0:		// enabled/active
-	default:
-		ulBackgroundCol = GetColWithModifiedAlpha( 0xF0E0E0E0, fAlphaVal );
-		break;
-	case 1:		// Disabled
 		ulBackgroundCol = GetColWithModifiedAlpha( 0x90D0D0D0, fAlphaVal );
-		break;
-	case 2:		// Hovered
+	}
+	else if ( modeFlags & UIBUTTON_FLAG_HOVERED )
+	{
 		ulBackgroundCol = GetColWithModifiedAlpha( 0xFFFFFFFF, fAlphaVal );
-		break;
-	case 5:		// Always small font
-	case 7:		// Always small font (hovered)
-	case 8:		// As 5 but dont display text		
-	case 10:		
+	}
+	else
+	{
+		ulBackgroundCol = GetColWithModifiedAlpha( 0xF0E0E0E0, fAlphaVal );	
+	}
+
+	if (modeFlags & UIBUTTON_FLAG_SMALL_FONT)
+	{
 		nFont = 3;
-		ulBackgroundCol = GetColWithModifiedAlpha( 0xF0E0E0E0, fAlphaVal );
-		break;
 	}
 
 	pInterface->TexturedRect( mahUIButtonOverlays[0], X, Y, nButtonImageW, nButtonImageH, ulBackgroundCol, 0.0f, 0.0f, 1.0f, 1.0f );
@@ -157,28 +155,35 @@ int		nFont = 1;
 	{
 		nFont = 3;
 	}
-	
-	if ( ( mode != 8 ) &&
-		 ( mode != 10 ) )
+
+	if ( !(modeFlags & UIBUTTON_FLAG_NO_LABEL) )
 	{
 		uint32	ulTextCol = GetColWithModifiedAlpha( 0xD0F0E0C0, fAlphaVal );
 		int		nTextH = pInterface->GetStringHeight( szText, nFont );
 		int		nTextY;
 
-		if ( mode != 0 )
+		if ( modeFlags & UIBUTTON_FLAG_DISABLED )
 		{
 			ulTextCol = GetColWithModifiedAlpha( 0x90F0E0C0, fAlphaVal );
 		}
 
 		nTextY = Y + ( ( H - (nTextH-1) ) / 2 );
 		InterfaceSetFontFlags( FONT_FLAG_DROP_SHADOW );
-		if (pInterface->GetStringWidth(szText, nFont) < (W - 4))
+
+		const char* pcTextToDisplay = szText;
+
+		if ( modeFlags & UIBUTTON_FLAG_LABEL_EDIT )
 		{
-			pInterface->TextCentre(1, X + (W / 2) + 1, nTextY, ulTextCol, nFont, szText);
+			pcTextToDisplay = PlatformKeyboardGetInputString( TRUE );
+			pInterface->TextLimitWidth(1, X + 3, nTextY, (W - 4), ulTextCol, nFont, pcTextToDisplay);
+		}
+		else if (pInterface->GetStringWidth(pcTextToDisplay, nFont) < (W - 4))
+		{
+			pInterface->TextCentre(1, X + (W / 2) + 1, nTextY, ulTextCol, nFont, pcTextToDisplay);
 		}
 		else
 		{
-			pInterface->TextLimitWidth(1, X + 3, nTextY, (W - 4), ulTextCol, nFont, szText);
+			pInterface->TextLimitWidth(1, X + 3, nTextY, (W - 4), ulTextCol, nFont, pcTextToDisplay);
 		}
 
 		InterfaceSetFontFlags( 0 );
@@ -206,7 +211,7 @@ void		UIButtonsShutdown( void )
 	msButtonStyle.Free();
 }
 
-void		UIButtonDrawBasic( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, uint32 ulIDParam, float fAlpha )
+void		UIButtonDrawBasic( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, uint32 modeFlags, uint32 ulParam, uint32 ulIDParam, float fAlpha )
 {
 InterfaceInstance* pInterface = UIInterfaceInstance();
 uint32	ulButtonMainCol = 0xB0707070;
@@ -214,19 +219,15 @@ uint32	ulTextCol = 0xD0F0F0F0;
 int		nTextSize = 15;
 int		nTextOffsetY = 2;
 
-	switch( nMode )
+	if ( modeFlags & UIBUTTON_FLAG_DISABLED )
 	{
-	case 3:
 		ulButtonMainCol = 0x60606060;
 		ulTextCol = 0xE0F0E080;
-		break;
-	case 4:
+	}
+	else if ( modeFlags & UIBUTTON_FLAG_HOVERED )
+	{
 		ulButtonMainCol = 0xB0901008;
 		ulTextCol = 0xE0F0E080;
-		break;
-	case 0:
-	default:
-		break;
 	}
 
 	InterfaceRect( 0, nX, nY, nWidth, nHeight, ulButtonMainCol );
@@ -237,35 +238,29 @@ int		nTextOffsetY = 2;
 }
 
 
-void		UIButtonDrawAlpha( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, uint32 ulIDParam, float fAlpha )
+void		UIButtonDrawAlpha( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, eUIBUTTON_MODE_FLAGS modeFlags, uint32 ulParam, uint32 ulIDParam, float fAlpha )
 {
 InterfaceInstance*		pInterfaceInstance = UIInterfaceInstance();
 BOOL	bEnabled = TRUE;
 
-	if ( nMode != 1 )
+	if ( (modeFlags & UIBUTTON_FLAG_DISABLED) == 0 )
 	{
 		if ( UIHoverItem( nX, nY, nWidth, nHeight ) == TRUE )
 		{
-			nMode += 2;
+			modeFlags = (eUIBUTTON_MODE_FLAGS)(modeFlags | UIBUTTON_FLAG_HOVERED);
 		}
 	}
 
-	switch ( nMode )
+	if ( modeFlags & UIBUTTON_FLAG_FLAT_STYLE )
 	{
-	case 3:
-	case 4:
-		UIButtonDrawBasic( nButtonID, nX, nY, nWidth, nHeight, szText, nMode, ulParam, ulIDParam, fAlpha );	
-		break;
-	default:
-	case 0:
-	case 1:
-	case 2:
-	case 5:
-		msButtonStyle.Render( nX, nY, nWidth, nHeight, szText, nMode, fAlpha );
-		break;
+		UIButtonDrawBasic( nButtonID, nX, nY, nWidth, nHeight, szText, modeFlags, ulParam, ulIDParam, fAlpha );	
+	}
+	else
+	{
+		msButtonStyle.Render( nX, nY, nWidth, nHeight, szText, modeFlags, fAlpha );
 	}
 
-	if ( nMode != 1 )
+	if ( (modeFlags & UIBUTTON_FLAG_DISABLED) == 0 )
 	{
 		if ( UIIsPressed( nX, nY, nWidth, nHeight ) == TRUE )
 		{
@@ -276,9 +271,9 @@ BOOL	bEnabled = TRUE;
 }
 
 
-void		UIButtonDraw( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, int nMode, uint32 ulParam, uint32 ulIDParam  )
+void		UIButtonDraw( int nButtonID, int nX, int nY, int nWidth, int nHeight, const char* szText, eUIBUTTON_MODE_FLAGS modeFlags, uint32 ulParam, uint32 ulIDParam  )
 {
-	UIButtonDrawAlpha( nButtonID, nX, nY, nWidth, nHeight, szText, nMode, ulParam, ulIDParam, 1.0f );
+	UIButtonDrawAlpha( nButtonID, nX, nY, nWidth, nHeight, szText, modeFlags, ulParam, ulIDParam, 1.0f );
 }
 
 
