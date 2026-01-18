@@ -79,7 +79,7 @@ void DetectMemoryLeaks()
    _CrtSetReportMode(_CRT_ASSERT,_CRTDBG_MODE_FILE); 
    _CrtSetReportFile(_CRT_ASSERT,_CRTDBG_FILE_STDERR); 
 
-//	_CrtSetBreakAlloc( 10623 );
+	_CrtSetBreakAlloc( 16243 );
 } 
 #endif
 

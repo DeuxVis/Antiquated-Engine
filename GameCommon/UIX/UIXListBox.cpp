@@ -61,8 +61,16 @@ UIXRECT			UIXListBoxEntry::Render( InterfaceInstance* pInstance, UIXRECT rect )
 }
 
 //-----------------------------------------------
+void	UIXListBox::OnShutdown()
+{
+	for( UIXListBoxEntry* pElement : mListBoxEntries )
+	{
+		delete pElement;
+	}
+	mListBoxEntries.clear();
+}
 
-void	UIXListBox::OnPressed( uint32 ulParam )
+void	UIXListBox::OnSelected( int nButtonID, uint32 ulParam )
 {
 	if ( mSelectionChangedCallback )
 	{

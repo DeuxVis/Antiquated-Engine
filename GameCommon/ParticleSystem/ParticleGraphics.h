@@ -12,4 +12,6 @@ extern SPRITE_GROUP		ParticleGraphicsGetSpriteGroup( int nParticleGraphicID );
 
 extern int		ParticleGraphicsGetTextureHandle(int nParticleGraphicID);
 
+extern void		ParticleGraphicsShutdown( );
+
 #endif

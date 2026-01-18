@@ -18,6 +18,7 @@
 #include "UIXCustomRender.h"
 #include "UIXCollapsableSection.h"
 #include "UIXScrollableSection.h"
+#include "UIXMenu.h"
 #include "UIXModalPopup.h"
 
 uint32						UIX::msulNextObjectID = 2001;
@@ -50,6 +51,17 @@ UIXObject::~UIXObject()
 {
 	// todo - Get rid of this by using smart(er) pointers for things like the mousewheel hover
 	if ( UIX::mspMousewheelHoverObject == this ) UIX::mspMousewheelHoverObject = NULL;
+
+	// nOTE THIS ALWAYS SHOULD GET DONE THROUGH uix::dELETEoBJECT
+}
+
+void	UIXObject::SelectObject( int nButtonID, uint32 ulParam )
+{
+	OnSelected( nButtonID, ulParam );
+	if ( mfnSelectedCallback )
+	{
+		mfnSelectedCallback( this, mulSelectParam );
+	}
 }
 
 void	UIXObject::KeyUp(int keyCode)
@@ -71,12 +83,19 @@ void	UIXObject::KeyUp(int keyCode)
 
 void	UIXObject::Update( float delta )
 {
-
 	OnUpdate( delta );
-
 	for ( UIXObject* pContainedObject : mContainsList )
 	{
 		pContainedObject->Update( delta );
+	}
+}
+
+void	UIXObject::CloseAllMenus()
+{
+	OnCloseAllMenus();
+	for ( UIXObject* pContainedObject : mContainsList )
+	{
+		pContainedObject->CloseAllMenus();
 	}
 }
 
@@ -238,68 +257,16 @@ void		UIXObject::SetDragReceiveCallback( int dragType, fnDragReceiveCallback fun
 }
 
 //--------------------------------------------------------------------------------------------------
-
-
+// IDParam must always be UIXObject's unique ID ( obj->GetID() )  to use this handler
+//
 void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam )
 {
-	switch( nButtonID )
+	auto it = msComponentIDMap.find( ulIDParam );
+	if ( it != msComponentIDMap.end() )
 	{
-	case UIX_TEXTBOX:
-		{
-		UIXTextBox*		pTextBox = (UIXTextBox*)msComponentIDMap[ulIDParam];
-			if ( pTextBox )
-			{
-				pTextBox->OnPressed( ulParam );
-			}
-		}	
-		break;
-	case UIX_LISTBOX_SELECT:
-		{
-		UIXListBox*		pListBox = (UIXListBox*)msComponentIDMap[ulIDParam];
-			if ( pListBox )
-			{
-				pListBox->OnPressed( ulParam );
-			}
-		}	
-		break;
-	case UIX_CHECKBOX:
-		{
-		UIXCheckbox*		pCheckbox = (UIXCheckbox*)msComponentIDMap[ulIDParam];
-			if ( pCheckbox )
-			{
-				pCheckbox->OnPressed();
-			}
-		}	
-		break;
+	UIXObject* pObject = msComponentIDMap[ulIDParam];
 
-	case UIX_COLLAPSABLE_SECTION_HEADER:
-		{
-		UIXCollapsableSection*		pCollapsableSection = (UIXCollapsableSection*)msComponentIDMap[ulIDParam];
-			if ( pCollapsableSection )
-			{
-				pCollapsableSection->ToggleCollapsed();
-			}
-		}	
-		break;
-	case UIX_DROPDOWN_ENTRY:
-		{
-		UIXDropdown*		pDropdown = (UIXDropdown*)msComponentIDMap[ulIDParam];
-			if ( pDropdown )
-			{
-				pDropdown->SetSelectedElementIndex( ulParam );
-				pDropdown->ToggleExpanded();
-			}
-		}	
-		break;
-	case UIX_DROPDOWN_HEADER:
-		{
-		UIXDropdown*		pDropdown = (UIXDropdown*)msComponentIDMap[ulIDParam];
-			if ( pDropdown )
-			{
-				pDropdown->ToggleExpanded();
-			}
-		}	
-		break;
+		pObject->SelectObject( nButtonID, ulParam );
 	}
 }
 	
@@ -393,6 +360,7 @@ void		UIX::Initialise( int mode )
 	UIRegisterButtonPressHandler( UIX_CHECKBOX, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_LISTBOX_SELECT, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_TEXTBOX, ButtonPressHandler );
+	UIRegisterButtonPressHandler( UIX_MENU_ITEM, ButtonPressHandler );
 	
 		
 	UIRegisterHoldHandler( UIX_SLIDER_BAR, SliderHoldHandler );
@@ -453,13 +421,17 @@ UIXRECT		pageDisplayRect;
 		pxObjects->PostRender( pxInterface );
 	}
 	// Debug stuff
+//	pxInterface->Text( 0, 5, 20, 0xd0f02010, 0, "press-pri: %d", msPressedSelectionPriority );
+}
 
-	UIXObject* pModal = UIX::GetModalObject();
-	if ( pModal )
+void		UIX::CloseAllMenus()
+{
+	for( UIXObject* pxPages : msPagesList )
 	{
-		pxInterface->Text( 0, 5, 20, 0xd0f02010, 0, "press-pri: %d, modal: %08x", msPressedSelectionPriority, pModal->GetID() );
+		pxPages->CloseAllMenus();
 	}
 }
+
 
 void		UIX::Shutdown()
 {
@@ -474,6 +446,7 @@ void		UIX::Shutdown()
 void		UIX::DeleteObject( UIXObject* pObject )
 {
 	msPagesList.erase( std::remove(msPagesList.begin(), msPagesList.end(), pObject), msPagesList.end() );
+	msComponentIDMap[pObject->GetID()] = NULL;
 	msComponentIDMap.erase( pObject->GetID() );
 	pObject->Shutdown();
 	delete pObject;
@@ -590,6 +563,14 @@ UIXCustomRender*		pNewCustomRender = new UIXCustomRender( pxContainer, msulNextO
 	return( pNewCustomRender );
 }
 
+UIXMenu*			UIX::AddMenuBar( UIXObject* pxContainer, UIXRECT rect )
+{
+UIXMenu*		pNewMenu = new UIXMenu( pxContainer, msulNextObjectID++, rect );
+
+	pNewMenu->Initialise(  );
+	pxContainer->mContainsList.push_back( pNewMenu );
+	return( pNewMenu );
+}
 
 UIXModalPopup*		UIX::AddModalPopup( UIXObject* pxContainer, UIXRECT rect )
 {
@@ -601,11 +582,11 @@ UIXModalPopup*		pNewModalPopup = new UIXModalPopup( pxContainer, msulNextObjectI
 }
 
 
-UIXCheckbox*		UIX::AddCheckbox( UIXObject* pxContainer, UIXRECT rect, UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc )
+UIXCheckbox*		UIX::AddCheckbox( UIXObject* pxContainer, UIXRECT rect, UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc, uint32 ulSelectParam )
 {
 UIXCheckbox*		pNewCheckbox = new UIXCheckbox( pxContainer, msulNextObjectID++, rect );
 
-	pNewCheckbox->Initialise( mode, bIsChecked, szText, selectedFunc );
+	pNewCheckbox->Initialise( mode, bIsChecked, szText, selectedFunc, ulSelectParam );
 	pxContainer->mContainsList.push_back( pNewCheckbox );
 	return( pNewCheckbox );
 }

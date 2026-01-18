@@ -56,8 +56,10 @@ protected:
 	virtual void		OnPostRender( InterfaceInstance* pInterface, UIXRECT rect );
 
 	virtual void		OnUpdate( float fDelta );
+	virtual void		OnSelected( int nButtonID, uint32 ulParam);
 
 	void			ToggleExpanded(); 
+	
 	uint32			GetNextIndex( UIXDropdownEntry* pDropdownEntry ) { mDropdownEntries.push_back( pDropdownEntry ); return( mulNextElementIndex++ ); }
 	virtual int		GetSelectionPriorityLayer() { return( 5 ); }
 	virtual void			OnEscape();

@@ -44,6 +44,7 @@ public:
 
 protected:
 	UIXScrollableSection( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
+	virtual ~UIXScrollableSection();
 
 	void	Initialise( );
 

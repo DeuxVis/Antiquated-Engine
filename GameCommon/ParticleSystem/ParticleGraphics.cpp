@@ -92,6 +92,23 @@ void		ParticleGraphic::Init( const char* szTextureName, float fGridScale, BOOL b
 }
 
 
+//-------------------------------------------------------------------------------------------------
+void		ParticleGraphicsShutdown( )
+{
+ParticleGraphic*		pParticleGraphic = mspParticleGraphics;
+ParticleGraphic*		pNext;
+
+	while( pParticleGraphic )
+	{
+		pNext = pParticleGraphic->GetNext();
+		delete pParticleGraphic;
+		pParticleGraphic = pNext;
+	}
+	mspParticleGraphics = NULL;
+
+}
+
+
 ParticleGraphic*		ParticleGraphicsFindFromID( int nParticleGraphicID )
 {
 ParticleGraphic*		pParticleGraphic = mspParticleGraphics;

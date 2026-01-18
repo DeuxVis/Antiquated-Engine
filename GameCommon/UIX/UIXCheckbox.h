@@ -16,14 +16,13 @@ public:
 protected:
 	UIXCheckbox( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
-	void	Initialise( UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc );
+	void	Initialise( UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc, uint32 ulSelectParam );
 	
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
 
-	void	OnPressed( void );
+	void	OnSelected( int nButtonID, uint32 ulParam );
 private:
 	BOOL				mbIsChecked = FALSE;
-	fnSelectedCallback	mfnSelectedCallback = NULL;
 	UIX_CHECKBOX_MODE	mMode = STANDARD_CHECKBOX;
 	std::string			mText;
 	uint32				mulBgCol = 0xD0202020;

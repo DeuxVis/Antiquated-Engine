@@ -1,23 +1,55 @@
-#ifndef UIX_PAGE_H
-#define UIX_PAGE_H
+#ifndef UIX_MENU_H
+#define UIX_MENU_H
 
 #include <string>
 #include "UIX.h"
 
-class UIXPage : public UIXObject
+class UIXMenuItem : public UIXObject
 {
 public:
-	UIXPage( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
+	UIXMenuItem( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
-	void		Initialise( const char* szTitle, BOOL bUseClipping );
-	
-	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT rect );
-	virtual void		OnPostChildrenRender( InterfaceInstance* pInterface );
+	void		Initialise( const char* szText, fnSelectedCallback selectedCallback = NULL, uint32 ulSelectParam = 0 );
+
+	const char* GetText() const { return mText.c_str(); }
+	UIXMenuItem*		AddMenuItem( const char* szMenuItemName, fnSelectedCallback selectedCallback = NULL, uint32 ulSelectParam = 0);
+
+	void		DoRender( InterfaceInstance* pInterface, UIXRECT rect );
+	virtual void		OnSelected( int nButtonID, uint32 ulParam );
+	bool			IsExpanded() const { return mbIsExpanded; }
+
+	UIXRECT		GetLastRenderRect() const { return mLastRenderRect; }
+	void	SetLastRenderRect(UIXRECT rect) { mLastRenderRect = rect; }
+
+protected:
+	virtual int		GetSelectionPriorityLayer() { return( 10 ); }
+	virtual void		OnEscape();
+	virtual void		OnCloseAllMenus();
 
 private:
-	UIXRECT		mPageRenderRect;
-	BOOL		mbUseClipping = FALSE;
-	std::string		mTitle;
+
+	void			SetExpanded( bool bFlag ) { mbIsExpanded = bFlag; };
+
+	std::string		mText;
+	bool			mbIsExpanded = false;	
+	UIXRECT			mLastRenderRect;
+
+};
+
+class UIXMenu : public UIXObject
+{
+public:
+	UIXMenu( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
+
+	void		Initialise( );
+	
+	UIXMenuItem*		AddMenuItem( const char* szMenuItemName );
+
+	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT rect );
+	virtual void		OnPostRender( InterfaceInstance* pInterface, UIXRECT rect );
+private:
+	virtual int		GetSelectionPriorityLayer() { return( 10 ); }
+	virtual bool		ShouldDisplayChildren() { return false; }
 
 };
 

@@ -16,6 +16,7 @@ protected:
 	void	Initialise( int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType = 0 );
 	void	ToggleCollapsed();
 
+	virtual void	OnSelected( int nButtonID, uint32 ulParam );
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
 
 	void			HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress );

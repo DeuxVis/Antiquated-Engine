@@ -18,7 +18,12 @@ void	UIXCollapsableSection::ToggleCollapsed()
 {
 	mbIsCollapsed = !mbIsCollapsed;
 }
-	
+
+void	UIXCollapsableSection::OnSelected( int nButtonID, uint32 ulParam )
+{
+	ToggleCollapsed();
+}
+
 void	UIXCollapsableSection::UpdateUIStateData( UIStateData* pData )
 {
 	pData->mbTabOpened = !mbIsCollapsed;
@@ -117,30 +122,26 @@ BOOL	bMouseIsOverSectionHeader = FALSE;
 
 void	UIXCollapsableSection::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress )
 {
-	if ( ( UIX::GetModalObject() == NULL ) ||
-		 ( UIX::GetModalObject() == this ) )
+	if ( bFirstPress )
 	{
-		if ( bFirstPress )
-		{
-			mDragRectOriginal = GetLastRenderRect();
-			UIX::SetDragItemType( mDragItemType, this, GetID() );
-			UIGetCurrentCursorPosition( &mDragRectMouseOriginal.x, &mDragRectMouseOriginal.y );
-		}
-		else if ( bIsHeld ) 
-		{
-		
-		}
-		else  // Just released
-		{
-		int		mouseX, mouseY;
+		mDragRectOriginal = GetLastRenderRect();
+		UIX::SetDragItemType( mDragItemType, this, GetID() );
+		UIGetCurrentCursorPosition( &mDragRectMouseOriginal.x, &mDragRectMouseOriginal.y );
+	}
+	else if ( bIsHeld ) 
+	{
+	
+	}
+	else  // Just released
+	{
+	int		mouseX, mouseY;
 
-			UIX::EndDragItemType( mDragItemType );
+		UIX::EndDragItemType( mDragItemType );
 
-			// If cursor has remained within the original section rect, treat it as a press (collapse the tab)
-			UIGetCurrentCursorPosition( &mouseX, &mouseY );
+		// If cursor has remained within the original section rect, treat it as a press (collapse the tab)
+		UIGetCurrentCursorPosition( &mouseX, &mouseY );
 
-			UIX::CheckForPress( this, mLastRender, UIX_COLLAPSABLE_SECTION_HEADER, 0 );
-		}
+		UIX::CheckForPress( this, mLastRender, UIX_COLLAPSABLE_SECTION_HEADER, 0 );
 	}
 }
 

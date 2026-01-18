@@ -6,21 +6,17 @@
 #include "UIXCheckbox.h"
 
 
-void	UIXCheckbox::Initialise( UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc )
+void	UIXCheckbox::Initialise( UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc, uint32 ulSelectParam )
 {
 	mbIsChecked = bIsChecked;
-	mfnSelectedCallback = selectedFunc;
+	SetSelectedCallback( selectedFunc, ulSelectParam );
 	mMode = mode;
 	mText = szText;
 }
 
-void	UIXCheckbox::OnPressed( void )
+void	UIXCheckbox::OnSelected( int nButtonID, uint32 ulParam )
 {
 	mbIsChecked = !mbIsChecked;
-	if ( mfnSelectedCallback )
-	{
-		mfnSelectedCallback( this );
-	}
 }
 
 	

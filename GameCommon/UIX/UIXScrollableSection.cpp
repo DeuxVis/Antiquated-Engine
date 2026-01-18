@@ -115,6 +115,11 @@ void	UIXScrollbar::OnMouseWheel(float fOffset)
 }
 
 //------------------------------------------------------------------------------------------------
+// 
+UIXScrollableSection::~UIXScrollableSection()
+{
+	SAFE_DELETE( mpScrollbar );
+}
 
 
 void	UIXScrollableSection::Initialise()

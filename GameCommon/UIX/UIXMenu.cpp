@@ -2,24 +2,130 @@
 #include "StandardDef.h"
 #include "InterfaceEx.h"
 #include "UIX.h"
-#include "UIXPage.h"
+#include "UIXMenu.h"
 
-void	UIXPage::Initialise( const char* szTitle, BOOL bUseClipping )
+UIXMenuItem*		mspExpandedMenuTopLayer = NULL;
+
+
+void	UIXMenuItem::Initialise( const char* szText, fnSelectedCallback selectCallback, uint32 ulSelectParam )
 {
-	mbUseClipping = bUseClipping;
-	mTitle = szTitle;
+	mText = szText;
+	SetSelectedCallback( selectCallback, ulSelectParam );
 }
 
-UIXRECT		UIXPage::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
+UIXMenuItem*		UIXMenuItem::AddMenuItem( const char* szMenuItemName, fnSelectedCallback selectCallback, uint32 ulSelectParam )
+{
+UIXMenuItem*		pNewMenuItem = new UIXMenuItem(this, UIX::GetNextObjectID(), UIXRECT(0, 0, 0, 0));
+
+	pNewMenuItem->Initialise(szMenuItemName, selectCallback, ulSelectParam );
+	GetChildObjectList().push_back( pNewMenuItem );
+	return( pNewMenuItem );
+}
+
+void		UIXMenuItem::OnCloseAllMenus()
+{
+	mbIsExpanded = false;
+	mspExpandedMenuTopLayer = NULL;
+}
+
+void		UIXMenuItem::OnSelected( int nButtonID, uint32 ulParam )
+{
+	if (GetChildObjectList().size() > 0)
+	{
+		if ( mspExpandedMenuTopLayer != NULL )
+		{
+			mspExpandedMenuTopLayer->SetExpanded( false );
+			mspExpandedMenuTopLayer = NULL;
+		}
+		mbIsExpanded = true;
+		mspExpandedMenuTopLayer = this;
+	}
+}
+
+void		UIXMenuItem::OnEscape()
+{
+	mbIsExpanded = false;
+	mspExpandedMenuTopLayer = NULL;
+}
+
+
+void		UIXMenuItem::DoRender( InterfaceInstance* pInterface, UIXRECT rect )
+{
+	int		nNumChildren = GetChildObjectList().size();
+	UIXMenuItem* pMenuItem;
+
+	rect.h = nNumChildren * 20 + 4;
+	pInterface->ShadedRect(0, rect.x, rect.y, rect.w, rect.h, 0xFF202020, 0xFF202020, 0xFF181818, 0xFF181818);
+	rect.y += 4;
+	for ( UIXObject* pItem : GetChildObjectList() )
+	{
+		pMenuItem = (UIXMenuItem*)pItem;
+		rect.h = 16;
+		uint32		ulTextCol = 0xd0d0d0d0;
+		uint32		ulHilightCol = 0x80808080;
+		if (UIX::IsMouseHover(rect))
+		{
+			pInterface->Rect(1, rect.x, rect.y, rect.w, rect.h, ulHilightCol);
+			ulTextCol = 0xe0e0e0e0;
+			UIX::CheckForPress(pMenuItem, rect, UIX_MENU_ITEM, 0);
+		}
+		pInterface->Text(0, rect.x + 5, rect.y + 2, ulTextCol, 3, pMenuItem->GetText());
+		rect.y += 18;
+	}
+}
+
+//---------------------------------------------------------------------
+
+UIXMenuItem*	UIXMenu::AddMenuItem( const char* szMenuItemName )
+{
+UIXMenuItem*		pNewMenuItem = new UIXMenuItem(this, UIX::GetNextObjectID(), UIXRECT(0, 0, 0, 0));
+
+	pNewMenuItem->Initialise(szMenuItemName);
+	GetChildObjectList().push_back( pNewMenuItem );
+	return( pNewMenuItem );
+}
+
+void	UIXMenu::Initialise( )
+{
+}
+
+UIXRECT		UIXMenu::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
 UIXRECT		renderRect = GetActualRenderRect( displayRect );
+int		stringWidth;
+UIXRECT		selectRect;
+uint32		ulTextCol = 0xD0C0C0C0;
+uint32		ulHilightCol = 0x80808080;
 
-	if ( mbUseClipping )
+	pInterface->ShadedRect( 0, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0x90303030,0x90303030, 0x90282828, 0x90282828 );
+
+	renderRect.x += 5;
+	renderRect.w -= 5;
+	renderRect.y += 7;
+	renderRect.h -= 7;
+
+	for ( UIXObject* pChild : GetChildObjectList() )
 	{
-		pInterface->DrawAllElements();
-		mPageRenderRect = displayRect;
-	//	pInterface->SetViewport( rect.x, rect.y, rect.w, rect.h );
-		pInterface->SetRenderCanvas();
+		UIXMenuItem* pMenuItem = (UIXMenuItem*)pChild;
+		stringWidth = pInterface->GetStringWidth( pMenuItem->GetText(), 3 ) + 1;
+
+		selectRect = renderRect;
+		selectRect.x -= 3;
+		selectRect.w = stringWidth + 6;
+		selectRect.y -= 3;
+
+		pMenuItem->SetLastRenderRect(selectRect);
+		if ( UIX::IsMouseHover( selectRect ) )
+		{
+			pInterface->Rect( 0, selectRect.x, selectRect.y, selectRect.w, selectRect.h, ulHilightCol );	
+			ulTextCol = 0xe0e0e0e0;
+
+			UIX::CheckForPress( pMenuItem, selectRect, UIX_MENU_ITEM, 0 );
+		}
+		pInterface->Text(0, renderRect.x, renderRect.y, ulTextCol, 3, pMenuItem->GetText() );
+
+		renderRect.x += stringWidth + 15;
+		renderRect.w -= stringWidth + 15;
 	}
 
 	displayRect.y = 0;
@@ -27,13 +133,20 @@ UIXRECT		renderRect = GetActualRenderRect( displayRect );
 	return displayRect;
 }
 
-void	UIXPage::OnPostChildrenRender( InterfaceInstance* pInterface )
+void		UIXMenu::OnPostRender( InterfaceInstance* pInterface, UIXRECT rect )
 {
-
-	if ( mbUseClipping )
+	for ( UIXObject* pChild : GetChildObjectList() )
 	{
-		pInterface->DrawAllElements();
-		pInterface->CopyRenderCanvasToBackBuffer( mPageRenderRect.x, mPageRenderRect.y, mPageRenderRect.w, mPageRenderRect.h );
-	//	pInterface->SetViewport( 0, 0, pInterface->GetWidth(), pInterface->GetHeight() );
+		UIXMenuItem* pMenuItem = (UIXMenuItem*)pChild;
+		if (pMenuItem->IsExpanded())
+		{
+			UIXRECT		itemRect = pMenuItem->GetLastRenderRect();
+			itemRect.y += itemRect.h;
+			if ( itemRect.w < 150 ) itemRect.w = 150;
+			itemRect.h = pInterface->GetHeight() - (itemRect.y + 10);
+			pMenuItem->DoRender( pInterface, itemRect );
+		}
 	}
+
 }
+

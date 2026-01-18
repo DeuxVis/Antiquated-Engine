@@ -18,6 +18,7 @@ UIXDropdownEntry::UIXDropdownEntry( UIXDropdown* pParent, const char* szTitle, u
 
 UIXDropdown::~UIXDropdown()
 {
+	SAFE_DELETE( mpScrollbar );
 	for ( UIXDropdownEntry* pListEntry : mDropdownEntries )
 	{
 		delete pListEntry;
@@ -43,13 +44,27 @@ void	UIXDropdown::ToggleExpanded()
 
 }
 
+void	UIXDropdown::OnSelected( int nButtonID, uint32 ulParam)
+{
+	switch( nButtonID )
+	{
+	case UIX_DROPDOWN_ENTRY:
+		SetSelectedElementIndex( ulParam );
+		ToggleExpanded();
+		break;
+	case UIX_DROPDOWN_HEADER:
+		ToggleExpanded();
+		break;
+	default:
+		PANIC_IF(TRUE, "UIXDropdown::OnSelected - Unknown button ID");
+		break;
+	}
+}
+
+
 void	UIXDropdown::OnEscape()
 {
 	mbIsExpanded = FALSE;
-	if (UIX::GetModalObject() == this)
-	{
-		UIX::SetModalObject(NULL);
-	}
 }
 
 

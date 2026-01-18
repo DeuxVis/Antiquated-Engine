@@ -86,7 +86,7 @@ const char*		pcInput = PlatformKeyboardGetInputString(FALSE);
 	return( FALSE );
 }
 
-void		UIXTextBox::OnPressed( uint32 ulParam )
+void		UIXTextBox::OnSelected( int nButtonID, uint32 ulParam )
 {
 	OnSelect();
 }
