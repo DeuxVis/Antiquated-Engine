@@ -29,7 +29,7 @@ private:
 	
 	int					mhTexture;
 
-	char*				mszTextureName;
+	char*				mszTextureName = NULL;
 
 	SPRITE_GROUP		mhSpriteGroup;
 	int					mnParticleGraphicID;
@@ -51,10 +51,7 @@ ParticleGraphic::ParticleGraphic()
 
 ParticleGraphic::~ParticleGraphic()
 {
-	if ( mszTextureName )
-	{
-		free( mszTextureName );
-	}
+	SAFE_FREE(mszTextureName);
 
 	if ( mhTexture != NOTFOUND )
 	{
@@ -65,6 +62,7 @@ void		ParticleGraphic::InitFromTexHandle( int hTex, float fGridScale, BOOL bUseR
 {
 const char*		szTextureName = "<External>";
 
+	SAFE_FREE(mszTextureName);
 	mszTextureName = (char*)( malloc( strlen( szTextureName ) + 1 ) );
 	strcpy( mszTextureName, szTextureName );
 
@@ -78,6 +76,7 @@ void		ParticleGraphic::Init( const char* szTextureName, float fGridScale, BOOL b
 	mszTextureName = (char*)( malloc( strlen( szTextureName ) + 1 ) );
 	strcpy( mszTextureName, szTextureName );
 	
+	return;
 	mhTexture = EngineLoadTexture( szTextureName, 0, 0 );
 
 	if ( bUseRotation )

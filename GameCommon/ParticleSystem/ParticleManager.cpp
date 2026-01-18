@@ -5,6 +5,7 @@
 //#include "../GameCamera.h"
 
 #include "Particle.h"
+#include "ParticleGraphics.h"
 #include "ParticleManager.h"
 
 int			msnNextParticleTypeID = 5001;
@@ -98,7 +99,7 @@ void		ParticleManagerInit( void )
 
 }
 
-void	ParticleManagerDeleteAlllActiveParticles( void )
+void	ParticleManagerDeleteAllActiveParticles( void )
 {
 RegisteredParticleList*	pRegisteredParticleList = mspRegisteredParticleList;
 
@@ -178,7 +179,8 @@ RegisteredParticleList*	pRegisteredParticleList = mspRegisteredParticleList;
 
 void		ParticleManagerShutdown( void )
 {
-	ParticleManagerDeleteAlllActiveParticles();
+	ParticleManagerDeleteAllActiveParticles();
+	ParticleGraphicsShutdown();
 
 	RegisteredParticleList::Shutdown();
 
