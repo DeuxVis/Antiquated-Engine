@@ -76,7 +76,6 @@ void		ParticleGraphic::Init( const char* szTextureName, float fGridScale, BOOL b
 	mszTextureName = (char*)( malloc( strlen( szTextureName ) + 1 ) );
 	strcpy( mszTextureName, szTextureName );
 	
-	return;
 	mhTexture = EngineLoadTexture( szTextureName, 0, 0 );
 
 	if ( bUseRotation )
