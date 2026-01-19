@@ -14,9 +14,10 @@ void	UIXCheckbox::Initialise( UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const cha
 	mText = szText;
 }
 
-void	UIXCheckbox::OnSelected( int nButtonID, uint32 ulParam )
+bool	UIXCheckbox::OnSelected( int nButtonID, uint32 ulParam )
 {
 	mbIsChecked = !mbIsChecked;
+	return( true );
 }
 
 	

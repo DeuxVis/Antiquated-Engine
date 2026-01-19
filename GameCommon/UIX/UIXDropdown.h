@@ -56,7 +56,7 @@ protected:
 	virtual void		OnPostRender( InterfaceInstance* pInterface, UIXRECT rect );
 
 	virtual void		OnUpdate( float fDelta );
-	virtual void		OnSelected( int nButtonID, uint32 ulParam);
+	virtual bool		OnSelected( int nButtonID, uint32 ulParam);
 
 	void			ToggleExpanded(); 
 	

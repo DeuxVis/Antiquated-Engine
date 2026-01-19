@@ -18,7 +18,7 @@ protected:
 	
 	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT pDisplayRect );
 	static void		RegisterControlHandlers();
-	virtual void			OnSelected( int nButtonID, uint32 ulParam );
+	virtual bool			OnSelected( int nButtonID, uint32 ulParam );
 
 
 private:

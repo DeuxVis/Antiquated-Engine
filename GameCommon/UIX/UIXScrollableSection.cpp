@@ -78,7 +78,7 @@ void		UIXScrollbar::HoldHandler(uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirst
 
 void		UIXScrollbar::HoldHandlerStatic(int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress)
 {
-	UIXScrollbar* pScrollbar = (UIXScrollbar*)UIX::GetUIXObjectByID(ulIDParam);
+	UIXScrollbar* pScrollbar = (UIXScrollbar*)UIX::FindUIXObjectByID(ulIDParam);
 
 	if (pScrollbar)
 	{
@@ -118,7 +118,11 @@ void	UIXScrollbar::OnMouseWheel(float fOffset)
 // 
 UIXScrollableSection::~UIXScrollableSection()
 {
-	SAFE_DELETE( mpScrollbar );
+	if ( mpScrollbar )
+	{
+		UIX::DeleteObject( mpScrollbar );
+		mpScrollbar = NULL;
+	}
 }
 
 

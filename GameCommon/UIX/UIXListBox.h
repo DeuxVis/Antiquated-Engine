@@ -51,7 +51,7 @@ protected:
 	void	Initialise( int mode, BOOL bContentsDraggable, int dragItemType );
 
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
-	virtual void			OnSelected( int nButtonID, uint32 ulParam );
+	virtual bool			OnSelected( int nButtonID, uint32 ulParam );
 	virtual void		OnShutdown();
 
 	void			HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress );

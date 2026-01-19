@@ -20,7 +20,7 @@ protected:
 	
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
 
-	void	OnSelected( int nButtonID, uint32 ulParam );
+	bool	OnSelected( int nButtonID, uint32 ulParam );
 private:
 	BOOL				mbIsChecked = FALSE;
 	UIX_CHECKBOX_MODE	mMode = STANDARD_CHECKBOX;

@@ -37,10 +37,9 @@ UIXRECT			UIXListBoxEntry::Render( InterfaceInstance* pInstance, UIXRECT rect )
 
 	if ( mpListBox->IsSelectable() )
 	{
-		if ( UIIsPressed( rect.x, rect.y, rect.w, 19 ) )
-		{
-			UIPressIDSet( UIX_LISTBOX_SELECT, mulUserParam, mpListBox->GetID() );
-		}
+		UIXRECT		selectRect = rect;
+		selectRect.h = 19;
+		UIX::CheckForPress( mpListBox, selectRect, UIX_LISTBOX_SELECT, mulUserParam );
 	}
 
 	pInstance->Text( 1, rect.x + 5, rect.y + 2, ulTextCol, 0, mTitle.c_str() );
@@ -70,12 +69,13 @@ void	UIXListBox::OnShutdown()
 	mListBoxEntries.clear();
 }
 
-void	UIXListBox::OnSelected( int nButtonID, uint32 ulParam )
+bool	UIXListBox::OnSelected( int nButtonID, uint32 ulParam )
 {
 	if ( mSelectionChangedCallback )
 	{
 		mSelectionChangedCallback( this, ulParam );
 	}
+	return false;
 }
 
 void	UIXListBox::Initialise( int mode, BOOL bContentsDraggable, int dragItemType )
@@ -156,7 +156,7 @@ UIXListBoxEntry*		pListBoxElement = mListBoxEntriesFlatList[ulIndex];
 
 void	UIXListBox::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
 {
-UIXListBox*		pListBox = (UIXListBox*)UIX::GetUIXObjectByID( ulIDParam );
+UIXListBox*		pListBox = (UIXListBox*)UIX::FindUIXObjectByID( ulIDParam );
 
 	if ( pListBox )
 	{

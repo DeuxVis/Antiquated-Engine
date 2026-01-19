@@ -7,7 +7,7 @@ extern "C"				// All interfaces use a C-linkage
 #endif
 
 	
-#define		NUM_OVERLAY_VERTICES	(8*2048) 
+#define		NUM_OVERLAY_VERTICES	(65536) 
 
 #ifndef USING_OPENGL
 #define D3DFVF_FLATVERTEX (D3DFVF_XYZ|D3DFVF_DIFFUSE|D3DFVF_TEX1)

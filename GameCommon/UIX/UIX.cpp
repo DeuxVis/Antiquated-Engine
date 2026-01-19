@@ -36,6 +36,7 @@ int							UIX::msMouseWheelHoverPriority = 0;
 int							UIX::mshUIXIconOverlays[MAX_NUM_UIX_ICONS] = { NOTFOUND };
 int							UIX::mshUIXIconsList[MAX_NUM_UIX_ICONS] = { NOTFOUND };
 
+
 uint32						UIX::msDragSourceParam = 0;
 //--------------------------------------------------------------------------------------
 UIXObject::UIXObject( UIXObject* pParent, uint32 uID, UIXRECT rect )
@@ -57,10 +58,14 @@ UIXObject::~UIXObject()
 
 void	UIXObject::SelectObject( int nButtonID, uint32 ulParam )
 {
-	OnSelected( nButtonID, ulParam );
-	if ( mfnSelectedCallback )
+	// HACK: If OnSelected returns false it indicates it may have deleted the object we were using
+	//  so we don't do any further callbacks now. This is unpleasant - needs refactoring
+	if ( OnSelected( nButtonID, ulParam ) )
 	{
-		mfnSelectedCallback( this, mulSelectParam );
+		if ( mfnSelectedCallback )
+		{
+			mfnSelectedCallback( this, mulSelectParam );
+		}
 	}
 }
 
@@ -236,7 +241,7 @@ void	UIXObject::Shutdown()
 	for ( UIXObject* pContainedObject : mContainsList )
 	{
 		pContainedObject->Shutdown();
-		delete pContainedObject;
+		UIX::DeleteObject( pContainedObject );
 	}
 	mContainsList.clear();
 }
@@ -264,7 +269,7 @@ void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam )
 	auto it = msComponentIDMap.find( ulIDParam );
 	if ( it != msComponentIDMap.end() )
 	{
-	UIXObject* pObject = msComponentIDMap[ulIDParam];
+	UIXObject* pObject = it->second;
 
 		pObject->SelectObject( nButtonID, ulParam );
 	}
@@ -384,7 +389,7 @@ void		UIX::Reset()
 {
 	for( UIXObject* pxObjects : msPagesList )
 	{
-		delete pxObjects;
+		DeleteObject( pxObjects );
 	}
 	msPagesList.clear();
 }
@@ -435,21 +440,36 @@ void		UIX::CloseAllMenus()
 
 void		UIX::Shutdown()
 {
-	for( UIXObject* pxObjects : msPagesList )
+	for( UIXObject* pObject : msPagesList )
 	{
-		pxObjects->Shutdown();
-		delete pxObjects;
+		msComponentIDMap[pObject->GetID()] = NULL;
+		msComponentIDMap.erase( pObject->GetID() );
+		pObject->Shutdown();
+		delete pObject;
 	}
 	msPagesList.clear();
 }
 
 void		UIX::DeleteObject( UIXObject* pObject )
 {
+	// HACK - Should shift to smart pointers
+	if ( mspDragDestinationHover == pObject ) mspDragDestinationHover = NULL;
+
 	msPagesList.erase( std::remove(msPagesList.begin(), msPagesList.end(), pObject), msPagesList.end() );
 	msComponentIDMap[pObject->GetID()] = NULL;
 	msComponentIDMap.erase( pObject->GetID() );
 	pObject->Shutdown();
 	delete pObject;
+}
+
+UIXObject*		UIX::FindUIXObjectByID( uint32 ulObjectID )
+{
+	auto it = msComponentIDMap.find( ulObjectID );
+	if ( it != msComponentIDMap.end() )
+	{
+		return( it->second );
+	}
+	return( NULL );
 }
 
 void			UIX::DrawIcon( InterfaceInstance* pInterface, int iconNum, UIXRECT rect, uint32 ulCol )
@@ -643,7 +663,8 @@ void	UIX::EndDragItemType( int type )
 {
 	if ( msDragItemType == type )
 	{
-		if ( mspDragDestinationHover != NULL )
+		if ( ( mspDragDestinationHover != NULL ) &&
+			 ( mspDragSource != mspDragDestinationHover ) )
 		{
 			mspDragDestinationHover->OnReceiveDragItem( type, mspDragSource, msDragSourceParam);
 			mspDragDestinationHover = NULL;

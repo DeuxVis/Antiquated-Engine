@@ -258,15 +258,27 @@ void	AsyncFileSelector::ThreadFunc()
 		{
 		char	acSelectedFile[1024];
 		BOOL	bRet;
+		char	szFileFilter[1024];
+		char*	pcRunner = szFileFilter;
+
+			strcpy( szFileFilter, mFileFilter.c_str() );
+			while( *pcRunner != 0 )
+			{
+				if ( *pcRunner == '\n')
+				{
+					*pcRunner = 0;
+				}
+				pcRunner++;
+			}
 			acSelectedFile[0] = 0;
 
 			if ( mMode == 0 )
 			{
-				bRet = SysGetOpenFilenameDialog( mFileFilter.c_str(), mDialogTitle.c_str(), mDefaultFolder.c_str(), mFlags, acSelectedFile );
+				bRet = SysGetOpenFilenameDialog( szFileFilter, mDialogTitle.c_str(), mDefaultFolder.c_str(), mFlags, acSelectedFile );
 			}
 			else
 			{
-				bRet = SysGetSaveFilenameDialog( mFileFilter.c_str(), mDialogTitle.c_str(), mDefaultFolder.c_str(), mFlags, acSelectedFile );
+				bRet = SysGetSaveFilenameDialog( szFileFilter, mDialogTitle.c_str(), mDefaultFolder.c_str(), mFlags, acSelectedFile );
 			}
 
 			mPendingResultFilename = acSelectedFile;

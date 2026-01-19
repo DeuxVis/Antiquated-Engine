@@ -19,9 +19,10 @@ void	UIXCollapsableSection::ToggleCollapsed()
 	mbIsCollapsed = !mbIsCollapsed;
 }
 
-void	UIXCollapsableSection::OnSelected( int nButtonID, uint32 ulParam )
+bool	UIXCollapsableSection::OnSelected( int nButtonID, uint32 ulParam )
 {
 	ToggleCollapsed();
+	return( false );
 }
 
 void	UIXCollapsableSection::UpdateUIStateData( UIStateData* pData )
@@ -148,7 +149,7 @@ void	UIXCollapsableSection::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BO
 
 void	UIXCollapsableSection::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
 {
-UIXCollapsableSection*		pSection = (UIXCollapsableSection*)UIX::GetUIXObjectByID( ulIDParam );
+UIXCollapsableSection*		pSection = (UIXCollapsableSection*)UIX::FindUIXObjectByID( ulIDParam );
 
 	if ( pSection )
 	{

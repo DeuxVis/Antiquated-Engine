@@ -143,7 +143,7 @@ protected:
 	virtual void		OnShutdown() {}
 	virtual void		OnPostChildrenRender( InterfaceInstance* pInterface ) { }
 	virtual void		OnMouseWheel( float fAmount ) {}
-	virtual void		OnSelected( int nButtonID, uint32 ulParam ) {}
+	virtual bool		OnSelected( int nButtonID, uint32 ulParam ) { return( true ); }		// Returns true to indicate we should continue to call any other selectionCallbacks (i.e. we can guarantee the current object is still valid (HACK))
 	virtual void		OnCloseAllMenus() {}
 
 	void		Update( float delta );
@@ -169,6 +169,7 @@ protected:
 	std::vector<UIXObject*>&		GetChildObjectList() { return mContainsList; }
 
 	void		SetSelectedCallback( fnSelectedCallback callbackFunc, uint32 ulSelectParam ) { mfnSelectedCallback = callbackFunc; mulSelectParam = ulSelectParam; }
+	bool		HasSelectionCallback() { return( mfnSelectedCallback != NULL ); }
 
 	virtual void			OnEscape() {}
 	UIXObject* GetParent() const { return(mpParent); }
@@ -225,7 +226,7 @@ public:
 	static UIXMenu*						AddMenuBar( UIXObject* pxContainer, UIXRECT rect );
 
 	static void							DeleteObject( UIXObject* pObject );
-	static UIXObject*					GetUIXObjectByID( uint32 ulObjectID ) { return( msComponentIDMap[ulObjectID]);}
+	static UIXObject*					FindUIXObjectByID( uint32 ulObjectID );
 
 	static void							SetDragItemType( int type, UIXObject* pxFromObject, uint32 param ) { msDragItemType = type; mspDragSource = pxFromObject; msDragSourceParam = param; }
 	static int							GetDragItemType() { return msDragItemType; }

@@ -15,7 +15,7 @@ public:
 	UIXMenuItem*		AddMenuItem( const char* szMenuItemName, fnSelectedCallback selectedCallback = NULL, uint32 ulSelectParam = 0);
 
 	void		DoRender( InterfaceInstance* pInterface, UIXRECT rect );
-	virtual void		OnSelected( int nButtonID, uint32 ulParam );
+	virtual bool		OnSelected( int nButtonID, uint32 ulParam );
 	bool			IsExpanded() const { return mbIsExpanded; }
 
 	UIXRECT		GetLastRenderRect() const { return mLastRenderRect; }

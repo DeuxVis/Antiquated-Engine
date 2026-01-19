@@ -28,18 +28,27 @@ void		UIXMenuItem::OnCloseAllMenus()
 	mspExpandedMenuTopLayer = NULL;
 }
 
-void		UIXMenuItem::OnSelected( int nButtonID, uint32 ulParam )
+bool		UIXMenuItem::OnSelected( int nButtonID, uint32 ulParam )
 {
 	if (GetChildObjectList().size() > 0)
 	{
-		if ( mspExpandedMenuTopLayer != NULL )
+		if ( mbIsExpanded )
 		{
-			mspExpandedMenuTopLayer->SetExpanded( false );
-			mspExpandedMenuTopLayer = NULL;
+			mbIsExpanded = false;
+			mspExpandedMenuTopLayer = NULL;	
 		}
-		mbIsExpanded = true;
-		mspExpandedMenuTopLayer = this;
+		else
+		{
+			if ( mspExpandedMenuTopLayer != NULL )
+			{
+				mspExpandedMenuTopLayer->SetExpanded( false );
+				mspExpandedMenuTopLayer = NULL;
+			}
+			mbIsExpanded = true;
+			mspExpandedMenuTopLayer = this;
+		}
 	}
+	return( true );
 }
 
 void		UIXMenuItem::OnEscape()
@@ -63,7 +72,14 @@ void		UIXMenuItem::DoRender( InterfaceInstance* pInterface, UIXRECT rect )
 		rect.h = 16;
 		uint32		ulTextCol = 0xd0d0d0d0;
 		uint32		ulHilightCol = 0x80808080;
-		if (UIX::IsMouseHover(rect))
+
+		// If no sub-items and no selection callback, this menu item is greyed out
+		if ( ( pMenuItem->GetChildObjectList().size() == 0 ) &&
+			 ( pMenuItem->HasSelectionCallback() == false ) )
+		{
+			ulTextCol = 0x80808080;
+		}
+		else if (UIX::IsMouseHover(rect))
 		{
 			pInterface->Rect(1, rect.x, rect.y, rect.w, rect.h, ulHilightCol);
 			ulTextCol = 0xe0e0e0e0;

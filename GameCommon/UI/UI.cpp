@@ -117,12 +117,14 @@ BOOL		UIOnPress( int X, int Y )
 BOOL		UIOnRelease( int X, int Y )
 {
 BOOL	bRet = FALSE;
+bool	bHoldHandlerWasActioned = false;
 
 	if ( mnUIButtonIDHeld != NOTFOUND )
 	{
 		if ( msHoldHandlerList[mnUIButtonIDHeld])
 		{			
 			msHoldHandlerList[mnUIButtonIDHeld]( mnUIButtonIDHeld, mulUIButtonIDHeldParam, mulUIButtonIDHeldID, FALSE, FALSE );
+			bHoldHandlerWasActioned = true;
 		}
 		mnUIButtonIDHeld = NOTFOUND;
 		bRet = TRUE;		
@@ -148,6 +150,7 @@ BOOL	bRet = FALSE;
 					msHoldHandlerList[mnUIButtonIDPressed]( mnUIButtonIDPressed, mulUIButtonIDPressedParam, mulUIButtonIDHoveredID, FALSE, FALSE );
 				}
 				 mnUIButtonIDPressed = NOTFOUND;
+				 mulUIButtonIDPressedIDParam = 0;
 				 bRet = TRUE;
 			}
 		}
