@@ -20,12 +20,17 @@ InterfaceInstance*	mpInterfaceInstance = NULL;
 
 short		mwUIPressX = 0;
 short		mwUIPressY = 0;
+short		mwUIRightPressX = 0;
+short		mwUIRightPressY = 0;
 int			mnUISetCursorX = NOTFOUND;
 int			mnUISetCursorY = NOTFOUND;
 
 int			mnUIButtonIDPressed = NOTFOUND;
 uint32		mulUIButtonIDPressedParam = 0;
 uint32		mulUIButtonIDPressedIDParam = 0;
+int			mnUIRightButtonIDPressed = NOTFOUND;
+uint32		mulUIRightButtonIDPressedParam = 0;
+uint32		mulUIRightButtonIDPressedIDParam = 0;
 
 int			mnUIButtonIDHovered = NOTFOUND;
 uint32		mulUIButtonIDHoveredParam = 0;
@@ -62,6 +67,7 @@ void		UIOnInterfaceDraw( void )
 void		UIUpdate( float fDelta )
 {
 	mnUIButtonIDPressed = NOTFOUND;
+	mnUIRightButtonIDPressed = NOTFOUND;
 	mnUIButtonIDHovered = NOTFOUND;
 	UITextBoxNewFrame();
 	UIButtonsNewFrame();
@@ -86,11 +92,17 @@ BOOL		UIOnZoom( float fZoomAmount )
 	return( FALSE );
 }
 
+BOOL		UIOnRightButtonPress( int X, int Y )
+{
+	mwUIRightPressX = X;
+	mwUIRightPressY = Y;
+	return( FALSE );
+}
+
 BOOL		UIOnPress( int X, int Y )
 {
 	if ( ( UISliderOnPress( X, Y ) == FALSE ) &&
 		 ( UIListBoxOnPress( X, Y ) == FALSE ) )
-
 	{
 		mwUIPressX = X;
 		mwUIPressY = Y;
@@ -111,6 +123,21 @@ BOOL		UIOnPress( int X, int Y )
 	
 	UIScrollablePageOnPress( X, Y );
 
+	return( FALSE );
+}
+
+BOOL		UIOnReleaseRightButton( int X, int Y )
+{
+	if ( mnUIRightButtonIDPressed != NOTFOUND )
+	{
+		if ( msButtonHandlerList[mnUIRightButtonIDPressed] )
+		{			
+			msButtonHandlerList[mnUIRightButtonIDPressed]( mnUIRightButtonIDPressed, mulUIRightButtonIDPressedParam, mulUIRightButtonIDPressedIDParam );
+		}
+		mnUIRightButtonIDPressed = NOTFOUND;
+		mulUIRightButtonIDPressedParam = 0;
+		return( TRUE );
+	}
 	return( FALSE );
 }
 
@@ -221,6 +248,13 @@ void		UIHoverIDSet( int nButtonID, uint32 ulParam, uint32 ulID )
 }
 
 
+void		UIRightPressIDSet( int nButtonID, uint32 ulParam, uint32 ulIDParam )
+{
+	mnUIRightButtonIDPressed = nButtonID;
+	mulUIRightButtonIDPressedParam = ulParam;
+	mulUIRightButtonIDPressedIDParam = ulIDParam;
+}
+
 void		UIPressIDSet( int nButtonID, uint32 ulParam, uint32 ulIDParam )
 {
 	mnUIButtonIDPressed = nButtonID;
@@ -239,6 +273,18 @@ int		hoverX, hoverY;
 		 ( hoverY < Y + H ) )
 	{
 		PlatformSetMouseOverCursor( TRUE );
+		return( TRUE );
+	}
+	return( FALSE );
+}
+
+BOOL		UIIsRightPressed( int X, int Y, int W, int H )
+{
+	if ( ( mwUIRightPressX > X ) &&
+		 ( mwUIRightPressX < X + W ) &&
+		 ( mwUIRightPressY > Y ) &&
+		 ( mwUIRightPressY < Y + H ) )
+	{
 		return( TRUE );
 	}
 	return( FALSE );

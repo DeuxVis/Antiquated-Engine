@@ -56,6 +56,9 @@ extern void		StringToLower( const char* pcText, char* pcTextOut );
 
 extern char*	GetRealTimeDate( uint32 ulTimeSeconds, BOOL bIncludeClockTime );
 extern void		GetCurrentDateTimeString( char* szBufferOut );
+extern void		EnsureFilenameHasExtension(char* acFilename, const char* acExtension);
+
+
 
 //------------------------------------------------------------------
 

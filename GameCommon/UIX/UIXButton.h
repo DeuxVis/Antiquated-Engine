@@ -12,6 +12,8 @@ friend class UIX;
 public:
 
 	void	EnableLabelEdit( fnLabelEditCallback callbackFunc );
+	
+	void	AddRightButtonPress( uint32 ulButtonID, uint32 ulButtonParam ) { mulRightPressButtonID = ulButtonID; mulRightPressButtonParam = ulButtonParam; }
 
 protected:
 	UIXButton( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
@@ -29,6 +31,8 @@ private:
 	std::string			mPreEditTitle;
 	uint32				mulButtonID = 0;
 	uint32				mulButtonParam = 0;
+	uint32				mulRightPressButtonID = 0;
+	uint32				mulRightPressButtonParam = 0;
 	eUIXBUTTON_MODE		mMode = UIXBUTTON_NORMAL;
 	BOOL				mbIsBlocking = TRUE;
 	BOOL				mbIsLabelEditable = FALSE;

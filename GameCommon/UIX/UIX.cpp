@@ -342,6 +342,20 @@ void		UIX::SetMousewheelHoverObject(UIXObject* pObject)
 
 }
 
+BOOL		UIX::CheckForRightButtonPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam )
+{
+	if ( msSelectionPriority >= msPressedSelectionPriority )
+	{
+		if ( UIIsRightPressed( rect.x, rect.y, rect.w, rect.h ) == TRUE )
+		{
+			UIRightPressIDSet( ulButtonID, ulButtonParam, pxObject->GetID() );
+			msPressedSelectionPriority = msSelectionPriority;
+		}
+		return( IsMouseHover( rect ) );
+	}
+	return( FALSE );
+}
+
 BOOL		UIX::CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam )
 {
 	if ( msSelectionPriority >= msPressedSelectionPriority )

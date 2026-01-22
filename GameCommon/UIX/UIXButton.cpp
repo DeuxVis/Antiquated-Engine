@@ -85,6 +85,10 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 			}
 	
 			UIButtonDraw( mulButtonID, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mTitle.c_str(), modeFlags, mulButtonParam, GetID() );
+			if ( mulRightPressButtonID )
+			{
+				UIX::CheckForRightButtonPress( this, drawRect, mulRightPressButtonID, mulRightPressButtonParam );	
+			}
 		}
 		break;
 	case UIXBUTTON_IMAGE:

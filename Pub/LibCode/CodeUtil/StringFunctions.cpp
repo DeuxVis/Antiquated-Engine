@@ -81,6 +81,20 @@ const char*	FindChar( const char* pcRunner, char cChar )
 	return( NULL );
 }
 
+void		EnsureFilenameHasExtension(char* acFilename, const char* acExtension)
+{
+	// Check if the filename already has the extension
+	int nExtLen = strlen(acExtension);
+	if (strlen(acFilename) >= nExtLen)
+	{
+		if (stricmp(acExtension, &acFilename[strlen(acFilename) - nExtLen]) == 0)
+		{
+			return;
+		}
+	}
+
+	strcat(acFilename, acExtension);
+}
 
 void		StringToLower( const char* pcSourceString, char* pcOutString )
 {

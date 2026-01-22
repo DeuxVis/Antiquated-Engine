@@ -88,7 +88,9 @@ extern void		UIReleaseGraphicsForDeviceReset( void );
 extern void		UIInitGraphicsPostDeviceReset( void );
 
 extern BOOL		UIOnPress( int X, int Y );
+extern BOOL		UIOnRightButtonPress( int X, int Y );
 extern BOOL		UIOnRelease( int X, int Y );
+extern BOOL		UIOnReleaseRightButton( int X, int Y );
 extern BOOL		UIOnZoom( float fZoomAmount );		// Mousewheel
 
 extern void		UIOnInterfaceDraw( void );
@@ -98,8 +100,10 @@ extern void		UIOnInterfaceDraw( void );
 
 extern void		UIHoverIDSet( int nButtonID, uint32 ulParam, uint32 ulIndex = 0 );
 extern void		UIPressIDSet( int nButtonID, uint32 ulParam, uint32 ulIndex = 0 );
+extern void		UIRightPressIDSet( int nButtonID, uint32 ulParam, uint32 ulIndex = 0 );
 extern BOOL		UIIsPressed( int X, int Y, int W, int H );
 extern BOOL		UIHoverItem( int X, int Y, int W, int H );
+extern BOOL		UIIsRightPressed( int X, int Y, int W, int H );
 
 extern void		UIGetCurrentCursorPosition( int* pnX, int* pnY );
 extern void		UISetCurrentCursorPosition( int nX, int nY );

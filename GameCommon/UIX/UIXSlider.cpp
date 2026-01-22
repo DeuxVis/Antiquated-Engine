@@ -197,6 +197,7 @@ uint32		ulCol = 0xf0505070;
 			int		nBarMaxW = renderRect.w - nTextAreaW;
 			int		nMinBarPos = (int)(((mfMinVal-mfInitialMinVal) * nBarMaxW) / (mfInitialMaxVal-mfInitialMinVal));
 			int		nMaxBarPos = (int)(((mfMaxVal-mfInitialMinVal) * nBarMaxW) / (mfInitialMaxVal-mfInitialMinVal));
+			int		nCurrentBarPos = (int)(((mfCurrentVal-mfInitialMinVal) * nBarMaxW) / (mfInitialMaxVal-mfInitialMinVal));
 
 			mRenderRect.x += nTextAreaW;
 			mRenderRect.w -= nTextAreaW;
@@ -220,6 +221,11 @@ uint32		ulCol = 0xf0505070;
 			}
 			pInterface->Rect( 0, mRenderRect.x + nMaxBarPos, mRenderRect.y + 6, 6, mRenderRect.h - 6, ulCol );
 			pInterface->Triangle( 1, mRenderRect.x + nMaxBarPos, mRenderRect.y + 6, mRenderRect.x + nMaxBarPos + 6, mRenderRect.y + 6, mRenderRect.x + nMaxBarPos, mRenderRect.y, ulCol, ulCol, ulCol );
+
+			// Current value indicator
+			ulCol = 0xc0b0b0b0;
+			pInterface->Rect( 0, mRenderRect.x + nCurrentBarPos - 1, mRenderRect.y + 4, 2, mRenderRect.h - 6, ulCol );
+			
 
 			// between bar
 			pInterface->Rect( 0, mRenderRect.x + nMinBarPos + 2, mRenderRect.y + ( mRenderRect.h / 2), (nMaxBarPos - nMinBarPos) - 2, (mRenderRect.h/2), 0xA0404040 );
@@ -393,7 +399,7 @@ void		UIXSlider::OnUpdate( float fDelta )
 			}		
 			break;
 		case VALUERANGE:
-			mValueUpdateFunc( GetID(), mfMinVal, mfMaxVal, mulUserParam, mbIsHeld );
+			mfCurrentVal = mValueUpdateFunc( GetID(), mfMinVal, mfMaxVal, mulUserParam, mbIsHeld );
 			break;
 		}
 	}

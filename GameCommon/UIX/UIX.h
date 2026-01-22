@@ -241,6 +241,7 @@ public:
 
 	static BOOL							IsMouseHover( UIXRECT rect );
 	static BOOL							CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam );
+	static BOOL							CheckForRightButtonPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam );
 
 	static void							DrawIcon( InterfaceInstance* pInterface, int iconNum, UIXRECT rect, uint32 ulCol );
 	static void							LoadIcon( InterfaceInstance* pInterface, int iconNum, const char* szFilename );
