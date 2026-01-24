@@ -1,5 +1,6 @@
 
 #include "../LibCode/Engine/DirectX/EngineDX.h"
+#include <map>
 #include "StandardDef.h"
 #include "Engine.h"
 
@@ -8,6 +9,8 @@
 
 #define NUM_SPRITE3D_VERTEX_BUFFERS		2
 #define SPRITE3D_VERTEX_BUFFER_SIZE		1024
+
+std::map<int,bool>		msSprite3dActiveLayers;
 
 class Sprite
 {
@@ -44,6 +47,7 @@ public:
 
 	SPRITE_GROUP		mhGroupNum;
 	int					mhTexture;
+	int					mLayer;
 	float				mfGridScale;
 	eSpriteGroupRenderFlags	mRenderFlags;
 	Sprite*				mpSpriteList;
@@ -473,19 +477,53 @@ Sprite*		pNext;
 	// DONT render if the texture hasn't loaded yet. We'd prefer nothing than big white squares
 	if ( EngineTextureIsFullyLoaded( mhTexture ) == TRUE )
 	{
+		// Colour is texture * diffuse
+		EngineSetColourMode( 0, COLOUR_MODE_TEXTURE_MODULATE );
 		EngineSetTexture( 0, mhTexture );
-		if ( mRenderFlags & kSpriteRender_Additive )
+
+		if ( mRenderFlags & kSpriteRender_Subtractive )
 		{
-			EngineSetBlendMode( BLEND_MODE_SRCALPHA_ADDITIVE );
-				mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
-				mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );
-				mpEngineDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE );
-			EngineSetColourMode( 0, COLOUR_MODE_TEXTURE_MODULATE );
+			if ( mRenderFlags & kSpriteRender_ColourBlend )
+			{
+				if ( mRenderFlags & kSpriteRender_IncAlpha)
+				{
+					EngineSetBlendMode( BLEND_MODE_COLOUR_SUBTRACTIVE_ALPHA );				
+				}
+				else
+				{
+					EngineSetBlendMode( BLEND_MODE_COLOUR_SUBTRACTIVE );		
+				}
+			}
+			else
+			{
+				EngineSetBlendMode( BLEND_MODE_ALPHA_SUBTRACTIVE );
+			}
+		}
+		else if ( mRenderFlags & kSpriteRender_Additive )
+		{
+			if ( mRenderFlags & kSpriteRender_ColourBlend )
+			{
+				EngineSetBlendMode( BLEND_MODE_COLOUR_ADDITIVE );		
+			}
+			else
+			{
+				EngineSetBlendMode( BLEND_MODE_SRCALPHA_ADDITIVE );
+			}
 		}
 		else if ( mRenderFlags & kSpriteRender_ColourBlend )
 		{
-			EngineSetBlendMode( BLEND_MODE_COLOUR_BLEND );
-			EngineSetColourMode( 0, COLOUR_MODE_TEXTURE_MODULATE );
+			if ( mRenderFlags & kSpriteRender_IncAlpha)
+			{
+				EngineSetBlendMode( BLEND_MODE_COLOUR_BOTHALPHA );		
+			}
+			else
+			{
+				EngineSetBlendMode( BLEND_MODE_COLOUR_BLEND );
+			}
+		}
+		else if ( mRenderFlags & kSpriteRender_SingleColTexAlpha )
+		{
+			EngineSetBlendMode( BLEND_MODE_COLOUR_INVALPHA );
 		}
 		else
 		{
@@ -609,25 +647,29 @@ SpriteGroup*	pLast = NULL;
 
 }
 
-SPRITE_GROUP	 Sprites3DGetGroup( int nTextureHandle, float fGridScale, eSpriteGroupRenderFlags nRenderFlags )
+SPRITE_GROUP	 Sprites3DGetGroup( int nTextureHandle, float fGridScale, eSpriteGroupRenderFlags nRenderFlags, int layer )
 {
 SpriteGroup*	pSpriteGroups = mspSpriteGroups;
 
 	while( pSpriteGroups )
 	{
 		if ( ( pSpriteGroups->mhTexture == nTextureHandle ) &&
-			 ( pSpriteGroups->mRenderFlags == nRenderFlags ) )
+			 ( pSpriteGroups->mRenderFlags == nRenderFlags ) &&
+			 ( pSpriteGroups->mLayer == layer ) )
 		{
 			return( pSpriteGroups->mhGroupNum );
 		}
 		pSpriteGroups = pSpriteGroups->mpNext;
 	}
 
+	msSprite3dActiveLayers[layer] = true;
+
 	pSpriteGroups = new SpriteGroup;
 	pSpriteGroups->mpNext = mspSpriteGroups;
 	mspSpriteGroups = pSpriteGroups;
 
 	pSpriteGroups->mhTexture = nTextureHandle;
+	pSpriteGroups->mLayer = layer;
 	pSpriteGroups->mhGroupNum = msnNextSpriteGroupNum++;
 	pSpriteGroups->mfGridScale = fGridScale;
 	pSpriteGroups->mRenderFlags = nRenderFlags;
@@ -787,10 +829,19 @@ SpriteGroup*	pSpriteGroups = mspSpriteGroups;
 		EngineEnableZWrite( FALSE );
 	}
 
-	while( pSpriteGroups )
+	for (auto& layerActive : msSprite3dActiveLayers)
 	{
-		pSpriteGroups->Render();
-		pSpriteGroups = pSpriteGroups->mpNext;
+		pSpriteGroups = mspSpriteGroups;
+		// TODO: Render in layers
+		while( pSpriteGroups )
+		{
+			if ( pSpriteGroups->mLayer == layerActive.first )
+			{
+				pSpriteGroups->Render();
+			}
+			pSpriteGroups = pSpriteGroups->mpNext;
+		}
+
 	}
 
 }

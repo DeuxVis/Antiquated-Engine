@@ -1,6 +1,7 @@
 #ifndef UNIVERSAL_SYSTEM_H
 #define UNIVERSAL_SYSTEM_H
 
+// System utils
 // This is a header intended to collect access functions to as much as the stuff as possible
 // thats windows related in the client and server.
 //
@@ -32,6 +33,7 @@ extern void		SysRegisterDebugPrintHandler( fnDebugPrintHandler pDebugPrintHandle
 typedef	void(*fnUserPrintFunction)( int mode, const char* szMessage );
 extern void		SysRegisterUserPrintHandler( fnUserPrintFunction pUserPrintHandler );
 
+extern u64		SysStringToU64( const char* szString );
 extern int		SysStricmp( const char* szOut, const char* szIn );
 extern BOOL		SysIsFinite( float fVal );
 
@@ -195,13 +197,12 @@ extern void WidgetSetEnabled( void* pTargetTopParent, int nTarget, BOOL boNewSta
 extern void MenuEntrySetEnabled( void* pTargetTopParent, int nTarget, BOOL boNewState );
 #endif
 extern void SysSetWindowTitle( void* pxWindow, char* pcNewTitle );
+extern void		SysSetMouseCursor( int mode );
+
 extern void SysEmptyList( void* pxParentWindow, void* pListIdent );
 //extern void SysFillListLine( void* pxParentWindow, void* pListIdent, int nLineNum, int nValuesQtt, char** ppcValues );
 extern void SysAddFilledListLine( void* pxParentWindow, void* pListIdent, int nValsQtt, char** ppcValues, int nPos, int nParam );
 
-// System utils
-extern void		SysSleep( int millisecs );
-extern u64		SysStringToU64( const char* szString );
 
 //------------ Platform specific externs
 
@@ -215,12 +216,36 @@ extern unsigned int		SysCreateThread( fnThreadFunction, void* pThreadPointerPara
 extern void				SysExitThread( int nRetVal );
 
 //------------- System OS processing
+extern void		SysSleep( int millisecs );
+
 extern BOOL		SysOSYieldIfRequired( void );
 extern BOOL		SysOSYield( void );
 
 extern BOOL		SysOSQuitApplicationRequested( void );
 
-extern void		SysSetMouseCursor( int mode );
+//------------------ Profiling
+typedef struct
+{
+	char		szEventName[256];
+	int			nNestedLevel;
+	float		fTotalTime;
+	int			nTotalNumHits;
+	float		fRollingAverageTime;
+	float		fSampleAverageTime;
+	float		fPeakFrameTime;
+	int			nFrameHits;
+	float		fFrameTime;
+
+} SYS_PROFILE_STAT;
+
+extern void		SysProfileNewFrame( void );
+extern u64		SysProfileStartEvent( const char* szEventName, int nEventParam = 0, const char* szEventParam = NULL );
+extern void		SysProfileEndEvent( u64 ullEventID );
+extern BOOL		SysProfileGetStat( int nStatNum, SYS_PROFILE_STAT* pStatOut );
+extern void		SysProfileNextEvent( u64* pullEventID, const char* szEventName );		// Convenience func for events on same level ; Calls end then start
+
+
+
 
 #ifdef WIN32
 #ifdef WINUSERAPI	// Only include this if winuser.h has been previously included

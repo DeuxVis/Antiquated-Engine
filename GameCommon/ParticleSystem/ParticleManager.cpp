@@ -1,5 +1,6 @@
 
 #include "StandardDef.h"
+#include <vector>
 #include "Engine.h"
 
 //#include "../GameCamera.h"
@@ -11,6 +12,8 @@
 int			msnNextParticleTypeID = 5001;
 
 RegisteredParticleList*	mspRegisteredParticleList = NULL;
+
+std::map<int, bool>		msActiveParticleLayers;
 
 void	RegisteredParticleList::Shutdown( void )
 {
@@ -25,6 +28,7 @@ RegisteredParticleList*		pNext;
 
 		pRegisteredParticles = pNext;
 	}
+	msActiveParticleLayers.clear();
 }
 
 BOOL	RegisteredParticleList::Register( const char* szParticleName, ParticleNewFunction fnNewParticle )
@@ -38,7 +42,7 @@ RegisteredParticleList*		pNewParticleRegistration = new RegisteredParticleList;
 	pNewParticleRegistration->mpNext = mspRegisteredParticleList;
 	mspRegisteredParticleList = pNewParticleRegistration;
 
-	pNewParticleRegistration->mspActiveParticleList = NULL;
+	pNewParticleRegistration->mParticleLayerMap.clear();
 	pNewParticleRegistration->mnParticleTypeID = msnNextParticleTypeID;
 
 	msnNextParticleTypeID++;
@@ -46,7 +50,16 @@ RegisteredParticleList*		pNewParticleRegistration = new RegisteredParticleList;
 	return( TRUE );
 }
 
+void	ParticleManagerAddParticleToLayer( RegisteredParticleList*	pRegisteredParticleList, Particle* pParticle, int layer )
+{
+	if ( msActiveParticleLayers[layer] == false )
+	{
+		msActiveParticleLayers[layer] = true;
+	}
 
+	pParticle->SetNext( pRegisteredParticleList->mParticleLayerMap[layer] );
+	pRegisteredParticleList->mParticleLayerMap[layer] = pParticle;
+}
 
 Particle*		ParticleManagerAddParticle( const char* szParticleName, const VECT* pxPos, const VECT* pxVel, uint32 ulCol, float fLongevity, int nInitParam, uint32 ulInitParamChannel, void* pUserObject )
 {
@@ -55,15 +68,14 @@ RegisteredParticleList*	pRegisteredParticleList = mspRegisteredParticleList;
 
 	while( pRegisteredParticleList )
 	{
+		// TODO - Replace with hash lookup
 		if ( stricmp( pRegisteredParticleList->mszParticleName, szParticleName ) == 0 )
 		{
 			pNewParticle = pRegisteredParticleList->mfnParticleNew();
-
 			pNewParticle->Init( pRegisteredParticleList->mnParticleTypeID, pxPos, pxVel, ulCol, fLongevity, nInitParam, ulInitParamChannel, pUserObject );
 
-			pNewParticle->SetNext( pRegisteredParticleList->mspActiveParticleList );
-			pRegisteredParticleList->mspActiveParticleList = pNewParticle;
-
+			// TODO - Channel = layer (when needed)
+			ParticleManagerAddParticleToLayer(pRegisteredParticleList, pNewParticle, ulInitParamChannel);
 			return( pNewParticle );
 		}
 		pRegisteredParticleList = pRegisteredParticleList->mpNext;
@@ -71,8 +83,8 @@ RegisteredParticleList*	pRegisteredParticleList = mspRegisteredParticleList;
 	return( NULL );
 }
 
-
-Particle*		ParticleManagerGetFirstParticleOfType( const char* szParticleTypeName )
+// Needed???
+Particle*		ParticleManagerGetFirstParticleOfType( const char* szParticleTypeName, int layer )
 {
 RegisteredParticleList*	pRegisteredParticleList = mspRegisteredParticleList;
 
@@ -80,7 +92,7 @@ RegisteredParticleList*	pRegisteredParticleList = mspRegisteredParticleList;
 	{
 		if ( stricmp( pRegisteredParticleList->mszParticleName, szParticleTypeName ) == 0 )
 		{
-			return( pRegisteredParticleList->mspActiveParticleList );
+			return( pRegisteredParticleList->mParticleLayerMap[layer] );
 		}
 		pRegisteredParticleList = pRegisteredParticleList->mpNext;
 	}
@@ -105,16 +117,20 @@ RegisteredParticleList*	pRegisteredParticleList = mspRegisteredParticleList;
 
 	while( pRegisteredParticleList )
 	{
-	Particle*		pParticle = pRegisteredParticleList->mspActiveParticleList;
-	Particle*		pNext;
-
-		while( pParticle )
+		for (auto& layerPair : pRegisteredParticleList->mParticleLayerMap)
 		{
-			pNext = pParticle->GetNext();
-			delete pParticle;
-			pParticle = pNext;
+		Particle*		pParticle = layerPair.second;
+		Particle*		pNext;
+
+			while( pParticle )
+			{	
+				pNext = pParticle->GetNext();
+				delete pParticle;
+				pParticle = pNext;
+			}
+			layerPair.second = NULL;
 		}
-		pRegisteredParticleList->mspActiveParticleList = NULL;
+
 		pRegisteredParticleList = pRegisteredParticleList->mpNext;
 	}
 }
@@ -125,55 +141,74 @@ RegisteredParticleList*	pRegisteredParticleList = mspRegisteredParticleList;
 
 	while( pRegisteredParticleList )
 	{
-	Particle*		pParticle = pRegisteredParticleList->mspActiveParticleList;
-	Particle*		pLast = NULL;	
-	Particle*		pNext;
-
-		while( pParticle )
+		for (auto& layerPair : pRegisteredParticleList->mParticleLayerMap)
 		{
-			pNext = pParticle->GetNext();
+		Particle*		pParticle = layerPair.second;
+		Particle*		pLast = NULL;	
+		Particle*		pNext;
 
-			if ( pParticle->GetTypeID() == IN_MORGUE )
-			{
-				if ( pLast )
+			while( pParticle )
+			{	
+				pNext = pParticle->GetNext();
+
+				if ( pParticle->GetTypeID() == IN_MORGUE )
 				{
-					pLast->SetNext( pNext );
+					if ( pLast )
+					{
+						pLast->SetNext( pNext );
+					}
+					else
+					{
+						layerPair.second = pNext;
+					}
+					delete pParticle;
 				}
 				else
 				{
-					pRegisteredParticleList->mspActiveParticleList = pNext;
+					pParticle->Update( delta );
+					pLast = pParticle;
 				}
-				delete pParticle;
-			}
-			else
-			{
-				pParticle->Update( delta );
-				pLast = pParticle;
-			}
 
-			pParticle = pNext;
+				pParticle = pNext;
+			}
 		}
 
 		pRegisteredParticleList = pRegisteredParticleList->mpNext;
 	}
 }
 
+int		msnNumRenderedParticles = 0;
+int		msnNumRenderedParticleGroups = 0;
+
+int		ParticleManagerGetRenderedParticleCount()
+{
+	return( msnNumRenderedParticles );
+}
+
 void		ParticleManagerRender( void )
 {
-RegisteredParticleList*	pRegisteredParticleList = mspRegisteredParticleList;
+	msnNumRenderedParticles = 0;
+	msnNumRenderedParticleGroups = 0;
 
-	while( pRegisteredParticleList )
+	for ( auto& activeLayerPair : msActiveParticleLayers)
 	{
-	Particle*		pParticle = pRegisteredParticleList->mspActiveParticleList;
+	RegisteredParticleList*	pRegisteredParticleList = mspRegisteredParticleList;
 
-		while( pParticle )
+		while( pRegisteredParticleList )
 		{
-			pParticle->Render();
+		Particle*		pParticle = pRegisteredParticleList->mParticleLayerMap[activeLayerPair.first];
+		Particle*		pLast = NULL;	
+//		Particle*		pNext;
 
-			pParticle = pParticle->GetNext();
+			while( pParticle )
+			{	
+				pParticle->Render();
+				msnNumRenderedParticles++;
+				pParticle = pParticle->GetNext();
+			}
+			pRegisteredParticleList = pRegisteredParticleList->mpNext;
+			msnNumRenderedParticleGroups++;
 		}
-
-		pRegisteredParticleList = pRegisteredParticleList->mpNext;
 	}
 }
 

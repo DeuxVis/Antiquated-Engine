@@ -669,7 +669,7 @@ int		nNameLen = strlen( szFilename );
 char	acExtensionRequired[64];
 
 	sprintf( acExtensionRequired, ".%s", szExtension );
-	if ( stricmp( szFilename + (nNameLen-4), acExtensionRequired) != 0 )
+	if ( stricmp( szFilename + (nNameLen-(strlen(acExtensionRequired))), acExtensionRequired) != 0 )
 	{
 		strcat( szFilename, acExtensionRequired ); 
 	}

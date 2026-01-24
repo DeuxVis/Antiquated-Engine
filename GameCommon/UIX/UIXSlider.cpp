@@ -36,6 +36,10 @@ float	UIXSlider::OnValueChange( UIXObject* pxSourceObj, float fNewValue )		// Tr
 		}
 		return mfMaxVal;	
 	}
+	else if ( pxSourceObj == mpValueTextBox )
+	{
+		mfCurrentVal = fNewValue;
+	}
 	return( fNewValue );
 }
 

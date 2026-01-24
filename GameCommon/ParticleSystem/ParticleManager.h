@@ -12,5 +12,6 @@ extern void		ParticleManagerShutdown( void );
 
 extern Particle*	ParticleManagerAddParticle( const char* szParticleTypeName, const VECT* pxPos, const VECT* pxVel, uint32 ulCol, float fLongevity, int nInitParam = 0, uint32 ulInitParamChannel = 0, void* pUserObject = NULL );
 
+extern int		ParticleManagerGetRenderedParticleCount();
 
 #endif

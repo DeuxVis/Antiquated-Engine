@@ -5,7 +5,7 @@
 
 int		mnOptionTextureFiltering = TRUE;
 int		mnOptionBackBuffer = TRUE;
-int		mnOptionVsync = TRUE;
+int		mnOptionVsync = FALSE;//TRUE;
 int		mnOptionOldStartup = TRUE;
 int		mnOptionMinimumSurfaceRes = TRUE;
 int		mnOptionFogMode = 0;

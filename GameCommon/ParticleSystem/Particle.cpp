@@ -23,14 +23,14 @@ Particle::~Particle()
 
 }
 
-void	Particle::SetGraphicHandle( TEXTURE_HANDLE hTex, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )
+void	Particle::SetGraphicHandle( TEXTURE_HANDLE hTex, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags, int layer )
 {
-	mnParticleGraphicsNum = ParticleGraphicsCreateHandle( hTex, fGridScale, bUseRotation, renderFlags );
+	mnParticleGraphicsNum = ParticleGraphicsCreateHandle( hTex, fGridScale, bUseRotation, renderFlags, layer );
 }
 
-void	Particle::SetGraphic( const char* szSpriteTextureName, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags )
+void	Particle::SetGraphic( const char* szSpriteTextureName, float fGridScale, BOOL bUseRotation, eSpriteGroupRenderFlags renderFlags, int layer )
 {
-	mnParticleGraphicsNum = ParticleGraphicsCreate( szSpriteTextureName, fGridScale, bUseRotation, renderFlags );
+	mnParticleGraphicsNum = ParticleGraphicsCreate( szSpriteTextureName, fGridScale, bUseRotation, renderFlags, layer );
 }
 	
 void	Particle::Init( int typeID, const VECT* pxPos, const VECT* pxVel, uint32 ulCol, float fLongevity, int nInitParam, uint32 ulInitParamChannel, void* pUserObject )

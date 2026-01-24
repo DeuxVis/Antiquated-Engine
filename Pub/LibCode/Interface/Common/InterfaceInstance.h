@@ -93,6 +93,7 @@ public:
 	FontSystem*				mpFontSystem;
 
 	void		DrawAllElements( void );
+	float		GetFPS() { return( mfInterfaceFPS ); }
 protected:
 	void		SetDevice( void* pDevice );		// oldschool
 
@@ -107,6 +108,7 @@ protected:
 	BOOL	mboTextureFilteringCurrentState = FALSE;
 	int		mnWindowWidth = 700;
 	int		mnWindowHeight = 600;
+	float	mfInterfaceFPS = 0.0f;
 
 };
 

@@ -39,7 +39,6 @@ u64		mullInterfaceLastPresentTick = 0;
 
 BOOL	mboCurrentlyFullscreen = FALSE;
 
-float	mfInterfaceFPS = 0.0f;
 
 //#ifndef STANDALONE
 static CD3DApplication		mcd3dUtilApp;
@@ -1067,7 +1066,7 @@ BOOL	boIsSmall = InterfaceIsSmall();
  ***************************************************************************/
 INTERFACE_API float	InterfaceGetFPS( void )
 {
-	return( mfInterfaceFPS );
+	return( InterfaceInstanceMain()->GetFPS() );
 }
 
 #define		NUM_FRAME_TIMES		16

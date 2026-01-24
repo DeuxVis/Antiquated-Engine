@@ -19,6 +19,7 @@
 #include "UIXCollapsableSection.h"
 #include "UIXScrollableSection.h"
 #include "UIXMenu.h"
+#include "UIXTabBar.h"
 #include "UIXModalPopup.h"
 
 uint32						UIX::msulNextObjectID = 2001;
@@ -380,6 +381,7 @@ void		UIX::Initialise( int mode )
 	UIRegisterButtonPressHandler( UIX_LISTBOX_SELECT, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_TEXTBOX, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_MENU_ITEM, ButtonPressHandler );
+	UIRegisterButtonPressHandler( UIX_TAB_SELECT, ButtonPressHandler );
 	
 		
 	UIRegisterHoldHandler( UIX_SLIDER_BAR, SliderHoldHandler );
@@ -597,7 +599,17 @@ UIXCustomRender*		pNewCustomRender = new UIXCustomRender( pxContainer, msulNextO
 	return( pNewCustomRender );
 }
 
-UIXMenu*			UIX::AddMenuBar( UIXObject* pxContainer, UIXRECT rect )
+UIXTabBar*		UIX::AddTabBar( UIXObject* pxContainer, UIXRECT rect )
+{
+UIXTabBar*		pNewTabBar = new UIXTabBar( pxContainer, msulNextObjectID++, rect );
+
+	pNewTabBar->Initialise(0);
+	pxContainer->mContainsList.push_back( pNewTabBar );
+	return( pNewTabBar );
+
+}
+
+UIXMenu*		UIX::AddMenuBar( UIXObject* pxContainer, UIXRECT rect )
 {
 UIXMenu*		pNewMenu = new UIXMenu( pxContainer, msulNextObjectID++, rect );
 

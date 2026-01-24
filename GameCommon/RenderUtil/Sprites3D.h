@@ -16,6 +16,9 @@ enum eSpriteGroupRenderFlags
 	kSpriteRender_ColourBlend = 0x10,
 	kSpriteRender_Orientation_YAxis = 0x20,
 	kSpriteRender_SoftEdges = 0x40,
+	kSpriteRender_Subtractive = 0x80,
+	kSpriteRender_SingleColTexAlpha = 0x100,
+	kSpriteRender_IncAlpha = 0x200,
 };
 
 typedef int		SPRITE_GROUP;
@@ -27,7 +30,7 @@ extern void Sprites3DInitialiseGraphicsDeviceResources( void );
 extern void Sprites3DReleaseGraphicsDeviceResources( void );
 
 
-extern SPRITE_GROUP	 Sprites3DGetGroup( int nTextureHandle, float fGridScale, eSpriteGroupRenderFlags nRenderFlags );
+extern SPRITE_GROUP	 Sprites3DGetGroup( int nTextureHandle, float fGridScale, eSpriteGroupRenderFlags nRenderFlags, int layer = 0 );
 
 extern void	Sprites3DAddSprite( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags );
 extern void	Sprites3DAddSpriteRot( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags, float fRotation );

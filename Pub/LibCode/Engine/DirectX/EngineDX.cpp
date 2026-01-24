@@ -1327,6 +1327,10 @@ void	EngineSetBlendMode( int nBlendMode )
 		mpEngineDevice->SetRenderState( D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 		mpEngineDevice->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 		break;
+	case BLEND_MODE_COLOUR_SUBTRACTIVE_ALPHA:
+		mpEngineDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		mpEngineDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
+		break;
 	case BLEND_MODE_COLOUR_SUBTRACTIVE:
 		mpEngineDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
 		mpEngineDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
@@ -1347,9 +1351,13 @@ void	EngineSetBlendMode( int nBlendMode )
 		mpEngineDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCCOLOR);
 		mpEngineDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 		break;
-	case BLEND_MODE_RAWCOLOUR_SUBTRACTIVE:
+	case BLEND_MODE_INVCOLOUR_SUBTRACTIVE:
 		mpEngineDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
 		mpEngineDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
+		break;
+	case BLEND_MODE_COLOUR_BOTHALPHA:
+		mpEngineDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_INVDESTCOLOR);
+		mpEngineDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_DESTCOLOR);
 		break;
 	}
 #endif

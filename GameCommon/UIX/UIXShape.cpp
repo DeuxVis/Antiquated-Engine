@@ -24,7 +24,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 	{
 	case 0:
 	default:
-		pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol1 );
+		pInterface->ShadedRect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol1, mulCol1, mulCol2, mulCol2 );
 
 		if ( mulButtonID != 0 )
 		{

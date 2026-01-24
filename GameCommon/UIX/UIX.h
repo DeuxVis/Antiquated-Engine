@@ -22,6 +22,7 @@ class UIXCustomRender;
 class UIXCheckbox;
 class UIXModalPopup;
 class UIXMenu;
+class UIXTabBar;
 
 #define		MAX_NUM_UIX_ICONS		32
 
@@ -41,6 +42,7 @@ enum
 	UIX_SCROLLBAR,
 	UIX_TEXTBOX,
 	UIX_MENU_ITEM,
+	UIX_TAB_SELECT,
 };
 
 enum eUIXBUTTON_MODE
@@ -224,6 +226,7 @@ public:
 	static UIXCheckbox*					AddCheckbox( UIXObject* pxContainer, UIXRECT rect, UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc, uint32 ulSelectParam = 0 );
 	static UIXModalPopup*				AddModalPopup( UIXObject* pxContainer, UIXRECT rect );
 	static UIXMenu*						AddMenuBar( UIXObject* pxContainer, UIXRECT rect );
+	static UIXTabBar*					AddTabBar( UIXObject* pxContainer, UIXRECT rect );
 
 	static void							DeleteObject( UIXObject* pObject );
 	static UIXObject*					FindUIXObjectByID( uint32 ulObjectID );

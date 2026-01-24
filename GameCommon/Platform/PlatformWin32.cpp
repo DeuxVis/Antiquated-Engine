@@ -817,7 +817,7 @@ BOOL		PlatformUpdateFrame( void )
 u64	ullCurrentTick = SysGetMicrosecondTick();
 float	fDelta = ( (float)(ullCurrentTick - mullPlatformLastTick ) ) * 0.000001f;
 
-	if ( fDelta > 0.001f )
+	if ( fDelta > 0.0025f )
 	{
 		if ( fDelta > 0.5f ) fDelta = 0.5f;
 		mullPlatformLastTick = ullCurrentTick;
