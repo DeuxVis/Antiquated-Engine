@@ -2,13 +2,16 @@
 #include <stdarg.h>
 #include "StandardDef.h"
 #include "Interface.h"
+#include "InterfaceEx.h"
 
+#include "../UIX/UIX.h"
 #include "../Platform/Platform.h"
 #include "Console.h"
 
 BOOL	mbConsoleAvailable = TRUE;
 BOOL	mbConsoleActive = FALSE;
 BOOL	mbConsoleLarge = FALSE;
+int		mnConsoleFont = 0;
 
 #define		MAX_LINES_IN_SUB_CONSOLE_BUFFER		96
 #define		NUM_CHARS_IN_CONSOLE_BUFFER_LINE	200
@@ -21,7 +24,7 @@ public:
 	CCommonSubConsole()	{ Init("", NULL, 0); } 
 	~CCommonSubConsole()	{ Destroy(); }
 
-	void	Display ( int nX, int nWidthOfBox, int nBottomOfBox, int nNumLines, int nDisplayEdit, float fAlpha );
+	void	Display ( InterfaceInstance* pInterface, int nX, int nWidthOfBox, int nBottomOfBox, int nNumLines, int nDisplayEdit, float fAlpha );
 	void	Print	( const char* szString, int );
 
 	void	Destroy	( void );
@@ -91,7 +94,7 @@ int		nActualLineNum;
 }
 
 
-void	CCommonSubConsole::Display ( int nX, int nWidthOfBox, int nBottomOfBox, int nNumLines, int nDisplayEditMode, float fAlpha )
+void	CCommonSubConsole::Display ( InterfaceInstance* pInterface, int nX, int nWidthOfBox, int nBottomOfBox, int nNumLines, int nDisplayEditMode, float fAlpha )
 {
 int		nCurrentY;
 int		nLoop;
@@ -126,21 +129,21 @@ uint32	ulCol;
 		pcNextConsoleLine = m_aConsoleBuffer[ nLineNum ].acText;
 		if ( *(pcNextConsoleLine) != 0 )
 		{
-			nWidth = GetStringWidth(pcNextConsoleLine, 0 );
+			nWidth = pInterface->GetStringWidth(pcNextConsoleLine, mnConsoleFont );
 			ulCol = GetColWithModifiedAlpha( m_aConsoleBuffer[ nLineNum ].uCol, fAlpha );
 			if ( nWidth > nWidthOfBox )
 			{
 			const char*	pcEndOfFirstLine;
 				nCurrentY -= 12;
-				pcEndOfFirstLine = InterfaceTextLimitWidth( 1, nX, nCurrentY, pcNextConsoleLine, ulCol, 0, nWidthOfBox );
+				pcEndOfFirstLine = pInterface->TextLimitWidth( 1, nX, nCurrentY, nWidthOfBox, ulCol, mnConsoleFont, pcNextConsoleLine );
 				nCurrentY += 12;
-				pcEndOfFirstLine = InterfaceTextLimitWidth( 1, nX, nCurrentY, pcEndOfFirstLine, ulCol, 0, nWidthOfBox );
+				pcEndOfFirstLine = pInterface->TextLimitWidth( 1, nX, nCurrentY, nWidthOfBox, ulCol, mnConsoleFont, pcEndOfFirstLine );
 				nCurrentY -= 24;
 				nNumLinesToDisplay--;
 			}
 			else
 			{
-				InterfaceText( 1, nX, nCurrentY, pcNextConsoleLine, ulCol, 0 );
+				pInterface->Text( 1, nX, nCurrentY, ulCol, mnConsoleFont, pcNextConsoleLine );
 				nCurrentY -= 12;
 			}
 		}
@@ -150,13 +153,13 @@ uint32	ulCol;
 	{
 	char	acBuff[512];	
 		sprintf( acBuff, "> %s", pcEditString );
-		InterfaceText( 2, nX, nBottomOfBox + 2, acBuff, COL_SYS_SPECIAL, 0 );
+		pInterface->Text( 2, nX, nBottomOfBox + 2, COL_SYS_SPECIAL, mnConsoleFont, acBuff );
 	}
 	else if ( ( nDisplayEditMode == 1 ) &&
 			  ( *pcEditString != 0 ) ) 
 	{
 		// Add the edit string 
-		InterfaceText( 2, nX, nBottomOfBox + 2, pcEditString, COL_SYS_SPECIAL, 0 );
+		pInterface->Text( 2, nX, nBottomOfBox + 2, COL_SYS_SPECIAL, mnConsoleFont, pcEditString );
 	}
 }
 
@@ -309,10 +312,21 @@ void		ConsoleUpdate( float fDelta )
 
 char	mszTempConsolePrint[256] = "";
 
+void		ConsoleRenderEx( InterfaceInstance* pInterface, int x, int y, int w, int h, int nFont, int nLineHeight )
+{
+int			nNumLines = (h - 5) / 16;
+	
+	mnConsoleFont = nFont;
+	m_sMainConsole.Display( pInterface, x, w, y + h - 20, nNumLines, 0, 1.0f );
+
+}
+ 
+
 void		ConsoleRender( void )
 {
 	if ( mbConsoleActive )
 	{
+	InterfaceInstance*		pInterface = InterfaceInstanceMain();
 	int			nX, nY, nW, nH;
 	const char*		pcInputString;
 	int			nNumLines;
@@ -332,7 +346,7 @@ void		ConsoleRender( void )
 
 		InterfaceRect( 0, nX, nY, nW, nH, 0xa0000000 );
 
-		m_sMainConsole.Display( nX + 5, nW - 10, nY + nH - 40, nNumLines, 0, 1.0f );
+		m_sMainConsole.Display( pInterface, nX + 5, nW - 10, nY + nH - 40, nNumLines, 0, 1.0f );
 
 		InterfaceText( 1, nX + 5, nY + nH - 20, "> ", 0xD0f0e080, 0 );
 		pcInputString = PlatformKeyboardGetInputString( TRUE );

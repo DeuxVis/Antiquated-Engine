@@ -85,7 +85,7 @@ void		EnsureFilenameHasExtension(char* acFilename, const char* acExtension)
 {
 	// Check if the filename already has the extension
 	int nExtLen = strlen(acExtension);
-	if (strlen(acFilename) >= nExtLen)
+	if ((int)strlen(acFilename) >= nExtLen)
 	{
 		if (stricmp(acExtension, &acFilename[strlen(acFilename) - nExtLen]) == 0)
 		{

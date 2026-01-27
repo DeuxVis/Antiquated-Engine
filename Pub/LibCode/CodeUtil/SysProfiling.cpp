@@ -378,7 +378,7 @@ void	SysProfileNextEvent( u64* pullEventIDInOut, const char* szEventName )		// C
 //
 BOOL		SysProfileGetStat( int nStatNum, SYS_PROFILE_STAT* pStatOut )
 {
-	if ( nStatNum < mLastFrameEventsList.size() )
+	if ( nStatNum < (int)mLastFrameEventsList.size() )
 	{
 		mLastFrameEventsList[nStatNum]->GetStats( pStatOut );
 		return( TRUE );

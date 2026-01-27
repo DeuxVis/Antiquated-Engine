@@ -39,6 +39,7 @@ public:
 	void	SetCol( uint32 ulCol ) { mulCol = ulCol; }
 
 	void	SetSpriteScale( float fScale ) { mfSpriteScale = fScale; }
+	void	SetSpriteAspect( float fAspectRatio ) { mfSpriteAspect = fAspectRatio; }
 	void	SetSpriteFrameNum( int nFrameNum ) { mnSpriteFrameNum = nFrameNum; }
 	void	SetParamChannel( uint32 nChannel ) { mulParamChannel = nChannel; }
 
@@ -50,6 +51,7 @@ public:
 	float	GetLongevity( void ) const { return( mfLongevity ); }
 	float	GetTimeAlive( void ) const { return( mfTimeAlive ); }
 	float	GetSpriteScale( void ) const { return( mfSpriteScale ); }
+	float	GetSpriteAspect( void ) const { return( mfSpriteAspect ); }
 	uint32	GetCol( void ) const { return( mulCol ); }
 	uint32	GetParamChannel( void ) const { return( mulParamChannel ); }
 
@@ -67,6 +69,7 @@ private:
 	float		mfLongevity;
 	float		mfTimeAlive;
 	float		mfSpriteScale;
+	float		mfSpriteAspect = 1.0f;
 	float		mfRot = 0.0f;
 	float		mfRotSpeed = 0.0f;
 	int			mnSpriteFrameNum;

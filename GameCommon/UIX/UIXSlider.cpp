@@ -209,7 +209,7 @@ uint32		ulCol = 0xf0505070;
 			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, nBarMaxW, mRenderRect.h, 0xf0080808 );
 			// INDICATOR (MIN)
 			ulCol = 0xf0505070;
-			if ( UIHoverItem( mRenderRect.x + nMinBarPos - 6, mRenderRect.y, 6, mRenderRect.h ) == TRUE )
+			if ( UIHoverItem( mRenderRect.x + nMinBarPos - 7, mRenderRect.y, 8, mRenderRect.h ) == TRUE )
 			{
 				UIHoverIDSet( UIX_SLIDER_BAR_MINRANGE, 0, GetID() );
 				ulCol = 0xf0a08050;
@@ -218,7 +218,7 @@ uint32		ulCol = 0xf0505070;
 			pInterface->Rect( 0, mRenderRect.x + nMinBarPos - 6, mRenderRect.y + 6, 6, mRenderRect.h - 6, ulCol );
 			// INDICATOR (MAX)
 			ulCol = 0xf0505070;
-			if ( UIHoverItem( mRenderRect.x + nMaxBarPos, mRenderRect.y, 6, mRenderRect.h ) == TRUE )
+			if ( UIHoverItem( mRenderRect.x + nMaxBarPos - 1, mRenderRect.y, 8, mRenderRect.h ) == TRUE )
 			{
 				UIHoverIDSet( UIX_SLIDER_BAR_MAXRANGE, 0, GetID() );
 				ulCol = 0xf0a08050;

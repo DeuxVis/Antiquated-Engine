@@ -249,8 +249,8 @@ void		RemoveExtensionFromEndOfFileName(const char* szFilenameIn, const char* szE
 		*pcOutRunner = *pcFilenameRunner;
 		pcFilenameRunner++;
 		pcOutRunner++;
-
 	}
+	*pcOutRunner = 0;
 }
 
 

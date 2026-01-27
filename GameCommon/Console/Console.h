@@ -14,6 +14,7 @@ extern BOOL		ConsoleIsActive( void );
 extern void		ConsoleUpdate( float fDelta );
 
 extern void		ConsoleRender( void );
+extern void		ConsoleRenderEx( InterfaceInstance* pInterface, int x, int y, int w, int h, int font, int lineHeight );
 
 extern void		ConsoleOnPressEnter( char* szKeyboardInputString );
 

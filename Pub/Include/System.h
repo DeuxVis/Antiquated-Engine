@@ -147,6 +147,7 @@ extern void		SysCopyFolderContents( const char* szSrcFolder, const char* szDestF
 extern void		SysGetAllFilesInFolder( const char* szSrcFolder, fnDirListingCallback callback );
 
 extern int		SysGetFileSize( FILE* );
+extern BYTE*	SysFileAllocateAndLoad( const char* szFilename, int* pnMemSizeOut );
 extern FILE*	SysFileOpen( const char* szFilename, const char* szOpenMode );
 extern int		SysFileRead( unsigned char*, int, int, FILE* );
 extern int		SysFileWrite( unsigned char*, int, int, FILE* );

@@ -453,6 +453,33 @@ int		SysFileGetNumOpenHandles( void )
 	return( mnSystemNumFilesOpen );
 }
 
+
+BYTE*	SysFileAllocateAndLoad( const char* szFilename, int* pnMemSize )
+{
+FILE*		pFile;
+BYTE*	pcMem = NULL;
+
+	*pnMemSize = 0;
+	// TODO - Change this to AsyncFile
+	pFile = SysFileOpen( szFilename, "rb");
+	if ( pFile )
+	{
+	int		nFileSize;
+
+		nFileSize = SysGetFileSize( pFile );
+		pcMem = (BYTE*)( malloc( nFileSize + 1 ) );
+		if ( pcMem )
+		{
+			pcMem[nFileSize] = 0;
+			fread( pcMem, nFileSize, 1, pFile );
+			*pnMemSize = nFileSize;
+		}
+		fclose( pFile );
+	}
+	return( pcMem );
+}
+
+
 FILE*	SysFileOpen( const char* szFilename, const char* szOpenMode )
 {
 FILE* pFile = fopen( szFilename, szOpenMode );

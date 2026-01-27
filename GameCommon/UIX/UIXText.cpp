@@ -20,6 +20,12 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 		// Centre align vertically (should be an option)
 int			drawY = drawRect.y + (((drawRect.h - pInterface->GetStringHeight(mText.c_str(), mFont))-1)/2);
 
+	if ( mDynamicTextFunc )
+	{
+	char	acBuff[512];
+		mDynamicTextFunc( this, 0, acBuff );
+		mText = acBuff;
+	}
 	// TODO - Use mFontFlags if set
 // TODO - These are bitflags and some should be combinable
 	switch( mFontFlags )
@@ -36,7 +42,7 @@ int			drawY = drawRect.y + (((drawRect.h - pInterface->GetStringHeight(mText.c_s
 	}
 
 	displayRect.h = 0;//
-	displayRect.y = GetDisplayRect().y + pInterface->GetStringHeight( mText.c_str(), mFont );		// displayRect.y returns the lowest point we drew to
+	displayRect.y = GetDisplayRect().y + drawRect.h + 1;		// displayRect.y returns the lowest point we drew to
 	return displayRect;
 }
 

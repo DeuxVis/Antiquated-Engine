@@ -716,6 +716,25 @@ SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
 	}
 }
 
+void	Sprites3DAddSpriteRotScaleXY( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags, float fRotation, float fXYScaleFactor )
+{
+SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
+
+	if ( pSpriteGroup )
+	{
+	Sprite*		pSprite = new Sprite;
+
+		pSprite->mpNext = pSpriteGroup->mpSpriteList;
+		pSpriteGroup->mpSpriteList = pSprite;
+
+		pSprite->mxPos = *pxPos;
+		pSprite->mfScale = fScale * fXYScaleFactor;
+		pSprite->mfScaleZ = fScale;
+		pSprite->mulCol = ulCol;
+		pSprite->mnFrameNum = nFrameNum;
+		pSprite->mfRot = fRotation;
+	}
+}
 
 void	Sprites3DAddSpriteRot( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags, float fRotation )
 {
@@ -794,7 +813,7 @@ VECT	xCamDir;
 
 	xCamDown.x = 0.0f;
 	xCamDown.y = 0.0f;
-	xCamDown.z = 1.0f;
+	xCamDown.z = -1.0f;
 	xCamRight.x = 1.0f;
 	xCamRight.y = 0.0f;
 	xCamRight.z = 0.0f;

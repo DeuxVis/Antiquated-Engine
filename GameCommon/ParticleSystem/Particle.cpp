@@ -89,32 +89,46 @@ void	Particle::DefaultRender( void )
 
 		if ( fAlpha < 0.0f )
 		{
-		float	fHalfLife = mfLongevity * 0.5f;
-			
-			if ( fHalfLife < 0.1f )
+			// Very shortlived particles just have alpha 1.0f
+			if ( mfLongevity <= 0.1f )
 			{
-				fHalfLife = 0.1f;
+				fAlpha = 1.0f;
 			}
+			else  			// Everything else fades out after half-life by default
+			{
+			float	fHalfLife = mfLongevity * 0.5f;
+			
+				if ( fHalfLife < 0.1f )
+				{
+					fHalfLife = 0.1f;
+				}
 
-			fAlpha = 1.0f;
+				fAlpha = 1.0f;
 		
-			if ( mfTimeAlive > fHalfLife  )
-			{	
-				fAlpha = 1.0f - ( ( mfTimeAlive - fHalfLife) / fHalfLife );
+				if ( mfTimeAlive > fHalfLife  )
+				{	
+					fAlpha = 1.0f - ( ( mfTimeAlive - fHalfLife) / fHalfLife );
+				}
 			}
 		}
 
-		if ( fAlpha < 1.0f )
+		if ( fAlpha > 0.0f )
 		{
-			if ( fAlpha > 0.0f )
+			ulCol = mulCol;
+
+			if ( fAlpha < 1.0f )	// TODO != ?????
 			{
 				ulCol = GetColWithModifiedAlpha( mulCol, fAlpha );
+			}
+
+			if (mfSpriteAspect != 1.0f )
+			{
+				Sprites3DAddSpriteRotScaleXY( hSpriteGroup, GetPos(), mfSpriteScale, ulCol, mnSpriteFrameNum, 0, GetRot(), mfSpriteAspect );			
+			}
+			else
+			{
 				Sprites3DAddSpriteRot( hSpriteGroup, GetPos(), mfSpriteScale, ulCol, mnSpriteFrameNum, 0, GetRot() );
 			}
-		}
-		else
-		{
-			Sprites3DAddSpriteRot( hSpriteGroup, GetPos(), mfSpriteScale, mulCol, mnSpriteFrameNum, 0, GetRot() );
 		}
 	}
 }

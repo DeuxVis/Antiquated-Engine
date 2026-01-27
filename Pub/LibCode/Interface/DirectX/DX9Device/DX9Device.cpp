@@ -34,6 +34,7 @@ LPGRAPHICS        mpD3D       = NULL; // Used to create the D3DDevice
 BOOL	mboMinPageSize = TRUE;
 BOOL	msbInterfaceGlobalTextureFilteringEnable = TRUE;
 
+D3DPRESENT_PARAMETERS	mLastUsedD3dpp;
 
 u64		mullInterfaceLastPresentTick = 0;
 
@@ -45,6 +46,10 @@ static CD3DApplication		mcd3dUtilApp;
 //#endif
 ENGINEMATERIAL mxStandardMat;
 
+void	InterfaceGetLastUsedD3DPP( D3DPRESENT_PARAMETERS* pPP )
+{
+	*pPP = mLastUsedD3dpp;
+}
 
 
 INTERFACE_API LPGRAPHICS	InterfaceGetD3D( void )
@@ -681,6 +686,8 @@ LPGRAPHICSDEVICE	pNewGraphicsDevice;
 		ZeroMemory( &d3dpp, sizeof(d3dpp) );
 
 		mpInterfaceInternals->GetDXDeviceCreateParams( hWindow, boMinPageSize, &d3dpp, nBackBufferMinW, nBackBufferMinH );
+
+		mLastUsedD3dpp = d3dpp;
 
 		pNewGraphicsDevice = mpInterfaceInternals->mpInterfaceD3DDevice;
 		if ( pNewGraphicsDevice == NULL )

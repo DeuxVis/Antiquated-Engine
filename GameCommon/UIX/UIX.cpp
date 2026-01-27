@@ -178,16 +178,19 @@ UIXRECT		xMaxRect;
 
 		for ( UIXObject* pContainedObject : mContainsList )
 		{
-			xRect = pContainedObject->Render( pInterface, xChildDisplayRect );
-
-			if ( xRect.y + nCursRelY > xMaxRect.y )
+			if ( xChildDisplayRect.h > 0 )
 			{
-				xMaxRect.y = xRect.y + nCursRelY;		
+				xRect = pContainedObject->Render( pInterface, xChildDisplayRect );
+
+				if ( xRect.y + nCursRelY > xMaxRect.y )
+				{
+					xMaxRect.y = xRect.y + nCursRelY;		
+				}
+				xUsedRect.h += xRect.h;
+				nCursRelY += xRect.h;
+				xChildDisplayRect.y += xRect.h;
+				xChildDisplayRect.h -= xRect.h;
 			}
-			xUsedRect.h += xRect.h;
-			nCursRelY += xRect.h;
-			xChildDisplayRect.y += xRect.h;
-			xChildDisplayRect.h -= xRect.h;
 		}
 
 		OnPostChildrenRender( pInterface );

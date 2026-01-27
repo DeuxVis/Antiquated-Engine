@@ -23,6 +23,7 @@
 // TODO - Have these passed in on init rather than assumed like this..
 extern void		MainInitialise( void );
 extern void		MainUpdate( void );
+extern void 	MainHighFreqUpdate();
 extern void		MainShutdown( void );
 
 extern void		MainOnPress( int X, int Y );
@@ -954,6 +955,7 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR lpCmdLine, INT )
 		}
 		else
 		{	
+			MainHighFreqUpdate();
 			if ( PlatformUpdateFrame() == TRUE )
 			{
 				MainUpdate();

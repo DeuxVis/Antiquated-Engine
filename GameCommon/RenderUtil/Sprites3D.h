@@ -19,6 +19,7 @@ enum eSpriteGroupRenderFlags
 	kSpriteRender_Subtractive = 0x80,
 	kSpriteRender_SingleColTexAlpha = 0x100,
 	kSpriteRender_IncAlpha = 0x200,
+	kSpriteRender_1920x1080Aspect = 0x400,
 };
 
 typedef int		SPRITE_GROUP;
@@ -35,6 +36,8 @@ extern SPRITE_GROUP	 Sprites3DGetGroup( int nTextureHandle, float fGridScale, eS
 extern void	Sprites3DAddSprite( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags );
 extern void	Sprites3DAddSpriteRot( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags, float fRotation );
 extern void	Sprites3DAddSpriteScaleZ( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags, float fScaleZ );
+extern void	Sprites3DAddSpriteRotScaleXY( SPRITE_GROUP hGroup, const VECT* pxPos, float fScale, uint32 ulCol, int nFrameNum, uint32 nFlags, float fRotation, float fXYScaleFactor );
+
 
 extern void	Sprites3DFreeGroup( SPRITE_GROUP hGroup );
 
