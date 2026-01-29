@@ -250,6 +250,7 @@ AsyncFileSelector::~AsyncFileSelector()
 {
 	Shutdown();
 }
+
 void	AsyncFileSelector::ThreadFunc()
 {
 	while( !msboAsyncFileSelectorKillThread )
@@ -261,24 +262,35 @@ void	AsyncFileSelector::ThreadFunc()
 		char	szFileFilter[1024];
 		char*	pcRunner = szFileFilter;
 
-			strcpy( szFileFilter, mFileFilter.c_str() );
-			while( *pcRunner != 0 )
+			if ( mMode != 2 )
 			{
-				if ( *pcRunner == '\n')
+				strcpy( szFileFilter, mFileFilter.c_str() );
+				while( *pcRunner != 0 )
 				{
-					*pcRunner = 0;
+					if ( *pcRunner == '\n')
+					{
+						*pcRunner = 0;
+					}
+					pcRunner++;
 				}
-				pcRunner++;
 			}
 			acSelectedFile[0] = 0;
 
-			if ( mMode == 0 )
+			switch( mMode )
 			{
+			case 0:
 				bRet = SysGetOpenFilenameDialog( szFileFilter, mDialogTitle.c_str(), mDefaultFolder.c_str(), mFlags, acSelectedFile );
-			}
-			else
-			{
+				break;
+			case 1:
 				bRet = SysGetSaveFilenameDialog( szFileFilter, mDialogTitle.c_str(), mDefaultFolder.c_str(), mFlags, acSelectedFile );
+				break;
+			case 2:
+				{
+				char		acCurrentDir[MAX_PATH];	
+					SysGetCurrentDir( MAX_PATH, acCurrentDir );
+					bRet = SysBrowseForFolderDialog( mDialogTitle.c_str(), acCurrentDir, acSelectedFile, mDefaultFolder.c_str() );
+				}
+				break;
 			}
 
 			mPendingResultFilename = acSelectedFile;
@@ -317,12 +329,20 @@ long WINAPI AsyncFileSelectorThread(long lParam)
 	AsyncFileSelector::Get().ThreadFunc();
 	return( 0 );
 }
+
 BOOL	AsyncFileSelector::Add( int mode, const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback )
 {
 	// Only allow 1 file dialog open at a time
 	if ( !mfnCallback )
 	{
-		mFileFilter = szFileFilter;
+		if ( szFileFilter )
+		{
+			mFileFilter = szFileFilter;
+		}
+		else
+		{
+			mFileFilter = "";
+		}
 		mDialogTitle = szTitle;
 		mDefaultFolder = szDefaultFolder;
 		mFlags = nFlags;
@@ -338,6 +358,17 @@ BOOL	AsyncFileSelector::Add( int mode, const char* szFileFilter, const char* szT
 	return( FALSE );
 }
 
+BOOL	SysSelectFolderDialogAsync( const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback )
+{
+char		acFullPathToDefaultFolder[512];
+
+	SysGetCurrentDir( 256, acFullPathToDefaultFolder );
+	strcat( acFullPathToDefaultFolder, "\\");
+	strcat( acFullPathToDefaultFolder, szDefaultFolder );
+
+	return( AsyncFileSelector::Get().Add( 2, NULL, szTitle, acFullPathToDefaultFolder, nFlags, fnCallback ) );
+
+}
 
 BOOL	SysGetOpenFilenameDialogAsync( const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback )
 {

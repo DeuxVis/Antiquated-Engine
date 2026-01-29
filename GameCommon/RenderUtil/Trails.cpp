@@ -303,6 +303,7 @@ VECT	axLastRight[4];
 float	fScale = mfScale;
 uint32	ulLastCol;
 BOOL	bStillAlive = FALSE;
+BOOL	bDebugColFlag = FALSE;
 float	fDot;
 int		blendCycle = 0;
 
@@ -325,6 +326,8 @@ int		blendCycle = 0;
 				{ 
 					if ( GetPos( nLoop+1, &xNextPos ) == TRUE )
 					{
+						bDebugColFlag = FALSE;
+
 						xTangent.x = xNextPos.x - xPos.x;
 						xTangent.y = xNextPos.y - xPos.y;
 						xTangent.z = xNextPos.z - xPos.z;
@@ -340,6 +343,11 @@ int		blendCycle = 0;
 						fDot = VectDot( &xTangent, &xCamDir );
 						VectCross( &xRight, &xTangent, &xCamDir );
 						VectNormalize( &xRight );	
+						if ( xRight.z < 0.0f )
+						{
+							VectScale(&xRight, &xRight, -1.0f );
+//							bDebugColFlag = TRUE;
+						}
 					}
 					ulLastCol= GetColour( nLoop );
 					if ( ulLastCol != 0 )
@@ -347,6 +355,11 @@ int		blendCycle = 0;
 						bStillAlive = TRUE;
 					}
 
+					if ( bDebugColFlag )
+					{
+						ulLastCol &= 0xFF000000;
+						ulLastCol |= 0x0000f0;
+					}
 					xBlendRight = xRight;
 					for( int blendLoop = 0; blendLoop < nBlendHistoryCount; blendLoop++ )
 					{

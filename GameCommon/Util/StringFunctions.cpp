@@ -285,6 +285,11 @@ const char*		pcFilenameRunner = szFilenameIn;
 		pcFilenameRunner++;
 	}
 
+	if ( *pcFilenameRunner == '\\')
+	{
+		pcFilenameRunner++;
+	}
+
 	strcpy( pcOut, pcFilenameRunner );
 }
 

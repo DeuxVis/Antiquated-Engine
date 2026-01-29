@@ -27,6 +27,7 @@ typedef	void(*fnAsyncFileSelectorCallback)( int error, const char* szFilename );
 
 extern BOOL	SysGetOpenFilenameDialogAsync( const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback );
 extern BOOL	SysGetSaveFilenameDialogAsync( const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback );
+extern BOOL	SysSelectFolderDialogAsync( const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback );
 
 
 extern void	AsyncCallbacksUpdate();
