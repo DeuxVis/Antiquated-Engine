@@ -26,33 +26,37 @@ private:
 	volatile BOOL	mboMutex = FALSE;
 };
 
+class AsyncFileQueueInstance
+{
+public:
+	AsyncFileQueueInstance() {}
+
+	AsyncFileQueueInstance( const char* szFilename, fnAsyncFileLoadCallback loadCallback, void* pUserParam )
+	{
+		mFileName = szFilename;
+		mLoadCallback = loadCallback;
+		mpUserParam = pUserParam;
+	}
+	std::string					mFileName;
+	void*						mpUserParam;
+	fnAsyncFileLoadCallback		mLoadCallback;
+};
+
+
 struct AsyncFilePendingCallbackResponse
 {
-	AsyncFilePendingCallbackResponse( fnAsyncFileLoadCallback callback, const char* szFileName, BYTE* pbMem, int nMemSize )
+	AsyncFilePendingCallbackResponse( AsyncFileQueueInstance queueInstance, BYTE* pbMem, int nMemSize )
 	{
-		mLoadCallback = callback;
-		mFilename = szFileName;
+		mQueueInstance = queueInstance;
 		mpbMem = pbMem;
 		mnMemSize = nMemSize;
 	}
 
-	fnAsyncFileLoadCallback		mLoadCallback;
-	std::string		mFilename;
+	AsyncFileQueueInstance		mQueueInstance;
 	BYTE*			mpbMem;
 	int				mnMemSize;
 };
 
-class AsyncFileQueueInstance
-{
-public:
-	AsyncFileQueueInstance( const char* szFilename, fnAsyncFileLoadCallback loadCallback )
-	{
-		mFileName = szFilename;
-		mLoadCallback = loadCallback;
-	}
-	std::string					mFileName;
-	fnAsyncFileLoadCallback		mLoadCallback;
-};
 
 
 class AsyncFileManager
@@ -61,7 +65,7 @@ public:
 	static	AsyncFileManager&		Get();
 	~AsyncFileManager();
 
-	void	Add( const char* szFilename, fnAsyncFileLoadCallback loadCallback );
+	void	Add( const char* szFilename, fnAsyncFileLoadCallback loadCallback, void* pUserParam );
 
 	void	LoadNext();
 	void	Shutdown();
@@ -123,14 +127,14 @@ void	AsyncFileManager::LoadNext()
 				SysFileRead( pbMem, nMemSize, 1, pFile );
 				SysFileClose( pFile );
 
-				AsyncFilePendingCallbackResponse	response( instance.mLoadCallback, instance.mFileName.c_str(), pbMem, nMemSize);
+				AsyncFilePendingCallbackResponse	response( instance, pbMem, nMemSize);
 				mCallbackQueueMutex.LockMutex();
 				mPendingLoadCallbacks.push_back( response );
 				mCallbackQueueMutex.UnlockMutex();
 			}
 			else
 			{
-				AsyncFilePendingCallbackResponse	response( instance.mLoadCallback, instance.mFileName.c_str(), NULL, -2 );
+				AsyncFilePendingCallbackResponse	response( instance, NULL, -2 );
 				mCallbackQueueMutex.LockMutex();
 				mPendingLoadCallbacks.push_back( response );
 				mCallbackQueueMutex.UnlockMutex();
@@ -138,7 +142,7 @@ void	AsyncFileManager::LoadNext()
 		}
 		else
 		{
-			AsyncFilePendingCallbackResponse	response( instance.mLoadCallback, instance.mFileName.c_str(), NULL, -1 );
+			AsyncFilePendingCallbackResponse	response( instance, NULL, -1 );
 			mCallbackQueueMutex.LockMutex();
 			mPendingLoadCallbacks.push_back( response );
 			mCallbackQueueMutex.UnlockMutex();
@@ -157,10 +161,10 @@ long WINAPI AsyncFileLoadThread(long lParam)
 	return( 0 );
 }
 
-void		AsyncFileManager::Add( const char* szFilename, fnAsyncFileLoadCallback loadCallback )
+void		AsyncFileManager::Add( const char* szFilename, fnAsyncFileLoadCallback loadCallback, void* pUserParam )
 {
 	mLoadQueueMutex.LockMutex();
-	AsyncFileQueueInstance		instance( szFilename, loadCallback );
+	AsyncFileQueueInstance		instance( szFilename, loadCallback, pUserParam );
 	mFileLoadQueue.push_back( instance );
 	mLoadQueueMutex.UnlockMutex();
 
@@ -180,7 +184,7 @@ void	AsyncFileManager::UpdatePendingCallbacks()
 		mCallbackQueueMutex.LockMutex();
 		for( AsyncFilePendingCallbackResponse callback : mPendingLoadCallbacks )
 		{
-			callback.mLoadCallback( callback.mFilename.c_str(), callback.mpbMem, callback.mnMemSize );				
+			callback.mQueueInstance.mLoadCallback( callback.mQueueInstance.mFileName.c_str(), callback.mpbMem, callback.mnMemSize, callback.mQueueInstance.mpUserParam );				
 			if ( callback.mpbMem )
 			{
 				SystemFree( callback.mpbMem );
@@ -193,9 +197,9 @@ void	AsyncFileManager::UpdatePendingCallbacks()
 
 //--------------------------------
 
-AsyncFile::AsyncFile( const char* szFilename, fnAsyncFileLoadCallback loadCallback )
+AsyncFile::AsyncFile( const char* szFilename, fnAsyncFileLoadCallback loadCallback, void* pUserObj )
 {
-	AsyncFileManager::Get().Add( szFilename, loadCallback );
+	AsyncFileManager::Get().Add( szFilename, loadCallback, pUserObj );
 }
 
 

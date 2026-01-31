@@ -6,14 +6,29 @@
 #include "UIXTextBox.h"
 #include "UIXSlider.h"
 
-float	UIXSlider::OnValueChange( UIXObject* pxSourceObj, float fNewValue )		// Triggered by (e.g) child text boxes when a new value is entered there directly
+float	UIXSlider::OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bFromTextBoxEntry )		// Triggered by (e.g) child text boxes when a new value is entered there directly
 {
 	if ( pxSourceObj == mpRangeMinTextBox)
 	{
 		mfMinVal = fNewValue;
+
 		if (mfMinVal > mfMaxVal)
 		{
-			mfMinVal = mfMaxVal;
+			// When the user has entered a new min value in a text box, we update the max value to fit it
+			// if the new min is higher than the max
+			if ( bFromTextBoxEntry )
+			{
+				mfMaxVal = mfMinVal;
+				// Expand the handled range if our new value is higher
+				if ( mfMaxVal > mfInitialMaxVal )
+				{
+					mfInitialMaxVal = mfMaxVal;
+				}
+			}
+			else 
+			{
+				mfMinVal = mfMaxVal;
+			}
 		}
 		// Expand the handled range if our new value is higher
 		if ( mfMinVal < mfInitialMinVal )
@@ -27,7 +42,21 @@ float	UIXSlider::OnValueChange( UIXObject* pxSourceObj, float fNewValue )		// Tr
 		mfMaxVal = fNewValue;
 		if (mfMaxVal < mfMinVal)
 		{
-			mfMaxVal = mfMinVal;
+			// When the user has entered a new max value in a text box, we update the min value to fit it
+			// if the new max is lower than the min
+			if ( bFromTextBoxEntry )
+			{
+				mfMinVal = mfMaxVal;
+				// Expand the handled range if our new value is higher
+				if ( mfMinVal < mfInitialMinVal )
+				{
+					mfInitialMinVal = mfMinVal;
+				}
+			}
+			else
+			{
+				mfMaxVal = mfMinVal;
+			}
 		}
 		// Expand the handled range if our new value is higher
 		if ( mfMaxVal > mfInitialMaxVal )
@@ -67,7 +96,7 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 		{
 		int		nTextSectionW = 120;
 		int		nTextBoxW = (nTextSectionW / 2) - 8;
-		UIXRECT		textboxRect = UIXRECT(0, 0, nTextBoxW, GetDisplayRect().h - 2);
+		UIXRECT		textboxRect = UIXRECT(0, 0, nTextBoxW, GetLocalPositionRect().h - 2);
 			
 			sprintf( acVal, "%.3f", mfMinVal );
 			mpRangeMinTextBox = UIX::AddTextBox( this, textboxRect, 0, acVal );
@@ -79,7 +108,7 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 		break;
 	case SLIDER_PLUSMINUS_VALUE:
 		{
-			UIXRECT		textboxRect = UIXRECT(0, 0, 60, GetDisplayRect().h - 2);
+			UIXRECT		textboxRect = UIXRECT(0, 0, 60, GetLocalPositionRect().h - 2);
 
 			sprintf(acVal, "%.2f", mfCurrentVal);
 			mpValueTextBox = UIX::AddTextBox(this, textboxRect, 0, acVal);
@@ -378,7 +407,7 @@ uint32		ulCol = 0xf0505070;
 	}
 	
 	displayRect.h = 0;
-	displayRect.y = GetDisplayRect().y + GetDisplayRect().h + 1;		// displayRect.y returns the lowest point we drew to
+	displayRect.y = GetLocalPositionRect().y + GetLocalPositionRect().h + 1;		// displayRect.y returns the lowest point we drew to
 
 	return( displayRect );
 }

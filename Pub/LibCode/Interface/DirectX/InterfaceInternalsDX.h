@@ -71,6 +71,7 @@ public:
 
 	LPGRAPHICSTEXTURE	LoadTextureDX( const char* szFilename, int boReduceFilter, int boMipFilter, BOOL bReadable );
 	LPGRAPHICSTEXTURE	LoadTextureFromArchive( const char* szFilename, int boReduceFilter, int boMipFilter, int nArchiveHandle );
+	LPGRAPHICSTEXTURE	LoadTextureFromFileInMemDX( const char* szFilename, BYTE* pbMem, int nMemSize, int boReduceFilter, int boMipFilter, BOOL bReadable );
 
 	BOOL				GetDXDeviceCreateParams( HWND hWindow, BOOL boMinPageSize, D3DPRESENT_PARAMETERS* pD3Dpp, int nBackBufferMinW = 0, int nBackBufferMinH = 0 );
 

@@ -13,12 +13,12 @@
 //  If the memory could not be allocated, the callback is triggered with NULL for the pbMem pointer and nMemSize = -2
 //  Simples
 //----------------------------------------------------
-typedef	void(*fnAsyncFileLoadCallback)( const char* szFilename, BYTE* pbMem, int nMemSize );
+typedef	void(*fnAsyncFileLoadCallback)( const char* szFilename, BYTE* pbMem, int nMemSize, void* pUserObj );
 
 class AsyncFile
 {
 public:
-	AsyncFile( const char* szFilename, fnAsyncFileLoadCallback loadCompleteCallback );
+	AsyncFile( const char* szFilename, fnAsyncFileLoadCallback loadCompleteCallback, void* pUserObj = NULL );
 
 };
 

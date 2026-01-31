@@ -959,7 +959,7 @@ BEGIN
             MENUITEM "Disc",                        ID_SCENETOOLS_ADDPRIMITIVE_DISC
             MENUITEM "Sphere",                      ID_ADDPRIMITIVE_SPHERE, GRAYED
             MENUITEM "Cone",                        ID_ADDPRIMITIVE_CONE, GRAYED
-            MENUITEM "Pyramid",                     ID_ADDPRIMITIVE_PYRAMID, GRAYED
+            MENUITEM "Pyramid",                     ID_ADDPRIMITIVE_PYRAMID
             MENUITEM "Wall Circle",                 ID_SCENETOOLS_ADDPRIMITIVE_WALLCIRCLE
         END
     END

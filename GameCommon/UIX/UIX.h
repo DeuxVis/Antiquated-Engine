@@ -52,6 +52,8 @@ enum eUIXBUTTON_MODE
 	UIXBUTTON_TEXT_WITH_SETTINGS,
 	UIXBUTTON_RECT_ICON,
 	UIXBUTTON_IMAGE,
+	UIXBUTTON_ICON,
+	UIXBUTTON_IMAGE_PATH,
 };
 
 enum UIX_TEXT_FLAGS
@@ -60,7 +62,6 @@ enum UIX_TEXT_FLAGS
 	ALIGN_RIGHT = 0x1,
 	BOLD = 0x2,
 	ALIGN_CENTRE = 0x4,
-	
 };
 
 enum UIX_SLIDER_MODE
@@ -126,14 +127,14 @@ public:
 	void		SetDragReceiveCallback( int dragType, fnDragReceiveCallback func, uint32 ulDestParam );
 
 	void*				GetUserObject() { return mpUserObject; }
-	void				SetUserObject( void* pObject ) { mpUserObject = pObject; }
+	void				SetUserObject( void* pObject, bool bDeleteOnShutdown = false ) { mpUserObject = pObject; mbDeleteUserObjectOnDestroy = bDeleteOnShutdown; }
 
 	BOOL				DoesHaveUserParamEx( const char* szKey ) { return( (mUserParamExList.find(szKey) != mUserParamExList.end()) ); }
 	int					GetUserParamEx( const char* szKey ) { return( mUserParamExList[szKey] ); }
 	void				SetUserParamEx( const char* szKey, int nValue ) { mUserParamExList[szKey] = nValue; }
 
 	virtual void		UpdateUIStateData( UIStateData* pData ) {}
-	virtual float		OnValueChange( UIXObject* pxSourceObj, float fNewValue ) { return( fNewValue ); }
+	virtual float		OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bByUserEditFlag ) { return( fNewValue ); }
 
 protected:
 	UIXObject( UIXObject* pParent, uint32 uID, UIXRECT rect );
@@ -162,7 +163,7 @@ protected:
 	virtual void		OnReceiveDragItem( int dragType, UIXObject* pxSourceObject, uint32 ulDragParam );
 	bool				CanReceiveDragItem( int dragType ) { return( mDragMap[dragType] ); }
 	
-	UIXRECT		GetDisplayRect() { return( mDisplayRect ); }
+	UIXRECT		GetLocalPositionRect() { return( mDisplayRect ); }
 	UIXRECT		GetActualRenderRect( UIXRECT parentRect );
 	int			GetChildContentsHeight() { return mChildContentsHeight; }
 	virtual int			GetScrollPosition() { return( 0 ); }
@@ -177,6 +178,7 @@ protected:
 	UIXObject* GetParent() const { return(mpParent); }
 private:
 	virtual bool		ShouldDisplayChildren() { return true; }
+	virtual bool		IncludeChildrenInOccupyCalc() { return true; }
 
 	std::vector<UIXObject*>			mContainsList;
 	std::map<std::string, int>		mUserParamExList;
@@ -186,6 +188,7 @@ private:
 	uint32			mulID;
 	UIXRECT			mDisplayRect;
 	void*			mpUserObject = NULL;
+	bool			mbDeleteUserObjectOnDestroy = false;
 	int				mChildContentsHeight = 0;
 	UIXRECT			mLastRenderDisplayRect;
 	UIXObject*		mpParent;
@@ -213,7 +216,7 @@ public:
 
 	static UIXObject*					AddPage( UIXRECT rect, const char* szTitle, BOOL bUseClipping = FALSE );
 	static UIXObject*					AddSubPage( UIXObject* pxContainer, UIXRECT rect, const char* szTitle, BOOL bUseClipping = FALSE );
-	static UIXCollapsableSection*		AddCollapsableSection( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType = 0 );
+	static UIXCollapsableSection*		AddCollapsableSection( UIXObject* pxContainer, UIXRECT rect, UIXRECT headerRect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType = 0 );
 	static UIXScrollableSection*		AddScrollableSection( UIXObject* pxContainer, UIXRECT rect );
 	static UIXButton*					AddButton( UIXObject* pxContainer, UIXRECT rect, eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL IsBlocking = TRUE, uint32 ulCol = 0xD0404040, int iconNum = 0 );
 	static UIXTextBox*					AddTextBox( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szDefaultText );

@@ -197,6 +197,11 @@ void	InterfaceInstance::ReleaseTexture( int nTextureHandle )
 	mpTexturedOverlays->ReleaseTexture( nTextureHandle );
 }
 
+int			InterfaceInstance::LoadTextureFromFileInMem( const char* szFilename, unsigned char* pbMem, int nMemSize, int nFlags )
+{
+	return( mpTexturedOverlays->GetTextureFromFileInMem( szFilename, pbMem, nMemSize, nFlags ) );
+}
+
 int			InterfaceInstance::GetTexture( const char* szFilename, int nFlags )
 {
 	return( mpTexturedOverlays->GetTextureInternal( szFilename, nFlags, NOTFOUND ) );

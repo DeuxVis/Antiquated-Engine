@@ -654,11 +654,13 @@ void	UVUnwrapRenderCreateBuffers( void )
 
 void	UVUnwrapLoadTexture( const char* szFilename )
 {
-LPDIRECT3DDEVICE9		pMainDevice = InterfaceGetD3DDevice();
+	// TODO - Needs reimplementing making use of InterfaceInstances
+	// 
+//LPDIRECT3DDEVICE9		pMainDevice = InterfaceGetD3DDevice();
 	
-	InterfaceSetD3DDevice( mpUVUnwrapD3DDevice );
-	mpMapTexture = InterfaceLoadTextureDX( szFilename, FALSE, FALSE );
-	InterfaceSetD3DDevice( pMainDevice );
+//	InterfaceSetD3DDevice( mpUVUnwrapD3DDevice );
+//	mpMapTexture = InterfaceLoadTextureDX( szFilename, FALSE, FALSE );
+//	InterfaceSetD3DDevice( pMainDevice );
 }
 
 

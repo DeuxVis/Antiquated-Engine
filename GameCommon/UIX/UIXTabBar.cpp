@@ -76,8 +76,8 @@ UIXRECT		lineRect = GetActualRenderRect( rect );
 		lineRect = pElement->Render( pInterface, lineRect );
 	}
 
-	rect.h = GetDisplayRect().h + 1;
-	rect.y = GetDisplayRect().h + 1;
+	rect.h = GetLocalPositionRect().h + 1;
+	rect.y = GetLocalPositionRect().h + 1;
 	return( rect );
 }
 

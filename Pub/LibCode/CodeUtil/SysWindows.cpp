@@ -943,7 +943,7 @@ BOOL fFinished = FALSE;
 			}
 			else
 			{
-				sprintf( acString, "%s\\%s", szSrcFolder,  FileData.cFileName );
+				sprintf( acString, "%s\\%s", szSrcFolder, FileData.cFileName );
 				callback( acString );
 			}
 	 

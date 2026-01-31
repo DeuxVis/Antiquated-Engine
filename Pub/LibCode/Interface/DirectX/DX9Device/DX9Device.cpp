@@ -231,6 +231,8 @@ int		InterfaceGetDeviceCaps( int Type )
 }
 
 
+
+
 /**************************************************************************
  * Function    : InterfaceInitSmall
  * Params      :

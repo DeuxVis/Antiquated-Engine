@@ -5,12 +5,13 @@
 #include "UIXCollapsableSection.h"
 
 
-void	UIXCollapsableSection::Initialise( int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType )
+void	UIXCollapsableSection::Initialise( UIXRECT headerRect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType )
 {
 	mTitle = szTitle;	
 	mbIsCollapsed = bStartCollapsed;
 	mMode = mode;
 	mDragItemType = draggableType;
+	mHeaderRect = headerRect;
 }
 
 
@@ -34,27 +35,27 @@ void	UIXCollapsableSection::UpdateUIStateData( UIStateData* pData )
 UIXRECT		UIXCollapsableSection::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
 UIXRECT		renderRect = GetActualRenderRect( displayRect );
-int	X = renderRect.x;
+int	X = renderRect.x + mHeaderRect.x;
 int	Y = renderRect.y;
-int	W = renderRect.w;
+int	W = renderRect.w - mHeaderRect.w;
 int	H = renderRect.h;
 uint32		ulCol = 0x90303030;
 uint32		ulTextCol = 0xd0d0d0d0;
 int		headerH = 20;
 int		nHeaderOffsetX = 0;
-int			nHeaderW = W;
+int			nHeaderW = W - mHeaderRect.w;
 BOOL	bMouseIsOverSectionHeader = FALSE;
 
 	switch( mMode )
 	{
 	case 1:
 		ulCol = 0x90303040;
-		nHeaderOffsetX = 20;
+		nHeaderOffsetX += 20;
 		break;
 	case 2:
 		ulCol = 0x90404040;
 		ulTextCol = 0xd0f0c080;
-		nHeaderOffsetX = 5;
+		nHeaderOffsetX += 5;
 //		nHeaderW -= 44;
 //		headerH = 20;
 		break;
@@ -62,7 +63,7 @@ BOOL	bMouseIsOverSectionHeader = FALSE;
 		break;
 	}
 
-	mLastRender = UIXRECT( X,Y,nHeaderW, headerH );
+	mLastHeaderRender = UIXRECT( X,Y, nHeaderW, headerH );
 	pInterface->Rect( 0, X, Y, nHeaderW, headerH, ulCol );
 		
 	if ( UIHoverItem( X, Y, nHeaderW, headerH ) == TRUE )
@@ -142,7 +143,7 @@ void	UIXCollapsableSection::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BO
 		// If cursor has remained within the original section rect, treat it as a press (collapse the tab)
 		UIGetCurrentCursorPosition( &mouseX, &mouseY );
 
-		UIX::CheckForPress( this, mLastRender, UIX_COLLAPSABLE_SECTION_HEADER, 0 );
+		UIX::CheckForPress( this, mLastHeaderRender, UIX_COLLAPSABLE_SECTION_HEADER, 0 );
 	}
 }
 

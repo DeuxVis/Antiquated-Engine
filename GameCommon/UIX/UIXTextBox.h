@@ -4,6 +4,8 @@
 #include <string>
 #include "UIX.h"
 
+typedef	void(*fnTextBoxEndEditCallback)( UIXObject* pxSourceObject, const char* szNewText );
+
 class UIXTextBox : public UIXObject
 {
 friend class UIX;
@@ -11,15 +13,15 @@ friend class UIXSlider;
 public:
 	void	SetText( const char* szText, ... );
 
+	void	SetEndEditCallback( fnTextBoxEndEditCallback func ) { mfnEndEditCallback = func; }
 protected:
 	UIXTextBox( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
 	void	Initialise( int mode, const char* szTitle );
 	
 	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT pDisplayRect );
-	static void		RegisterControlHandlers();
-	virtual bool			OnSelected( int nButtonID, uint32 ulParam );
-
+	static void			RegisterControlHandlers();
+	virtual bool		OnSelected( int nButtonID, uint32 ulParam );
 
 private:
 	static int		TextBoxKeyboardMessageHandlerStatic( int nResponseCode, const char* szInputText, void* pUserObj );
@@ -31,6 +33,7 @@ private:
 	std::string			mText;
 	std::string			mPreEditText;
 	int					mMode;
+	fnTextBoxEndEditCallback		mfnEndEditCallback = NULL;
 };
 
 

@@ -91,8 +91,8 @@ pInterface->Rect( 1, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0xa
 //	}
 
 
-	occupyRect.h = 0;//GetDisplayRect().h + 1;
-	occupyRect.y = GetDisplayRect().y + GetDisplayRect().h + 1;
+	occupyRect.h = 0;//GetLocalPositionRect().h + 1;
+	occupyRect.y = GetLocalPositionRect().y + GetLocalPositionRect().h + 1;
 	return occupyRect;
 }
 
@@ -143,7 +143,7 @@ int			entryIndex = 0;
 			scrollbarRect.y = expandedRect.y + 1;
 			scrollbarRect.h = nMaxDropdownH - 2;
 
-			mpScrollbar->RenderDirect(pInterface, scrollbarRect, nMaxNumEntriesInView, mDropdownEntries.size() );
+			mpScrollbar->RenderDirect(pInterface, scrollbarRect, nMaxNumEntriesInView - 1, mDropdownEntries.size() );
 
 			lineRect.w -= 13;
 			expandedRect.h = nMaxDropdownH;

@@ -751,11 +751,11 @@ int		nHandle;
 	{
 		if ( (nFlags & 0x1) == 0 )
 		{
-			maxInternalTextures[ nHandle ].pTexture = InterfaceLoadTextureDXFromFileInMem( szFilename, pbMem, nMemSize, 1, 1, FALSE );
+			maxInternalTextures[ nHandle ].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureFromFileInMemDX( szFilename, pbMem, nMemSize, 1, 1, FALSE );
 		}
 		else
 		{
-			maxInternalTextures[ nHandle ].pTexture = InterfaceLoadTextureDXFromFileInMem( szFilename, pbMem, nMemSize, 0, 0, FALSE );
+			maxInternalTextures[ nHandle ].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureFromFileInMemDX( szFilename, pbMem, nMemSize, 0, 0, FALSE );
 		}
 
 		// Load failed

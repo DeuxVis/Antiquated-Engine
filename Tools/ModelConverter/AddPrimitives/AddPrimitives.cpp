@@ -14,6 +14,27 @@
 
 #include "../ModelConverter.h"
 
+VECT	axPyramidVerts[] = 
+{
+	{ 0.0f, 0.0f, 1.0f },
+	{ -1.0f, -1.0f, 0.0f },
+	{ 1.0f, -1.0f, 0.0f },
+	{ 1.0f, 1.0f, 0.0f },
+	{ -1.0f, 1.0f, 0.0f },
+};
+
+ushort	auwPyramidIndices[] = 
+{
+	0, 1, 2,
+	0, 2, 3,
+	0, 3, 4,
+	0, 4, 1,
+
+	1, 4, 2,
+	3, 2, 4,
+};
+
+
 VECT	axCuboidCornerPositions[] = 
 {
 	{ -1.0f, -1.0f, -1.0f },		// 0 - back left bottom
@@ -284,6 +305,57 @@ int				nLoop;
 
 	ModelConvSetCurrentModel( nNewHandle );
 }
+
+
+void	AddPrimitivePyramid( void )
+{
+int		nNewHandle = ModelRenderGetNextHandle();
+MODEL_RENDER_DATA*		pxModelData;
+CUSTOMVERTEX*		pVertexBuffer;
+CUSTOMVERTEX*		pVertexBufferBase;
+ushort*				puwIndexBuffer;
+float				fScale = 1.0f;
+int				nLoop;
+
+	pxModelData = maxModelRenderData + nNewHandle;
+	
+	ModelConvInitialiseBlankModel( pxModelData, 5, 6 );
+
+	pxModelData->pxBaseMesh->LockVertexBuffer( 0, (BYTE**)&pVertexBufferBase );
+
+	pVertexBuffer = pVertexBufferBase;
+	for( nLoop = 0; nLoop < 5; nLoop++ )
+	{
+		pVertexBuffer->position = axPyramidVerts[nLoop];
+		pVertexBuffer->color = 0xFFFFFFFF;
+		pVertexBuffer->tu = 0.0f;
+		pVertexBuffer->tv = 0.0f;
+
+		pVertexBuffer++;
+	}
+
+	RenderingComputeBoundingBox( pVertexBufferBase, pxModelData->xStats.nNumVertices, &pxModelData->xStats.xBoundMin, &pxModelData->xStats.xBoundMax );
+	RenderingComputeBoundingSphere( pVertexBufferBase, pxModelData->xStats.nNumVertices, &pxModelData->xStats.xBoundSphereCentre, &pxModelData->xStats.fBoundSphereRadius );
+
+	pxModelData->pxBaseMesh->UnlockVertexBuffer();
+	
+	pxModelData->pxBaseMesh->LockIndexBuffer( 0, (BYTE**)&puwIndexBuffer );
+	for( nLoop = 0; nLoop < 6*3; nLoop++ )
+	{
+		puwIndexBuffer[nLoop] = auwPyramidIndices[nLoop];
+	}
+
+	pxModelData->pxBaseMesh->UnlockIndexBuffer();
+	
+
+	ModelConvSeparateVerts( nNewHandle );
+
+	ModelConvFixNormals( nNewHandle, FLAT_FACES );
+
+	ModelConvSetCurrentModel( nNewHandle );
+
+}
+
 
 
 LRESULT CALLBACK AddPrimitiveDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)

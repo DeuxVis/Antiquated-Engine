@@ -35,7 +35,7 @@ public:
 	// Textures
 	int			GetTexture( const char* szFilename, int nFlags );
 	void		ReleaseTexture( int nTextureHandle );
-	
+	int			LoadTextureFromFileInMem( const char* szFilename, unsigned char* pbMem, int nMemSize, int nFlags );
 	// Textured Overlays
 	int			CreateNewTexturedOverlay( int nLayer, int nTextureHandle );
 	void		TexturedRect( int nOverlayNum, int nX, int nY, int nWidth, int nHeight, uint32 ulCol, float fU, float fV, float fU2, float fV2 );

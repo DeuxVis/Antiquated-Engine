@@ -150,7 +150,7 @@ int		childContentsHeight = GetChildContentsHeight() + 4;
 		pInterface->SetRenderCanvas();
 		mbIsUsingClippingCanvas = TRUE;
 
-		UIXRECT		localRect = GetDisplayRect();
+		UIXRECT		localRect = GetLocalPositionRect();
 		UIXRECT		occupyRect = displayRect;
 		UIXRECT		drawRect = localRect;
 
@@ -173,7 +173,7 @@ int		childContentsHeight = GetChildContentsHeight() + 4;
 
 		occupyRect.h = 0;
 		occupyRect.y = 0;
-		occupyRect.w -= 16;
+		occupyRect.w = -16;
 		return occupyRect;
 	}
 	else

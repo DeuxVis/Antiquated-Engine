@@ -54,6 +54,10 @@ UIXObject::~UIXObject()
 	// todo - Get rid of this by using smart(er) pointers for things like the mousewheel hover
 	if ( UIX::mspMousewheelHoverObject == this ) UIX::mspMousewheelHoverObject = NULL;
 
+	if ( mbDeleteUserObjectOnDestroy )
+	{
+		SAFE_DELETE( mpUserObject );
+	}
 	// nOTE THIS ALWAYS SHOULD GET DONE THROUGH uix::dELETEoBJECT
 }
 
@@ -105,9 +109,17 @@ void	UIXObject::CloseAllMenus()
 	}
 }
 
+// The actual position something is drawn at is
+//   LocalPositionRect x,y  ( Which is set at init time, relative to its parent. e.g. An object's localPosition is 0,0 if it is to be rendered at the top left corner of its parent's display area
+//    +
+//   ParentRect x,y
+//
+//  This func also deals with cases where the x or w components are set to negative numbers which indicates that they're right-aligned to the parent rect.
+//  (i.e. a localPosition.x of -10 means we draw at 10px from the right hand side, w = -30 means all the width except 30 is used)
+
 UIXRECT		UIXObject::GetActualRenderRect( UIXRECT parentRect )
 {
-UIXRECT		renderRect = GetDisplayRect();		// This is our local position, relative to 0,0 within whatever container we're in
+UIXRECT		renderRect = GetLocalPositionRect();		// This is our local position, relative to 0,0 within whatever container we're in
 
 	if ( renderRect.x < 0 )
 	{
@@ -121,13 +133,9 @@ UIXRECT		renderRect = GetDisplayRect();		// This is our local position, relative
 
 	if ( renderRect.w < 0 )
 	{
-		renderRect.w = (parentRect.w + renderRect.w) - renderRect.x;
+		renderRect.w = (parentRect.w + (renderRect.w+1)) - renderRect.x;
 	}
 
-	if ( renderRect.x + renderRect.w > parentRect.x + parentRect.w )
-	{
-		renderRect.w = (parentRect.w - parentRect.x) - renderRect.x;
-	}
 	return renderRect;
 }
 
@@ -152,6 +160,8 @@ UIXRECT	UIXObject::Render( InterfaceInstance* pInterface, UIXRECT displayRect )
 UIXRECT		xUsedRect = displayRect;
 UIXRECT		xRect;
 UIXRECT		xMaxRect;
+bool		bIncludeChildOccupyHeight = IncludeChildrenInOccupyCalc();
+int			baseOccupyHeight;
 
 	xUsedRect.y = 0;
 	xUsedRect.h = 0;
@@ -161,62 +171,87 @@ UIXRECT		xMaxRect;
 	UIX::msSelectionPriority += GetSelectionPriorityLayer();
 
 	xRect = OnRender( pInterface, displayRect );
+		// The y and h values returned from the render function are used
+
+		// If the item has children or siblings, the h value is first used to update
+		// the current position (displayRect) the children/siblings start drawing at..
+		// so returning an h value effectively blocks out (occupies) some of the 
+		// vertical display space.
+
+		// The y value tells the system how much vertical space the render actually used and
+		// is returned up to the parent
+
 
 	xUsedRect.w = xRect.w;		// w is reduced by things like scrollbars occupying space within the page
 	xUsedRect.h = xRect.h;
 	xUsedRect.y = xRect.y;
-	
+	xMaxRect.y = xRect.y;
+	baseOccupyHeight = xUsedRect.h;
+
 	if ( !mContainsList.empty() && ShouldDisplayChildren() )
 	{
-	UIXRECT		xChildDisplayRect = displayRect;
-	int			nCursRelY = 0;
+	UIXRECT		xChildDisplayRect = GetActualRenderRect( displayRect );
+	int			nCursRelY = xMaxRect.y;
 		
-		xChildDisplayRect.w = xUsedRect.w;
-		xChildDisplayRect.y += xUsedRect.h;
+		xChildDisplayRect.y += xUsedRect.h;// + mDisplayRect.y;
+		if ( xUsedRect.w < 0 ) 
+		{
+			xChildDisplayRect.w += xUsedRect.w;
+		}
 		xChildDisplayRect.h -= xUsedRect.h;
+
 		xChildDisplayRect.y -= GetScrollPosition();
 
 		for ( UIXObject* pContainedObject : mContainsList )
 		{
-			if ( xChildDisplayRect.h > 0 )
-			{
-				xRect = pContainedObject->Render( pInterface, xChildDisplayRect );
+			xRect = pContainedObject->Render( pInterface, xChildDisplayRect );
 
-				if ( xRect.y + nCursRelY > xMaxRect.y )
-				{
-					xMaxRect.y = xRect.y + nCursRelY;		
-				}
-				xUsedRect.h += xRect.h;
-				nCursRelY += xRect.h;
-				xChildDisplayRect.y += xRect.h;
-				xChildDisplayRect.h -= xRect.h;
+			// MaxRect.y maintains the largest y value drawn to, relative to the DisplayRect, including any space occupied by the main object & children
+			if ( xRect.y + nCursRelY > xMaxRect.y )
+			{
+				xMaxRect.y = xRect.y + nCursRelY;		
 			}
+			// UsedRect.h contains the cumulative height occupied by all children + the main object
+			xUsedRect.h += xRect.h;
+			// CursRelY contains the cumulative height occupied by all children
+			nCursRelY += xRect.h;
+			// childDisplayRect.y is the current draw position for the next child, and is updated as each child occupies space with its returned h value
+			xChildDisplayRect.y += xRect.h;
+			// childDisplayRect.h is the remaining space in the main objects original render rect, and is updated as each child occupies space with its returned h value
+			xChildDisplayRect.h -= xRect.h;
 		}
 
 		OnPostChildrenRender( pInterface );
 
-		int presetChildBlockSize = GetDisplayRect().h;
+		int presetChildBlockSize = GetLocalPositionRect().h;
 
-		xUsedRect.y += xMaxRect.y;
-		if ( xUsedRect.y > xUsedRect.h )
+		if ( bIncludeChildOccupyHeight )
 		{
-			xUsedRect.h = xUsedRect.y;
-		}
-		// MaxRect contains the lowest point that was drawn to by children including those bits that dont change the cursor
-		// and will tell us if we need to expand the box
-		if ( xMaxRect.y > presetChildBlockSize )
-		{
-			if ( xMaxRect.y > xUsedRect.h )
+			if ( xMaxRect.y > xUsedRect.y )
 			{
-				xUsedRect.h = xMaxRect.y;
+				xUsedRect.y = xMaxRect.y;
 			}
+			if ( xUsedRect.y > xUsedRect.h )
+			{
+				xUsedRect.h = xUsedRect.y;
+			}
+
+			// MaxRect contains the lowest point that was drawn to by children including those bits that dont change the cursor
+			// and will tell us if we need to expand the box
+			if ( xMaxRect.y > presetChildBlockSize )
+			{
+				if ( xMaxRect.y > xUsedRect.h )
+				{
+					xUsedRect.h = xMaxRect.y;
+				}
+			}
+			mChildContentsHeight = xUsedRect.h;
 		}
-		// The usedRect effectively tracks the cursor line position, not always meaningful as the child UI may never adjust it
-		else if ( xUsedRect.h < presetChildBlockSize )
+		else
 		{
-//			xUsedRect.h = fPresetChildBlockSize;
+			xUsedRect.h = baseOccupyHeight;
+			mChildContentsHeight = 0;
 		}
-		mChildContentsHeight = xUsedRect.h;
 	}
 	UIX::msSelectionPriority -= GetSelectionPriorityLayer();
 	return( xUsedRect );
@@ -424,6 +459,8 @@ void		UIX::Render( InterfaceInstance* pxInterface )
 {
 UIXRECT		pageDisplayRect;
 
+	mspDragDestinationHover = NULL;
+
 	for ( int loop = 0; loop < MAX_NUM_UIX_ICONS; loop++ )
 	{
 		mshUIXIconOverlays[loop] = NOTFOUND;
@@ -432,11 +469,11 @@ UIXRECT		pageDisplayRect;
 	msSelectionPriority = 0;
 	msPressedSelectionPriority = 0;
 	msMouseWheelHoverPriority = 0;
+	UIXRECT		rootRect( 0,0,pxInterface->GetWindowWidth(),pxInterface->GetWindowHeight());
 
 	for( UIXObject* pxObjects : msPagesList )
 	{
-		pageDisplayRect = pxObjects->GetDisplayRect();
-		pxObjects->Render( pxInterface, pageDisplayRect );
+		pxObjects->Render( pxInterface, rootRect );
 	}
 
 	pxInterface->Draw();
@@ -508,7 +545,7 @@ void			UIX::DrawIcon( InterfaceInstance* pInterface, int iconNum, UIXRECT rect, 
 		{
 		int		hTexture = mshUIXIconsList[nIconPageNum];
 
-			mshUIXIconOverlays[nIconPageNum] = pInterface->CreateNewTexturedOverlay( 1, hTexture );
+			mshUIXIconOverlays[nIconPageNum] = pInterface->CreateNewTexturedOverlay( 2, hTexture );
 		}
 		pInterface->TexturedRect( mshUIXIconOverlays[nIconPageNum], rect.x, rect.y, rect.w, rect.h, ulCol, fU, fV, fU + fUW, fV + fVH );
 	}	
@@ -570,11 +607,11 @@ UIXScrollableSection*		pNewScrollableSection = new UIXScrollableSection( pxConta
 	return( pNewScrollableSection );
 }
 
-UIXCollapsableSection*		UIX::AddCollapsableSection( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType )
+UIXCollapsableSection*		UIX::AddCollapsableSection( UIXObject* pxContainer, UIXRECT rect,  UIXRECT headerRect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType )
 {
 UIXCollapsableSection*		pNewCollapsableSection = new UIXCollapsableSection( pxContainer, msulNextObjectID++, rect );
 
-	pNewCollapsableSection->Initialise( mode, szTitle, bStartCollapsed, draggableType );
+	pNewCollapsableSection->Initialise( headerRect, mode, szTitle, bStartCollapsed, draggableType );
 	pxContainer->mContainsList.push_back( pNewCollapsableSection );
 	return( pNewCollapsableSection );
 }

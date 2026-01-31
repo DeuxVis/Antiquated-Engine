@@ -14,7 +14,7 @@ void	UIXModalPopup::Initialise( )
 UIXRECT		UIXModalPopup::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
 UIXRECT		drawRect = GetActualRenderRect( displayRect );
-//UIXRECT		drawRect = GetDisplayRect();
+//UIXRECT		drawRect = GetLocalPositionRect();
 
 	// Force interface draw here so the popup is displayed above everything else (we assume the modalPopup is added
 	// later in the UIX than everything else)

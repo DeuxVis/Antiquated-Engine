@@ -5,6 +5,7 @@
 #include "UIX.h"
 
 typedef	bool(*fnLabelEditCallback)( UIXObject* pObject, const char* szInputText );
+typedef	int(*fnDynamicButtonImageHandleCallback)( UIXObject* pObject, void* pImageHandlerParam );
 
 class UIXButton : public UIXObject
 {
@@ -14,6 +15,8 @@ public:
 	void	EnableLabelEdit( fnLabelEditCallback callbackFunc );
 	
 	void	AddRightButtonPress( uint32 ulButtonID, uint32 ulButtonParam ) { mulRightPressButtonID = ulButtonID; mulRightPressButtonParam = ulButtonParam; }
+
+	void	SetDynamicButtonImageHandler( fnDynamicButtonImageHandleCallback func, void* pUserParam ) { mfnDynamicButtonImageHandler = func; mpImageHandlerParam = pUserParam; }
 
 protected:
 	UIXButton( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
@@ -36,7 +39,10 @@ private:
 	eUIXBUTTON_MODE		mMode = UIXBUTTON_NORMAL;
 	BOOL				mbIsBlocking = TRUE;
 	BOOL				mbIsLabelEditable = FALSE;
+	BOOL				mbHasAttemptedLoadTexture = FALSE;
 	fnLabelEditCallback		mfnLabelEditCallback = NULL;
+	fnDynamicButtonImageHandleCallback		mfnDynamicButtonImageHandler = NULL;
+	void*				mpImageHandlerParam = NULL;
 	uint32				mulCol = 0xd0404040;
 	int					mIconNum = 0;
 	int					mhImageTexture = NOTFOUND;

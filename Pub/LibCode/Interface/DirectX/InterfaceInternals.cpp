@@ -254,6 +254,38 @@ D3DFORMAT dx9Format;
 }
 #endif
 
+LPGRAPHICSTEXTURE	InterfaceInternalsDX::LoadTextureFromFileInMemDX( const char* szFilename, BYTE* pbMem, int nMemSize, int boReduceFilter, int boMipFilter, BOOL bReadable )
+{
+int	nRet;
+LPGRAPHICSTEXTURE	pxTexture = NULL;
+int		nFilter = D3DX_FILTER_NONE;
+int		nMipFilter = D3DX_FILTER_NONE;
+int		nMipLevels = 1;
+int		nFormat = D3DFMT_R8G8B8;
+
+	InterfaceGetTextureLoadParams( szFilename, boReduceFilter, boMipFilter, &nFormat, &nFilter, &nMipFilter, &nMipLevels );
+
+#ifdef USE_D3DEX_INTERFACE
+	if ( bReadable )
+	{
+		nRet = D3DXCreateTextureFromFileInMemoryEx( mpInterfaceD3DDevice, pbMem, nMemSize,0,0,nMipLevels,0,(D3DFORMAT)nFormat, D3DPOOL_SYSTEMMEM, nFilter,nMipFilter, 0xFF0000FF, NULL,NULL, &pxTexture );
+	}
+	else
+	{
+		nRet = D3DXCreateTextureFromFileInMemoryEx( mpInterfaceD3DDevice, pbMem, nMemSize,0,0,nMipLevels,0,(D3DFORMAT)nFormat, D3DPOOL_DEFAULT, nFilter,nMipFilter, 0xFF0000FF, NULL,NULL, &pxTexture );
+	}
+#else
+	nRet = D3DXCreateTextureFromFileInMemoryEx( mpInterfaceD3DDevice, pbMem, nMemSize,0,0,nMipLevels,0,(D3DFORMAT)nFormat, D3DPOOL_MANAGED, nFilter,nMipFilter, 0xFF0000FF, NULL,NULL, &pxTexture );
+#endif
+	if( FAILED( nRet ) )
+	{
+		pxTexture = NULL;
+	}
+	return( pxTexture );
+
+
+}
+
 LPGRAPHICSTEXTURE InterfaceInternalsDX::LoadTextureDX( const char* szFilename, int boReduceFilter, int boMipFilter, BOOL bReadable )
 {
 int	nRet = 0;
@@ -424,6 +456,8 @@ void		InterfaceInstance::SetDrawRegion( int nX, int nY, int nWidth, int nHeight 
 
 BOOL	mboDontShowAnyMoreLoadErrors = FALSE;
 
+#define NO_POPUPS
+
 INTERFACE_API void InterfaceTextureLoadError( int nRet, const char* szFilename )
 {
 char	acString[512];
@@ -431,6 +465,11 @@ char	acString[512];
 //return;
 	if ( mboDontShowAnyMoreLoadErrors == FALSE )
 	{
+#ifdef NO_POPUPS
+		SysDebugPrint( "Image load error: %s", szFilename );
+		SysGetCurrentDir( 256, acString);
+		SysDebugPrint( "(Current dir: %s)", acString );
+#else
 		sprintf( acString, "**** Texture load error ****\n%s\n", szFilename);
 		switch( nRet )
 		{
@@ -471,6 +510,7 @@ char	acString[512];
 				PostQuitMessage( 0 );
 			}
 		}
+#endif
 	}
 }
 

@@ -7,7 +7,7 @@
 
 extern void		AddPrimitiveCuboid( void );
 
-
+extern void		AddPrimitivePyramid( void );
 
 
 

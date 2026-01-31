@@ -39,7 +39,7 @@ void	UIXTextBox::EndEdit()
 	if ( GetParent() != NULL )
 	{
 		float	fValue = (float)atof( mText.c_str() );
-		float	fAcceptedValue = GetParent()->OnValueChange( this, fValue );
+		float	fAcceptedValue = GetParent()->OnValueChange( this, fValue, TRUE );
 
 		if ( fAcceptedValue != fValue )
 		{
@@ -47,6 +47,11 @@ void	UIXTextBox::EndEdit()
 			sprintf( acVal, "%.3f", fAcceptedValue );
 			mText = acVal;
 		}
+	}
+
+	if ( mfnEndEditCallback )
+	{
+		mfnEndEditCallback( this, mText.c_str() );
 	}
 
 	UIX::SetTextEditFocus( NULL );
@@ -129,7 +134,7 @@ char		acBuff[256];
 	pInterface->Text( 1, drawRect.x + 4, drawRect.y + (drawRect.h-10)/2, ulTextCol, 3, acBuff );
 
 	displayRect.h = 0;//
-	displayRect.y = GetDisplayRect().y + drawRect.h;		// displayRect.y returns the lowest point we drew to
+	displayRect.y = GetLocalPositionRect().y + drawRect.h;		// displayRect.y returns the lowest point we drew to
 	return displayRect;
 
 

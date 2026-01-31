@@ -91,31 +91,40 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 		}
 		break;
 	case POPUP_MENU_LIST:
-		if ( mbIsChecked )
 		{
-		UIXRECT		checkedIconRect = drawRect;
+		uint32		ulTextCol = 0xD0A0A0A0;
+			if ( mbIsChecked )
+			{
+			UIXRECT		checkedIconRect = drawRect;
 			
-			checkedIconRect.y += 2;
-			checkedIconRect.h -= 8;
-			checkedIconRect.w = checkedIconRect.h;
-			checkedIconRect.x += 2;
+				checkedIconRect.y += 2;
+				checkedIconRect.h -= 8;
+				checkedIconRect.w = checkedIconRect.h;
+				checkedIconRect.x += 2;
 
-			pInterface->Rect( 0, checkedIconRect.x, checkedIconRect.y, checkedIconRect.w, checkedIconRect.h, 0xC05050d0 );
+				pInterface->Rect( 0, checkedIconRect.x, checkedIconRect.y, checkedIconRect.w, checkedIconRect.h, 0xC05050d0 );
+			}
+
+			if ( HasSelectionCallback() )
+			{
+				if ( UIX::IsMouseHover( drawRect ))
+				{
+					pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0xb0303030 );	
+				}
+			}
+			else
+			{
+				ulTextCol = 0x60606060;
+			}
+			pInterface->Text( 1, drawRect.x + 30, drawRect.y + 2, ulTextCol, 3, mText.c_str() );
 		}
-
-
-		if ( UIX::IsMouseHover( drawRect ))
-		{
-			pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0xb0303030 );	
-		}
-		pInterface->Text( 1, drawRect.x + 30, drawRect.y + 2, 0xD0A0A0A0, 3, mText.c_str() );
 		break;
 	}
 
 	UIX::CheckForPress( this, drawRect, UIX_CHECKBOX, 0 );
 	
 	displayRect.h = 0;
-	displayRect.y = GetDisplayRect().y + GetDisplayRect().h + 1;		// displayRect.y returns the lowest point we drew to
+	displayRect.y = GetLocalPositionRect().y + GetLocalPositionRect().h + 1;		// displayRect.y returns the lowest point we drew to
 	return displayRect;
 }
 

@@ -18,6 +18,7 @@ typedef	void(*fnValueChangeCallback)( int hDropdownHandle, int nNewSelectedParam
 
 enum eUIBUTTON_MODE_FLAGS
 {
+	UIBUTTON_FLAG_NONE = 0,
 	UIBUTTON_FLAG_DISABLED = 0x01,
 	UIBUTTON_FLAG_HOVERED = 0x02,
 	UIBUTTON_FLAG_LABEL_EDIT = 0x4,

@@ -4625,14 +4625,17 @@ int		nLoop;
 						      xWindowRect.right - xWindowRect.left, xWindowRect.bottom - xWindowRect.top,
                               mhwndMainDialog, NULL, ghInstance, NULL );
 	InterfaceSetWindow( mhwndGraphicWindow );
-	g_pd3dDevice = InterfaceInitD3D(TRUE);
+	InterfaceInitDisplayDevice( TRUE );
+
 	EngineInitFromInterface();
+
+	g_pd3dDevice = EngineGetDXDevice();
+	
 	ModelConverterAddStandardLighting();
 	
 	EngineSetGameInterface( (EngineGameInterface*)&m_sEngineGameInterface );
 
 	InterfaceSetGlobalParam( INTF_TEXTURE_FILTERING, 1 );
-	InterfaceSetFilteringModes(0);
 
 	InterfaceInit( TRUE );
 	InterfaceNewFrame( 0 );
@@ -5730,6 +5733,10 @@ int	nVal;
 				break;
 			case ID_SCENETOOLS_ADDPRIMITIVE_WALLCIRCLE:
 				AddCurvedWall();
+				ModelConverterDisplayFrame( TRUE );
+				break;
+			case ID_ADDPRIMITIVE_PYRAMID:
+				AddPrimitivePyramid();
 				ModelConverterDisplayFrame( TRUE );
 				break;
 			case ID_ADDPRIMITIVE_CUBOID:

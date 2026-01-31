@@ -64,12 +64,15 @@ void	UIXButton::Initialise( eUIXBUTTON_MODE mode, const char* szTitle, uint32 ul
 	mbIsBlocking = bIsBlocking;
 	mulCol = ulCol;
 	mIconNum = iconNum;
-
+	if ( mode == UIXBUTTON_IMAGE )
+	{
+		mhImageTexture = mIconNum;
+	}
 }
 	
 UIXRECT		UIXButton::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
-UIXRECT		localRect = GetDisplayRect();
+UIXRECT		localRect = GetLocalPositionRect();
 UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
 	switch( mMode)
@@ -91,26 +94,81 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 			}
 		}
 		break;
-	case UIXBUTTON_IMAGE:
+	case UIXBUTTON_IMAGE_PATH:
+		if ( mbHasAttemptedLoadTexture == FALSE )
 		{
-			if ( mhImageTexture == NOTFOUND )
-			{
-				// TODO - Switch to async
-				mhImageTexture = pInterface->GetTexture( mTitle.c_str(), 0 );
-			}
-			
+			// TODO - Switch to async
+			mhImageTexture = pInterface->GetTexture( mTitle.c_str(), 0 );
+			mbHasAttemptedLoadTexture = TRUE;
+		}
+
+		if ( mhImageTexture != NOTFOUND )
+		{
 			int		nOverlay = pInterface->CreateNewTexturedOverlay( 0, mhImageTexture );
 			pInterface->TexturedRect( nOverlay, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol, 0.0f, 0.0f, 1.0f, 1.0f );
+		}
+		else
+		{
+			pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x90404040 );
+		}
 
-			if ( mulButtonID != 0 )
-			{	
-				if ( UIX::CheckForPress( this, drawRect, mulButtonID, mulButtonParam ) )
-				{		
-					pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x20FFFFFF );				
-				}
+		if ( mulButtonID != 0 )
+		{	
+			if ( UIX::CheckForPress( this, drawRect, mulButtonID, mulButtonParam ) )
+			{		
+				pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x20FFFFFF );				
 			}
 		}
 		break;
+	case UIXBUTTON_IMAGE:
+		if ( mfnDynamicButtonImageHandler != NULL )
+		{
+		int		hTexture = mfnDynamicButtonImageHandler( this, mpImageHandlerParam );
+
+			if ( hTexture != NOTFOUND )
+			{
+			int		nOverlay = pInterface->CreateNewTexturedOverlay( 0, hTexture );
+				pInterface->TexturedRect( nOverlay, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol, 0.0f, 0.0f, 1.0f, 1.0f );
+			}
+			else
+			{
+				pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x90404040 );
+			}		
+		}
+		else if ( mhImageTexture != NOTFOUND )
+		{
+			int		nOverlay = pInterface->CreateNewTexturedOverlay( 0, mhImageTexture );
+			pInterface->TexturedRect( nOverlay, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol, 0.0f, 0.0f, 1.0f, 1.0f );
+		}
+		else
+		{
+			pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x90404040 );
+		}
+
+		if ( mulButtonID != 0 )
+		{	
+			if ( UIX::CheckForPress( this, drawRect, mulButtonID, mulButtonParam ) )
+			{		
+				pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x20FFFFFF );				
+			}
+		}
+		break;
+	case UIXBUTTON_ICON:
+		{
+			UIButtonDraw( mulButtonID, drawRect.x, drawRect.y, drawRect.w, drawRect.h, "", UIBUTTON_FLAG_NONE, mulButtonParam, GetID() );
+
+			UIXRECT	 iconRect = drawRect;
+
+			// TEMP assumes icons are all 19x19
+			iconRect.x += ((drawRect.w-19)/2);
+			iconRect.y += ((drawRect.h-19)/2);
+			iconRect.w = 19;
+			iconRect.h = 19;
+
+			UIX::DrawIcon( pInterface, mIconNum, iconRect, 0xE0D0D0D0 );
+		}
+		break;
+
 	case UIXBUTTON_RECT_ICON:
 		pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol );
 		if ( mulButtonID != 0 )
@@ -120,7 +178,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 				pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x20FFFFFF );				
 			}
 		}
-		UIX::DrawIcon( pInterface, mIconNum, UIXRECT(drawRect.x + 1, drawRect.y + 1, drawRect.w - 2, drawRect.h - 2), 0xE0A0A0A0 );
+		UIX::DrawIcon( pInterface, mIconNum, UIXRECT(drawRect.x + 1, drawRect.y + 1, drawRect.w - 2, drawRect.h - 2), 0xE0D0D0D0 );
 		break;		
 	case UIXBUTTON_PLAIN_RECT:
 		pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol );

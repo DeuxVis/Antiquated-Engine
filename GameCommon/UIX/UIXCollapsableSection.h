@@ -13,7 +13,7 @@ public:
 protected:
 	UIXCollapsableSection( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
-	void	Initialise( int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType = 0 );
+	void	Initialise( UIXRECT headerRect, int mode, const char* szTitle, BOOL bStartCollapsed, int draggableType = 0 );
 	void	ToggleCollapsed();
 
 	virtual bool	OnSelected( int nButtonID, uint32 ulParam );
@@ -23,7 +23,7 @@ protected:
 	static void		HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
 	static void		RegisterControlHandlers();
 	
-	UIXRECT					GetLastRenderRect() const { return( mLastRender ); }
+	UIXRECT					GetLastRenderRect() const { return( mLastHeaderRender ); }
 
 private:
 	virtual bool		ShouldDisplayChildren() { return !mbIsCollapsed; }
@@ -33,12 +33,12 @@ private:
 	BOOL				mbCollapsable = TRUE;
 	int					mMode = 0;
 
-	UIXRECT				mLastRender;
+	UIXRECT				mLastHeaderRender;
 
 	int					mDragItemType = 0;
 	UIXRECT				mDragRectOriginal;
 	UIXRECT				mDragRectMouseOriginal;
-
+	UIXRECT				mHeaderRect;
 };
 
 

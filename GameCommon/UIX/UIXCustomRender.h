@@ -15,6 +15,8 @@ protected:
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
 
 private:
+	virtual bool		IncludeChildrenInOccupyCalc() { return false; }
+
 	fnCustomRenderCallback		mfnRenderCallback;
 	uint32			mulUserParam;
 

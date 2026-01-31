@@ -45,9 +45,9 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 	}
 	else
 	{
-		displayRect.h = GetDisplayRect().h + 1;
+		displayRect.h = GetLocalPositionRect().h + 1;
 	}
-	displayRect.y = GetDisplayRect().y + GetDisplayRect().h + 1;		// displayRect.y returns the lowest point we drew to
+	displayRect.y = GetLocalPositionRect().y + GetLocalPositionRect().h + 1;		// displayRect.y returns the lowest point we drew to
 
 	return displayRect;
 }

@@ -503,7 +503,8 @@ extern "C"				// All interfaces use a C-linkage
 {
 #endif
 
-extern INTERFACE_API LPGRAPHICSDEVICE	InterfaceInitD3D( BOOL boMinRenderPageSize );
+
+//extern INTERFACE_API LPGRAPHICSDEVICE	InterfaceInitD3D( BOOL boMinRenderPageSize );		// replaced by InterfaceInitDisplayDevice
 extern INTERFACE_API LPGRAPHICSDEVICE	InterfaceGetD3DDevice( void );
 extern INTERFACE_API LPGRAPHICS		InterfaceGetD3D( void );
 extern void	InterfaceGetLastUsedD3DPP( D3DPRESENT_PARAMETERS* pPP );

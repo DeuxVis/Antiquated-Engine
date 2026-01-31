@@ -81,6 +81,35 @@ const char*	FindChar( const char* pcRunner, char cChar )
 	return( NULL );
 }
 
+void		SysExtractFilenameFromPath( const char* szPath, char* szFilenameOut )
+{
+int		pathLen = (int)strlen(szPath);
+const char*	pcRunner = szPath + (pathLen - 1);
+
+	while( ( *pcRunner != '\\') &&
+		   ( *pcRunner != '/') &&
+		   ( pcRunner != szPath ) )
+	{
+		pcRunner--;
+	}
+
+	strcpy( szFilenameOut, pcRunner );
+}
+
+BOOL		SysFilenameHasExtension( const char* szFilename, const char* szExtension )
+{
+	int nExtLen = strlen(szExtension);
+	int		fileNameLen = (int)strlen(szFilename);
+	if ( fileNameLen >= nExtLen)
+	{
+		if (stricmp(szExtension, &szFilename[fileNameLen - nExtLen]) == 0)
+		{
+			return( TRUE );
+		}
+	}
+	return( FALSE );
+}
+
 void		EnsureFilenameHasExtension(char* acFilename, const char* acExtension)
 {
 	// Check if the filename already has the extension

@@ -42,7 +42,7 @@ int			drawY = drawRect.y + (((drawRect.h - pInterface->GetStringHeight(mText.c_s
 	}
 
 	displayRect.h = 0;//
-	displayRect.y = GetDisplayRect().y + drawRect.h + 1;		// displayRect.y returns the lowest point we drew to
+	displayRect.y = GetLocalPositionRect().y + drawRect.h + 1;		// displayRect.y returns the lowest point we drew to
 	return displayRect;
 }
 
