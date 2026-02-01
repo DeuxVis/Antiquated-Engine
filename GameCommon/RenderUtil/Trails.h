@@ -12,6 +12,7 @@ extern void		TrailUpdateEx( TRAIL_HANDLE hHandle, const VECT* pxPos, BOOL bVisib
 extern void		TrailSetScale( TRAIL_HANDLE hHandle, float fBandScale );
 extern void		TrailSetTint( TRAIL_HANDLE hHandle, uint32 ulCol );
 extern void		TrailSetAlpha( TRAIL_HANDLE hHandle, float fAlpha );
+extern void		TrailSetFadeProp( TRAIL_HANDLE hHandle, uint32 ulFadeHoldTimeMS, uint32 ulFadeOutTimeMS );
 extern void		TrailDelete( TRAIL_HANDLE hHandle, BOOL bDeleteImmediately );
 
 //--------------------------------------------------------------

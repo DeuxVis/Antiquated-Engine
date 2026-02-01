@@ -58,8 +58,10 @@ extern	void	MatrixIdentity( ENGINEMATRIX* pMat );
 
 
 #ifndef TRACTOR_STD_DEF_H
-typedef struct
+struct VECT
 {
+	VECT() { x = 0.0f; y = 0.0f; z = 0.0f; }
+	VECT( float vx, float vy, float vz ) { x = vx; y = vy; z = vz; }
 /*
 	union {	float	x;	float fX; };
     union {	float	y;	float fY; };
@@ -68,7 +70,7 @@ typedef struct
  	float	x;
     float	y;	
     float	z;	
-} VECT;
+};
 
 typedef VECT            MVECT;
 

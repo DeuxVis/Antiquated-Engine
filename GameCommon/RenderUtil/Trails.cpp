@@ -9,7 +9,8 @@
 
 //----------------------------------------------------------
 // TrailListInternal
-#define	MAX_POINTS_IN_TRAIL_LIST	48
+#define	MAX_POINTS_IN_TRAIL_LIST	512
+
 #define	MAX_TRAIL_VERTICES		((MAX_POINTS_IN_TRAIL_LIST*2)+2)
 #define	NUM_POLYS_IN_TRAIL		(((MAX_POINTS_IN_TRAIL_LIST-1)*2)+2)
 #define	NUM_TRAIL_INDICES		(NUM_POLYS_IN_TRAIL*3)
@@ -20,6 +21,7 @@ public:
 	typedef struct
 	{
 		VECT	xPos;
+		VECT	xTangent;
 		uint32	ulTimeAdded;
 		BOOL	mbIsVisible;
 		uint32	ulTintCol;
@@ -28,7 +30,9 @@ public:
 	TrailListInternal()
 	{
 		mnType = 0;
-		mulDecayTime = 7500;
+		mulFadeHoldTimeMS = 1000;
+		mulFadeOutTimeMS = 1000;
+
 		mfScale = 0.1f;
 		mhTrailVertexBuffer = NOTFOUND;
 		mhTrailIndexBuffer = NOTFOUND;
@@ -37,6 +41,7 @@ public:
 		mfAlpha = 0.5f;
 
 		mnNextTrailPoint = 0;
+		mnLastTrailPoint = NOTFOUND;
 		mulLastInternalAddTick = 0;
 
 		ZeroMemory( axTrailListInternal, sizeof(TRAIL_POINT) * MAX_POINTS_IN_TRAIL_LIST );
@@ -63,7 +68,8 @@ public:
 	void	SetScale( float fScale ) { mfScale = fScale; }
 	void	SetAlpha( float fAlpha ) { mfAlpha = fAlpha; }
 	void	SetTint( uint32 ulCol ) { mulTintCol = ulCol; }
-	void	SetDecayTime( uint32 ulTime ) { mulDecayTime = ulTime; }
+	void	SetDecayTime( uint32 ulTime ) { mulFadeHoldTimeMS = ulTime / 2; mulFadeOutTimeMS = ulTime / 2; }
+	void	SetFadeProp( uint32 ulFadeHoldTime, uint32 ulFadeOutTime ) { mulFadeHoldTimeMS = ulFadeHoldTime; mulFadeOutTimeMS = ulFadeOutTime; }
 	void	RequestDelete( BOOL bImmediately ) { mbWantsDelete = TRUE; mbDeleteImmediately = bImmediately; }
 
 	TRAIL_HANDLE	GetHandle( void ) { return( mnTrailHandle ); }
@@ -97,15 +103,18 @@ private:
 	uint32	GetColour( int nIndex );
 
 	void	AddPos( const VECT* pxIn, BOOL bDoDraw = TRUE );
-	BOOL	GetPos( int nIndex, VECT* pxOut );
+	BOOL	GetPos( int nIndex, VECT* pxOut, VECT* pxTangent );
 
 	void	InitTrailBuffers( void );
 	void	FreeVertexBuffer(void);
 	void	CalcTrailUVs( int nType );
 	void	UpdateInternal( void );
+	void	AddMidPoint( const VECT* pxIn, uint32 ulTime, int nRecurseLayer, BOOL bIsVisible );
+	void	AddPosImmediate( const VECT* pxIn, const VECT* pxTangent, uint32 ulTime, BOOL bIsVisible );
 
 	TRAIL_POINT		axTrailListInternal[MAX_POINTS_IN_TRAIL_LIST];
 	int		mnNextTrailPoint;
+	int		mnLastTrailPoint;
 	uint32	mulLastInternalAddTick;
 	int		mnType;
 	VECT	mxCurrentPos;
@@ -113,7 +122,8 @@ private:
 	VECT	mxLastValidRight;
 	float	mfScale;
 	float	mfAlpha;
-	uint32	mulDecayTime;
+	uint32	mulFadeHoldTimeMS;
+	uint32	mulFadeOutTimeMS;
 	uint32	mulTintCol;
 
 	int		mhTrailVertexBuffer;
@@ -191,20 +201,20 @@ uint32	TrailListInternal::GetColour( int nIndex )
 
 		if ( ulAliveTime > 0 )
 		{
-		uint32	nExpiryTime;
 		uint32	ulCol;
-		int		nColMax = 0xFF;
+		uint32		ulMaxAliveTime = mulFadeHoldTimeMS + mulFadeOutTimeMS;
 
-			if ( mnType == 0 )
+			if ( ulAliveTime < ulMaxAliveTime )
 			{
-				nColMax = 0xFF;
-			}
-			nExpiryTime = mulDecayTime;
-			if ( ulAliveTime < nExpiryTime )
-			{
-				ulAliveTime = ((nExpiryTime-ulAliveTime) * nColMax)/nExpiryTime;
-				ulCol = (ulAliveTime<<24) | axTrailListInternal[nActualIndex].ulTintCol;
-				ulCol = GetColWithModifiedAlpha( ulCol, mfAlpha );
+			float	fFadeMod = 1.0f;
+
+				if ( ulAliveTime > mulFadeHoldTimeMS )
+				{
+					fFadeMod = 1.0f - ((float)(ulAliveTime - mulFadeHoldTimeMS) / mulFadeOutTimeMS );
+				}
+
+				ulCol = 0xff000000 | axTrailListInternal[nActualIndex].ulTintCol;
+				ulCol = GetColWithModifiedAlpha( ulCol, mfAlpha * fFadeMod );
 				return( ulCol );
 			}
 		}
@@ -213,44 +223,107 @@ uint32	TrailListInternal::GetColour( int nIndex )
 	return( 0 );
 }
 
-BOOL	TrailListInternal::GetPos( int nIndex, VECT* pxOut )
+BOOL	TrailListInternal::GetPos( int nIndex, VECT* pxOut, VECT* pxTangent )
 {
 	if ( nIndex < MAX_POINTS_IN_TRAIL_LIST )
 	{
 	int	nActualIndex = (mnNextTrailPoint + nIndex) % MAX_POINTS_IN_TRAIL_LIST;
 		*pxOut = axTrailListInternal[nActualIndex].xPos;
+		*pxTangent = axTrailListInternal[nActualIndex].xTangent;
 		return( TRUE );
 	}
 	return( FALSE );
 }
 
-void	TrailListInternal::AddPos( const VECT* pxIn, BOOL bDoDraw )
+void	TrailListInternal::AddPosImmediate( const VECT* pxIn, const VECT* pxTangent, uint32 ulTime, BOOL bIsVisible )
 {
-uint32	ulCurrentTick = SysGetTick();
-
-	axTrailListInternal[ mnNextTrailPoint ].mbIsVisible = bDoDraw;
+	axTrailListInternal[ mnNextTrailPoint ].mbIsVisible = bIsVisible;
 	axTrailListInternal[ mnNextTrailPoint ].ulTintCol = mulTintCol;
-	if ( pxIn )
-	{
-		axTrailListInternal[ mnNextTrailPoint ].xPos = *pxIn;
-		axTrailListInternal[ mnNextTrailPoint ].ulTimeAdded = ulCurrentTick;
-	}
-	else
-	{
-		axTrailListInternal[ mnNextTrailPoint ].xPos.x = 0.0f;
-		axTrailListInternal[ mnNextTrailPoint ].xPos.y = 0.0f;
-		axTrailListInternal[ mnNextTrailPoint ].xPos.z = 0.0f;
-		axTrailListInternal[ mnNextTrailPoint ].ulTimeAdded = 0;
-	}
+	axTrailListInternal[ mnNextTrailPoint ].xPos = *pxIn;
+	axTrailListInternal[ mnNextTrailPoint ].xTangent = *pxTangent;
+	axTrailListInternal[ mnNextTrailPoint ].ulTimeAdded = ulTime;
+	mnLastTrailPoint = mnNextTrailPoint;
 	mnNextTrailPoint++;
 	mnNextTrailPoint %= MAX_POINTS_IN_TRAIL_LIST;
+
+	// Now clear the next in the circular buffer
 	axTrailListInternal[ mnNextTrailPoint ].mbIsVisible = FALSE;
 	if ( pxIn )
 	{
 		axTrailListInternal[ mnNextTrailPoint ].xPos = *pxIn;
 		axTrailListInternal[ mnNextTrailPoint ].ulTimeAdded = 0;
 	}
-	mulLastInternalAddTick = ulCurrentTick;
+	mulLastInternalAddTick = ulTime;
+}
+
+void	TrailListInternal::AddMidPoint( const VECT* pxIn, uint32 ulTime, BOOL bIsVisible, int nRecurseLayer )
+{
+VECT*		pxLastPos = &axTrailListInternal[ mnLastTrailPoint ].xPos;
+VECT		xMidPoint;
+uint32		ulMidTime;
+VECT	xTangent;
+float	fDot;
+VECT*	pxLastTangent = &axTrailListInternal[mnLastTrailPoint].xTangent;
+uint32		ulLastPointTime = axTrailListInternal[ mnLastTrailPoint ].ulTimeAdded;
+float		fDist = VectDist( pxIn, pxLastPos );
+VECT		xMidTangent;
+	
+	VectSub( &xTangent, pxIn, pxLastPos );
+	VectNormalize( &xTangent );
+
+	VectAdd( &xMidTangent, pxLastTangent, &xTangent );
+	VectNormalize( &xMidTangent );
+	
+	VectScale( &xMidTangent, &xMidTangent, fDist * 0.5f );
+	
+	VectAdd( &xMidPoint, pxLastPos, &xMidTangent );
+
+	ulMidTime = (ulTime + ulLastPointTime) / 2;
+
+	VectSub( &xTangent, &xMidPoint, pxLastPos );
+	VectNormalize( &xTangent );
+
+	// Compare the tangent with the previously added tangent
+	// If the difference is large, add another point midway  between this one and the last
+	fDot = VectDot( pxLastTangent, &xTangent );
+	if ( ( fDot < 0.9f ) &&
+		 ( nRecurseLayer < 8 ) )
+	{
+		AddMidPoint( &xMidPoint, ulMidTime, bIsVisible, nRecurseLayer + 1 );
+	}
+
+	AddPosImmediate( &xMidPoint, &xTangent, ulMidTime, bIsVisible );
+}
+
+void	TrailListInternal::AddPos( const VECT* pxIn, BOOL bIsVisible )
+{
+uint32	ulCurrentTick = SysGetTick();
+VECT	xTangent(0.0f,0.0f,0.0f);
+VECT	xEmpty;
+
+	if ( pxIn == NULL )
+	{
+		pxIn = &xEmpty;
+	}
+	else if ( mnLastTrailPoint != NOTFOUND )
+	{
+	VECT*		pxLastPos = &axTrailListInternal[ mnLastTrailPoint ].xPos;
+	const VECT*	pxLastTangent = &axTrailListInternal[mnLastTrailPoint].xTangent;
+	float	fDot;
+
+		VectSub( &xTangent, pxIn, pxLastPos );
+		VectNormalize( &xTangent );
+
+		// TODO - Compare the tangent with the previously added tangent
+		// If the difference is large, add another point midway  between this one and the last
+		fDot = VectDot( pxLastTangent, &xTangent );
+		if ( fDot < 0.9f )
+		{
+			AddMidPoint( pxIn, ulCurrentTick, 0, bIsVisible );
+		}
+	}
+
+	AddPosImmediate( pxIn, &xTangent, ulCurrentTick, bIsVisible );
 	mxCurrentPos = *pxIn;
 }
 
@@ -260,6 +333,7 @@ uint32		ulCurrentTick = SysGetTick();
 
 	if ( axTrailListInternal[ mnNextTrailPoint ].ulTimeAdded != 0 )
 	{
+		// Clear points after 10 seconds
 		if ( ulCurrentTick - axTrailListInternal[ mnNextTrailPoint ].ulTimeAdded > 10000 )
 		{
 			axTrailListInternal[ mnNextTrailPoint ].xPos.x = 0.0f;
@@ -296,6 +370,7 @@ int		nNumPolysToDraw = -2;
 int		nNumVerts = 2;
 VECT	xCamDir = *EngineCameraGetDirection();
 VECT	xTangent;
+VECT	xNextTangent;
 VECT	xRight = { 0.0f, 1.0f, 0.0f };
 VECT	xBlendRight = { 0.0f, 1.0f, 0.0f };
 int		nBlendHistoryCount = 4;
@@ -304,7 +379,7 @@ float	fScale = mfScale;
 uint32	ulLastCol;
 BOOL	bStillAlive = FALSE;
 BOOL	bDebugColFlag = FALSE;
-float	fDot;
+
 int		blendCycle = 0;
 
 	for( int blendLoop = 0; blendLoop < nBlendHistoryCount; blendLoop++ )
@@ -317,39 +392,16 @@ int		blendCycle = 0;
 		EngineVertexBufferLock( mhTrailVertexBuffer, FALSE );
 		pxVertices = EngineVertexBufferGetBufferPointer( mhTrailVertexBuffer, MAX_TRAIL_VERTICES );
 			
-		for ( nLoop = 0; nLoop < (MAX_POINTS_IN_TRAIL_LIST); nLoop++ )
+		for ( nLoop = 0; nLoop < (MAX_POINTS_IN_TRAIL_LIST-2); nLoop++ )
 		{
-			if ( GetPos( nLoop, &xPos ) == TRUE )
+			if ( GetPos( nLoop, &xPos, &xTangent ) == TRUE )
 			{
 				if ( ( xPos.x != 0.0f ) ||
 					 ( xPos.z != 0.0f ) )
 				{ 
-					if ( GetPos( nLoop+1, &xNextPos ) == TRUE )
-					{
-						bDebugColFlag = FALSE;
-
-						xTangent.x = xNextPos.x - xPos.x;
-						xTangent.y = xNextPos.y - xPos.y;
-						xTangent.z = xNextPos.z - xPos.z;
-						if ( VectGetLength( &xTangent ) < 0.01f )
-						{
-							xTangent = mxLastValidTangent;
-						}
-						else
-						{
-							mxLastValidTangent = xTangent;
-						}
-						VectNormalize( &xTangent );
-						fDot = VectDot( &xTangent, &xCamDir );
-						VectCross( &xRight, &xTangent, &xCamDir );
-						VectNormalize( &xRight );	
-						if ( xRight.z < 0.0f )
-						{
-							VectScale(&xRight, &xRight, -1.0f );
-//							bDebugColFlag = TRUE;
-						}
-					}
-					ulLastCol= GetColour( nLoop );
+					VectCross( &xRight, &xTangent, &xCamDir );
+					VectNormalize( &xRight );	
+					ulLastCol = GetColour( nLoop );
 					if ( ulLastCol != 0 )
 					{
 						bStillAlive = TRUE;
@@ -361,11 +413,13 @@ int		blendCycle = 0;
 						ulLastCol |= 0x0000f0;
 					}
 					xBlendRight = xRight;
+#ifdef TRAIL_VEC_RIGHT_BLENDING
 					for( int blendLoop = 0; blendLoop < nBlendHistoryCount; blendLoop++ )
 					{
 						VectAdd( &xBlendRight, &xBlendRight, &axLastRight[blendLoop] );
 					}
 					VectScale( &xBlendRight, &xBlendRight, 1.0f / (float)nBlendHistoryCount );
+#endif
 
 					pxVertices->color = ulLastCol;
 					pxVertices->position.x = xPos.x + (xBlendRight.x * fScale);
@@ -460,6 +514,7 @@ float	fBaseV = 0.005f;
 		puwIndexBuff[0] = nRow*2;
 		puwIndexBuff[1] = (nRow*2)+1;
 		puwIndexBuff[2] = (nRow*2)+2;
+
 		puwIndexBuff[3] = (nRow*2)+1;
 		puwIndexBuff[4] = (nRow*2)+3;
 		puwIndexBuff[5] = (nRow*2)+2;
@@ -665,6 +720,16 @@ TrailListInternal*		pTrail = TrailFind( hHandle );
 	{
 		pTrail->SetAlpha(fAlpha);
 	}	
+}
+
+void		TrailSetFadeProp( TRAIL_HANDLE hHandle, uint32 ulFadeHoldTimeMS, uint32 ulFadeOutTimeMS )
+{
+TrailListInternal*		pTrail = TrailFind( hHandle );
+	
+	if ( pTrail )
+	{
+		pTrail->SetFadeProp( ulFadeHoldTimeMS, ulFadeOutTimeMS );
+	}
 }
 
 

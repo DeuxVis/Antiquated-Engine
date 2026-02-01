@@ -16,10 +16,10 @@ public:
 	const std::string&		GetText() const { return mTitle; }
 
 protected:
-	UIXListBoxEntry( UIXListBox* pListbox, const char* szTitle, uint32 ulUserParam );
+	UIXListBoxEntry( UIXListBox* pListbox, const char* szTitle, uint32 ulUserParam, BOOL bSelectable );
 
 	UIXRECT					Render( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
-	UIXListBoxEntry*		AddSubElement( const char* szElementName, uint32 ulElementParam );
+	UIXListBoxEntry*		AddSubElement( const char* szElementName, uint32 ulElementParam, BOOL bSelectable = TRUE );
 
 	UIXRECT					GetLastRenderRect() const { return( mLastRender ); }
 private:
@@ -29,6 +29,7 @@ private:
 	std::vector<UIXListBoxEntry*>	mChildren;
 	UIXRECT							mLastRender;
 	uint32							mIndex;
+	BOOL							mbSelectable;
 };
 
 typedef	void(*fnListboxSelectionChangedCallback)( UIXObject* pxSourceObject, uint32 ulElementParam );
@@ -39,7 +40,7 @@ class UIXListBox : public UIXObject
 friend class UIX;
 friend class UIXListBoxEntry;
 public:
-	UIXListBoxEntry*		AddElement(	const char* szElementName, uint32 ulElementParam );
+	UIXListBoxEntry*		AddElement(	const char* szElementName, uint32 ulElementParam, BOOL bSelectable = TRUE );
 
 	void		SetSelectionChangedCallback( fnListboxSelectionChangedCallback func ) { mSelectionChangedCallback = func; }
 

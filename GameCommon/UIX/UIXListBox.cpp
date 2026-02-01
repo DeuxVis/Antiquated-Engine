@@ -5,17 +5,18 @@
 
 #include "UIXListBox.h"
 
-UIXListBoxEntry::UIXListBoxEntry( UIXListBox* pListbox, const char* szTitle, uint32 ulUserParam )
+UIXListBoxEntry::UIXListBoxEntry( UIXListBox* pListbox, const char* szTitle, uint32 ulUserParam, BOOL bSelectable )
 { 
 	mpListBox = pListbox; 
 	mTitle = szTitle; 
 	mulUserParam = ulUserParam; 
 	mIndex = pListbox->GetNextIndex( this ); 
+	mbSelectable = bSelectable;
 }
 
-UIXListBoxEntry*	UIXListBoxEntry::AddSubElement( const char* szElementName, uint32 ulElementParam )
+UIXListBoxEntry*	UIXListBoxEntry::AddSubElement( const char* szElementName, uint32 ulElementParam, BOOL bSelectable )
 {
-UIXListBoxEntry*	pNewElement = new UIXListBoxEntry( mpListBox, szElementName, ulElementParam );
+UIXListBoxEntry*	pNewElement = new UIXListBoxEntry( mpListBox, szElementName, ulElementParam, bSelectable );
 
 	mChildren.push_back( pNewElement );
 	return( pNewElement );
@@ -26,20 +27,27 @@ UIXRECT			UIXListBoxEntry::Render( InterfaceInstance* pInstance, UIXRECT rect )
 {
 	mLastRender = rect;
 	mLastRender.h = 21;
-	uint32	ulTextCol = 0xd0d0d0d0;
+	uint32	ulTextCol = 0xd0e0e0e0;
 
-	if ( UIHoverItem(  rect.x, rect.y, rect.w, 19 ) == TRUE )
+	if ( mbSelectable )
 	{
-		UIHoverIDSet( UIX_LISTBOX, mIndex, mpListBox->GetID() );
-		ulTextCol = 0xE0F0F0F0;
-		pInstance->Rect( 0, rect.x, rect.y, rect.w, 19, 0x40404040 );
-	}
+		if ( UIHoverItem(  rect.x, rect.y, rect.w, 19 ) == TRUE )
+		{
+			UIHoverIDSet( UIX_LISTBOX, mIndex, mpListBox->GetID() );
+			ulTextCol = 0xE0F0F0F0;
+			pInstance->Rect( 0, rect.x, rect.y, rect.w, 19, 0x40404040 );
+		}
 
-	if ( mpListBox->IsSelectable() )
-	{
+		if ( mpListBox->IsSelectable() )
+		{
 		UIXRECT		selectRect = rect;
-		selectRect.h = 19;
-		UIX::CheckForPress( mpListBox, selectRect, UIX_LISTBOX_SELECT, mulUserParam );
+			selectRect.h = 19;
+			UIX::CheckForPress( mpListBox, selectRect, UIX_LISTBOX_SELECT, mulUserParam );
+		}
+	}
+	else
+	{
+		ulTextCol = 0xa0808080;
 	}
 
 	pInstance->Text( 1, rect.x + 5, rect.y + 2, ulTextCol, 0, mTitle.c_str() );
@@ -119,9 +127,9 @@ UIXRECT		lineRect = GetActualRenderRect( rect );
 }
 
 
-UIXListBoxEntry*		UIXListBox::AddElement(	const char* szElementName, uint32 ulElementParam )
+UIXListBoxEntry*		UIXListBox::AddElement(	const char* szElementName, uint32 ulElementParam, BOOL bSelectable )
 {
-UIXListBoxEntry*	pNewElement = new UIXListBoxEntry( this, szElementName, ulElementParam );
+UIXListBoxEntry*	pNewElement = new UIXListBoxEntry( this, szElementName, ulElementParam, bSelectable );
 
 	mListBoxEntries.push_back( pNewElement );
 	return( pNewElement );

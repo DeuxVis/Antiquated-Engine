@@ -149,7 +149,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 		{	
 			if ( UIX::CheckForPress( this, drawRect, mulButtonID, mulButtonParam ) )
 			{		
-				pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x20FFFFFF );				
+				pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x30FFe0c0 );				
 			}
 		}
 		break;

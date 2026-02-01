@@ -285,12 +285,19 @@ const char*		pcFilenameRunner = szFilenameIn;
 		pcFilenameRunner++;
 	}
 
-	if ( *pcFilenameRunner == '\\')
+	if ( *pcDirRunner == 0 )
 	{
-		pcFilenameRunner++;
-	}
+		if ( *pcFilenameRunner == '\\')
+		{
+			pcFilenameRunner++;
+		}
 
-	strcpy( pcOut, pcFilenameRunner );
+		strcpy( pcOut, pcFilenameRunner );
+	}
+	else
+	{
+		strcpy( pcOut, szFilenameIn );
+	}
 }
 
 void		GetDateString( uint32 ulUnixTime, char* pcOut )

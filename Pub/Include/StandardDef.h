@@ -342,12 +342,15 @@ typedef unsigned char			byte;
 typedef unsigned long long		u64;
 
 #ifndef TRACTOR_ENGINE_H
-typedef struct
+struct VECT
 {
+	VECT() { x = 0.0f; y = 0.0f; z = 0.0f; }
+	VECT( float vx, float vy, float vz ) { x = vx; y = vy; z = vz; }
+
    float	x;
    float	y;
    float	z;
-} VECT;
+};
 
 typedef struct
 {
