@@ -22,12 +22,12 @@ protected:
 	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT pDisplayRect );
 	static void			RegisterControlHandlers();
 	virtual bool		OnSelected( int nButtonID, uint32 ulParam );
+	virtual void		EndEdit();
 
 private:
 	static int		TextBoxKeyboardMessageHandlerStatic( int nResponseCode, const char* szInputText, void* pUserObj );
 	
 	int		OnKeyboardMessage( int nResponseCode, const char* szInputText );
-	void	EndEdit();
 	BOOL	OnSelect();
 
 	std::string			mText;

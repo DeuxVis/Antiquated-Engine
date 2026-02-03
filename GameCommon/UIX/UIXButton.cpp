@@ -14,20 +14,26 @@ UIXButton::~UIXButton()
 	}
 }
 
+void	UIXButton::EndEdit()
+{
+	if ( mfnLabelEditCallback )
+	{
+		mTitle = PlatformKeyboardGetInputString(FALSE);
+		PlatformKeyboardSetInputString( "" );
+		if ( mfnLabelEditCallback(this, mTitle.c_str() ) == false )
+		{
+			mTitle = mPreEditTitle;
+		}
+	}
+	UIX::SetTextEditFocus(NULL);
+}
+
 int		UIXButton::OnKeyboardMessage( int nResponseCode, const char* szInputText )
 {
 	switch( nResponseCode )
 	{
 	case 1:	// press enter
-		if ( mfnLabelEditCallback )
-		{
-			mTitle = szInputText;
-			PlatformKeyboardSetInputString( "" );
-			if ( mfnLabelEditCallback(this, mTitle.c_str() ) == false )
-			{
-				mTitle = mPreEditTitle;
-			}
-		}
+		EndEdit();
 		break;
 	case 2:		// press TAB
 

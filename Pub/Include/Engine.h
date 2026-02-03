@@ -475,6 +475,7 @@ TEXTURE_HANDLE	EngineCreateTextureFromBackBuffer( int nNewTexW, int nNewTexH );
 
 #ifdef USE_D3DEX_INTERFACE
 void	EngineInitDX( LPDIRECT3DDEVICE9EX );
+void	EngineRemoveDXDevice( );
 LPDIRECT3DDEVICE9EX		EngineGetDXDevice(void);
 #else
 void	EngineInitDX( LPDIRECT3DDEVICE9 );

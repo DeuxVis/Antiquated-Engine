@@ -1665,6 +1665,11 @@ void	EngineDefaultState( void )
 	}
 }
 
+void	EngineRemoveDXDevice( )
+{
+	mpEngineDevice = NULL;
+}
+
 void	EngineInitDX( LPGRAPHICSDEVICE pDevice )
 {
 	mpEngineDevice = pDevice;

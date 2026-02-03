@@ -89,6 +89,7 @@ enum UIX_VALUE_CALLBACK_FLAGS
 	IS_BEING_MODIFIED,
 };
 
+// Value Update callbacks are used by sliders etc to both inform the user of the current value(s) of the slider and accept changes to the value from the outside
 typedef	float(*fnValueUpdateCallback)( uint32 ulUIXObjectID, float fUIXValue, float fUIXMinRangeVal, float fUIXMaxRangeValue, uint32 ulUserParam, BOOL bIsUIHeld );
 typedef	void(*fnDragReceiveCallback)( UIXObject* pxSourceObject, uint32 ulDragParam, UIXObject* pxDestObject, uint32 ulDragDestParam );
 typedef	void(*fnSelectedCallback)( UIXObject* pxSourceObject, uint32 ulSelectParam );
@@ -149,6 +150,7 @@ protected:
 	virtual void		OnMouseWheel( float fAmount ) {}
 	virtual bool		OnSelected( int nButtonID, uint32 ulParam ) { return( true ); }		// Returns true to indicate we should continue to call any other selectionCallbacks (i.e. we can guarantee the current object is still valid (HACK))
 	virtual void		OnCloseAllMenus() {}
+	virtual void		EndEdit() {}
 
 	void		Update( float delta );
 	UIXRECT		Render( InterfaceInstance* pInterface, UIXRECT rect );
@@ -243,7 +245,7 @@ public:
 
 	static void							SetMousewheelHoverObject(UIXObject* pObject);
 
-	static void							SetTextEditFocus( UIXObject* pObject ) { mspTextEditFocusObject = pObject; }
+	static void							SetTextEditFocus( UIXObject* pObject );
 	static UIXObject*					GetTextEditFocus() { return( mspTextEditFocusObject ); }
 
 	static BOOL							IsMouseHover( UIXRECT rect );

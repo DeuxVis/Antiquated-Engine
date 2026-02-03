@@ -101,6 +101,7 @@ protected:
 	BOOL	mboInterfaceInitialised = FALSE;
 	bool	mbIsInScene = false;
 	HWND	mhWindow;
+	int		mnAdapterUsedForDevice = 0;
 
 	InterfaceRECT		m_DrawRect;
 	int		mnRenderSurfaceWidth = 900;

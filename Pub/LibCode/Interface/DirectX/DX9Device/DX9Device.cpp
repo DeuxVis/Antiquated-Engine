@@ -439,11 +439,26 @@ HRESULT		hr;
 	}
 }
 
-BOOL		InterfaceInternalsDX::GetDXDeviceCreateParams( HWND hWindow, BOOL boMinPageSize,  D3DPRESENT_PARAMETERS* pD3Dpp, int nBackBufferMinW, int nBackBufferMinH )
+int		InterfaceInternalsDX::GetDXDeviceCreateParams( HWND hWindow, BOOL boMinPageSize,  D3DPRESENT_PARAMETERS* pD3Dpp, int nBackBufferMinW, int nBackBufferMinH )
 {
 D3DDISPLAYMODE d3ddm;
 
-	if( FAILED( mpD3D->GetAdapterDisplayMode( D3DADAPTER_DEFAULT, &d3ddm ) ) )
+	HMONITOR hMonitor = MonitorFromWindow(hWindow, MONITOR_DEFAULTTONEAREST);
+	MONITORINFOEX mi;
+	mi.cbSize = sizeof(mi);
+	GetMonitorInfo(hMonitor, &mi);
+
+	int adapterIndex = 0;
+	for (UINT i = 0; i < mpD3D->GetAdapterCount(); ++i) 
+	{
+	    if (mpD3D->GetAdapterMonitor(i) == hMonitor)
+		{
+		    adapterIndex = i;
+	        break;
+	    }
+	}
+
+	if( FAILED( mpD3D->GetAdapterDisplayMode( adapterIndex, &d3ddm ) ) )
 	{
 		PANIC_IF(TRUE,"Couldn't get display mode" );
 		return( NULL );
@@ -455,6 +470,7 @@ D3DDISPLAYMODE d3ddm;
 		pD3Dpp->Windowed = FALSE;
 		pD3Dpp->BackBufferWidth  = d3ddm.Width;
 		pD3Dpp->BackBufferHeight = d3ddm.Height;
+		pD3Dpp->FullScreen_RefreshRateInHz = d3ddm.RefreshRate;
 		// Set fullscreen-mode style
 		InterfaceSetWindowStyle( hWindow, true );
 	}
@@ -494,7 +510,7 @@ D3DDISPLAYMODE d3ddm;
 		// If Fullscreen.. find a suitable display mode that best matches the requested format
 		if ( mboFullScreen )
 		{
-        DWORD dwNumAdapterModes = mpD3D->GetAdapterModeCount( 0, d3ddm.Format );
+        DWORD dwNumAdapterModes = mpD3D->GetAdapterModeCount( adapterIndex, d3ddm.Format );
 		int		nWidthGap;
 		int		nBestWidthGap = 99999999;
 		int		nBestWidth;
@@ -504,7 +520,7 @@ D3DDISPLAYMODE d3ddm;
 			for( UINT iMode = 0; iMode < dwNumAdapterModes; iMode++ )
 			{
 			D3DDISPLAYMODE DisplayMode;
-	            mpD3D->EnumAdapterModes( 0, d3ddm.Format, iMode, &DisplayMode );
+	            mpD3D->EnumAdapterModes( adapterIndex, d3ddm.Format, iMode, &DisplayMode );
 
 				nWidthGap = abs( (int)(DisplayMode.Width - pD3Dpp->BackBufferWidth) );
 				if ( nWidthGap < nBestWidthGap )
@@ -532,11 +548,11 @@ D3DDISPLAYMODE d3ddm;
 	// Apply full-scene antialias if available and on in options
 	if ( InterfaceGetOption( FSAA ) == 1 )
 	{
-		if( SUCCEEDED(mpD3D->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3ddm.Format, FALSE, D3DMULTISAMPLE_4_SAMPLES, NULL ) ) )
+		if( SUCCEEDED(mpD3D->CheckDeviceMultiSampleType( adapterIndex, D3DDEVTYPE_HAL, d3ddm.Format, FALSE, D3DMULTISAMPLE_4_SAMPLES, NULL ) ) )
 		{
 			pD3Dpp->MultiSampleType = D3DMULTISAMPLE_4_SAMPLES;
 		}
-		else if ( SUCCEEDED(mpD3D->CheckDeviceMultiSampleType( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, d3ddm.Format, FALSE, D3DMULTISAMPLE_2_SAMPLES, NULL ) ) )
+		else if ( SUCCEEDED(mpD3D->CheckDeviceMultiSampleType( adapterIndex, D3DDEVTYPE_HAL, d3ddm.Format, FALSE, D3DMULTISAMPLE_2_SAMPLES, NULL ) ) )
 		{
 			pD3Dpp->MultiSampleType = D3DMULTISAMPLE_2_SAMPLES;
 		}
@@ -593,7 +609,7 @@ D3DDISPLAYMODE d3ddm;
 		}
 	}
 
-	return( TRUE );
+	return( adapterIndex );
 }
 
 
@@ -641,7 +657,6 @@ LPGRAPHICSDEVICE	pNewGraphicsDevice;
 	{
 	D3DXVECTOR3 xVect;
 	HRESULT		hr;
-	D3DDISPLAYMODE d3ddm;
 	bool		bFullScreenAntiAlias = false;
 
 		mboMinPageSize = boMinPageSize;
@@ -672,39 +687,56 @@ LPGRAPHICSDEVICE	pNewGraphicsDevice;
 			}
 		}
 
-		int		nNumAdapters = mpD3D->GetAdapterCount();
-
-		// Get the current desktop display mode, so we can set up a back
-		// buffer of the same format
-		if( FAILED( mpD3D->GetAdapterDisplayMode( D3DADAPTER_DEFAULT, &d3ddm ) ) )
-		{
-			PANIC_IF(TRUE,"Couldn't get display mode" );
-			return;
-		}
-		D3DADAPTER_IDENTIFIER9	identifier;
-		mpD3D->GetAdapterIdentifier( 0, 0, &identifier );
 		// Set up the present parameters - This is generally what odd vid cards have a problem with
 		D3DPRESENT_PARAMETERS d3dpp;
 		ZeroMemory( &d3dpp, sizeof(d3dpp) );
 
-		mpInterfaceInternals->GetDXDeviceCreateParams( hWindow, boMinPageSize, &d3dpp, nBackBufferMinW, nBackBufferMinH );
+		int		nAdapterToUse = mpInterfaceInternals->GetDXDeviceCreateParams( hWindow, boMinPageSize, &d3dpp, nBackBufferMinW, nBackBufferMinH );
 
+		// If we've changed which monitor we're displaying on, we'll need ro recreate the d3dDevice
+		if ( ( mpInterfaceInternals->mpInterfaceD3DDevice ) &&
+			 ( mnAdapterUsedForDevice != nAdapterToUse ) )
+		{	
+			mpInterfaceInternals->mpInterfaceD3DDevice->SetTexture(0, NULL);
+			mpInterfaceInternals->mpInterfaceD3DDevice->SetTexture(1, NULL);
+			mpInterfaceInternals->mpInterfaceD3DDevice->EvictManagedResources();
+//			mpInterfaceInternals->mpInterfaceD3DDevice->Reset();
+			uint32 ulRefCount = mpInterfaceInternals->mpInterfaceD3DDevice->Release();
+			mpInterfaceInternals->mpInterfaceD3DDevice = NULL;
+			EngineRemoveDXDevice();
+
+		}
 		mLastUsedD3dpp = d3dpp;
 
 		pNewGraphicsDevice = mpInterfaceInternals->mpInterfaceD3DDevice;
 		if ( pNewGraphicsDevice == NULL )
 		{
-		int		nAdapterToUse = D3DADAPTER_DEFAULT;
 
 //		D3DDISPLAYMODEEX*		pDisplayModeEx;
 
 //			hr = mpD3D->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWindow,D3DCREATE_SOFTWARE_VERTEXPROCESSING, &d3dpp, &pNewGraphicsDevice );
 
 #ifdef USE_D3DEX_INTERFACE
-			hr = mpD3D->CreateDeviceEx( nAdapterToUse, D3DDEVTYPE_HAL, hWindow, D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, NULL, &pNewGraphicsDevice );								  
+			if ( mboFullScreen )
+			{
+			D3DDISPLAYMODEEX	displayModeEx;
+				displayModeEx.Size = sizeof( displayModeEx );
+				displayModeEx.Width = d3dpp.BackBufferWidth;
+				displayModeEx.Height = d3dpp.BackBufferHeight;
+				displayModeEx.Format = d3dpp.BackBufferFormat;
+				displayModeEx.RefreshRate = d3dpp.FullScreen_RefreshRateInHz;
+				displayModeEx.ScanLineOrdering = D3DSCANLINEORDERING_PROGRESSIVE ;
+				hr = mpD3D->CreateDeviceEx( nAdapterToUse, D3DDEVTYPE_HAL, hWindow, D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &displayModeEx, &pNewGraphicsDevice );								  
+			}
+			else
+			{
+				hr = mpD3D->CreateDeviceEx( nAdapterToUse, D3DDEVTYPE_HAL, hWindow, D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, NULL, &pNewGraphicsDevice );								  
+			
+			}
 #else
 			hr = mpD3D->CreateDevice( nAdapterToUse, D3DDEVTYPE_HAL, hWindow, D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &pNewGraphicsDevice );								  
 #endif
+			mnAdapterUsedForDevice = nAdapterToUse;
 
 			d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE;
 

@@ -771,7 +771,7 @@ HRESULT	hr;
 
 TEXTURE_HANDLE		EngineCreateTextureHandleFromRawTexture( LPGRAPHICSTEXTURE pTexture )
 {
-int		nLoop = EngineGetFreeTextureHandle();
+int		nLoop = EngineGetFreeTextureHandle(); 
 
 	maTextureReferences[nLoop].pTexture = pTexture;
 	maTextureReferences[nLoop].nUsed = 1;

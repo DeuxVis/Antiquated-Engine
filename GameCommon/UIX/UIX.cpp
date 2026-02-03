@@ -51,9 +51,6 @@ UIXObject::UIXObject( UIXObject* pParent, uint32 uID, UIXRECT rect )
 
 UIXObject::~UIXObject()
 {
-	// todo - Get rid of this by using smart(er) pointers for things like the mousewheel hover
-	if ( UIX::mspMousewheelHoverObject == this ) UIX::mspMousewheelHoverObject = NULL;
-
 	if ( mbDeleteUserObjectOnDestroy )
 	{
 		SAFE_DELETE( mpUserObject );
@@ -508,8 +505,11 @@ void		UIX::Shutdown()
 
 void		UIX::DeleteObject( UIXObject* pObject )
 {
-	// HACK - Should shift to smart pointers
+		// todo - Get rid of this by using smart(er) pointers for things like the mousewheel hover
+	// HACK - Should shift to smart pointers	
 	if ( mspDragDestinationHover == pObject ) mspDragDestinationHover = NULL;
+	if ( mspTextEditFocusObject == pObject ) mspTextEditFocusObject = NULL;
+	if ( mspMousewheelHoverObject == pObject ) mspMousewheelHoverObject = NULL;
 
 	msPagesList.erase( std::remove(msPagesList.begin(), msPagesList.end(), pObject), msPagesList.end() );
 	msComponentIDMap[pObject->GetID()] = NULL;
@@ -579,6 +579,19 @@ UIXPage*		pNewPage = new UIXPage( NULL, msulNextObjectID++, rect );
 	msPagesList.push_back( pNewPage );
 	return( pNewPage );
 }
+
+void			UIX::SetTextEditFocus( UIXObject* pObject )
+{
+	// If we're switching to a new text box while another was being edited, save out the old one
+	if ( ( mspTextEditFocusObject != NULL ) &&
+		 ( pObject != NULL ) )
+	{
+		mspTextEditFocusObject->EndEdit();
+	}
+	mspTextEditFocusObject = pObject;
+}
+
+
 
 UIXText*		UIX::AddText( UIXObject* pxContainer, UIXRECT rect, uint32 ulCol, int font, UIX_TEXT_FLAGS fontFlags, const char* szTitle, ... )
 {
