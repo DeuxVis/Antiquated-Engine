@@ -210,16 +210,27 @@ int		nLoop = 1;
 	PANIC_IF( TRUE, "DX11 EngineCreateTexture TBI" );
 #else
 	D3DFORMAT	 d3dFormat;
-	if ( format == 0 )
+	switch ( format )
 	{
+	case 0:
 		d3dFormat = D3DFMT_R5G6B5;
+		break;
+	case 2:
+		d3dFormat = D3DFMT_X8R8G8B8;
+		break;
+	default:
+		d3dFormat = D3DFMT_A8R8G8B8;
+		break;
+	}
+
+	if ( format == 2 )
+	{
+		mpEngineDevice->CreateTexture(nWidth,nHeight,1,D3DUSAGE_DYNAMIC,d3dFormat,D3DPOOL_DEFAULT, &pTexture, NULL );
 	}
 	else
 	{
-		d3dFormat = D3DFMT_A8R8G8B8;
+		mpEngineDevice->CreateTexture(nWidth,nHeight,1,0,d3dFormat,D3DPOOL_MANAGED, &pTexture, NULL );
 	}
-
-	mpEngineDevice->CreateTexture(nWidth,nHeight,1,0,d3dFormat,D3DPOOL_MANAGED, &pTexture, NULL );
 #endif
 
 	if ( pTexture != NULL ) 

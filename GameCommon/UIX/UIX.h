@@ -66,11 +66,12 @@ enum UIX_TEXT_FLAGS
 
 enum UIX_SLIDER_MODE
 {
-	VALUE,
-	ANGLE,
-	VALUERANGE,
-	VERTICAL_VALUE,
-	SLIDER_PLUSMINUS_VALUE,
+	SLIDERMODE_VALUE,
+	SLIDERMODE_ANGLE,
+	SLIDERMODE_VALUERANGE,
+	SLIDERMODE_VERTICAL_VALUE,
+	SLIDERMODE_PLUSMINUS_VALUE,
+	SLIDERMODE_VALUE_WITH_CONSTRAINTS,
 };
 
 enum UIX_CHECKBOX_MODE
@@ -88,7 +89,7 @@ enum UIX_VALUE_CALLBACK_FLAGS
 	IS_BEING_MODIFIED,
 };
 
-typedef	float(*fnValueUpdateCallback)( uint32 ulUIXObjectID, float fUIXValue, float fUIXValue2, uint32 ulUserParam, BOOL bIsUIHeld );
+typedef	float(*fnValueUpdateCallback)( uint32 ulUIXObjectID, float fUIXValue, float fUIXMinRangeVal, float fUIXMaxRangeValue, uint32 ulUserParam, BOOL bIsUIHeld );
 typedef	void(*fnDragReceiveCallback)( UIXObject* pxSourceObject, uint32 ulDragParam, UIXObject* pxDestObject, uint32 ulDragDestParam );
 typedef	void(*fnSelectedCallback)( UIXObject* pxSourceObject, uint32 ulSelectParam );
 
@@ -221,7 +222,7 @@ public:
 	static UIXButton*					AddButton( UIXObject* pxContainer, UIXRECT rect, eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL IsBlocking = TRUE, uint32 ulCol = 0xD0404040, int iconNum = 0 );
 	static UIXTextBox*					AddTextBox( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szDefaultText );
 	static UIXListBox*					AddListBox( UIXObject* pxContainer, UIXRECT rect, int mode = 0, BOOL bContentsDraggable = FALSE, int dragItemType = 0 );
-	static UIXSlider*					AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode = VALUE, uint32 ulUserParam = 0, float fMin = 0.0f, float fMax = 1.0f, float fInitial = 0.0f, float fMinStep = 0.1f, const char* szText = NULL );
+	static UIXSlider*					AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode = SLIDERMODE_VALUE, uint32 ulUserParam = 0, float fMin = 0.0f, float fMax = 1.0f, float fInitial = 0.0f, float fMinStep = 0.1f, const char* szText = NULL );
 	static UIXDropdown*					AddDropdown( UIXObject* pxContainer, UIXRECT rect );
 	static UIXText*						AddText( UIXObject* pxContainer, UIXRECT rect, uint32 ulCol = 0xc0c0c0c0, int font = 0, UIX_TEXT_FLAGS fontFlags = NONE,  const char* szTitle = NULL, ... );
 	static UIXShape*					AddShape( UIXObject* pxContainer, UIXRECT rect, int mode = 0, BOOL bBlocks = FALSE, uint32 ulCol1 = 0xC0C0C0C0, uint32 ulCol2 = 0xC0C0C0C0, uint32 ulButtonID = 0, uint32 ulButtonParam = 0 );
