@@ -122,40 +122,58 @@ BOOL	bMouseIsOverSectionHeader = FALSE;
 	return displayRect;
 }
 
-void	UIXCollapsableSection::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress )
+BOOL	UIXCollapsableSection::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress )
 {
-	if ( bFirstPress )
+	if ( mDragItemType != 0 )
 	{
-		mDragRectOriginal = GetLastRenderRect();
-		UIX::SetDragItemType( mDragItemType, this, GetID() );
-		UIGetCurrentCursorPosition( &mDragRectMouseOriginal.x, &mDragRectMouseOriginal.y );
-	}
-	else if ( bIsHeld ) 
-	{
+		if ( bFirstPress )
+		{
+			mDragRectOriginal = GetLastRenderRect();
+			UIX::SetDragItemType( mDragItemType, this, GetID() );
+			UIGetCurrentCursorPosition( &mDragRectMouseOriginal.x, &mDragRectMouseOriginal.y );
+		}
+		else if ( bIsHeld ) 
+		{
 	
+		}
+		else  // Just released
+		{
+		int		mouseX, mouseY;
+
+			UIX::EndDragItemType( mDragItemType );
+			if ( ( UIX::GetDragDestinationHover() != NULL ) &&
+				 ( UIX::GetDragDestinationHover() != this ) )
+			{
+				return( TRUE );
+			}
+			else
+			{
+				// If cursor has remained within the original section rect, treat it as a press (collapse the tab)
+				UIX::CheckForPress( this, mLastHeaderRender, UIX_COLLAPSABLE_SECTION_HEADER, 0 );		
+			}
+		}
 	}
-	else  // Just released
+	else
 	{
-	int		mouseX, mouseY;
-
-		UIX::EndDragItemType( mDragItemType );
-
-		// If cursor has remained within the original section rect, treat it as a press (collapse the tab)
-		UIGetCurrentCursorPosition( &mouseX, &mouseY );
-
-		UIX::CheckForPress( this, mLastHeaderRender, UIX_COLLAPSABLE_SECTION_HEADER, 0 );
+		// Just released
+		if ( bIsHeld ) 
+		{
+			UIX::CheckForPress( this, mLastHeaderRender, UIX_COLLAPSABLE_SECTION_HEADER, 0 );
+		}		 
 	}
+	return( FALSE );
 }
 
 
-void	UIXCollapsableSection::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
+BOOL	UIXCollapsableSection::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
 {
 UIXCollapsableSection*		pSection = (UIXCollapsableSection*)UIX::FindUIXObjectByID( ulIDParam );
 
 	if ( pSection )
 	{
-		pSection->HoldHandler( ulParam, bIsHeld, bFirstPress );
+		return( pSection->HoldHandler( ulParam, bIsHeld, bFirstPress ) );
 	}
+	return( FALSE );
 }
 
 

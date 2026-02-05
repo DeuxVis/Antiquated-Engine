@@ -135,7 +135,7 @@ UIXListBoxEntry*	pNewElement = new UIXListBoxEntry( this, szElementName, ulEleme
 	return( pNewElement );
 }
 
-void	UIXListBox::HoldHandler( uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress )
+BOOL	UIXListBox::HoldHandler( uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress )
 {
 UIXListBoxEntry*		pListBoxElement = mListBoxEntriesFlatList[ulIndex];
 
@@ -147,6 +147,7 @@ UIXListBoxEntry*		pListBoxElement = mListBoxEntriesFlatList[ulIndex];
 			mDragRectOriginal = pListBoxElement->GetLastRenderRect();
 			UIX::SetDragItemType( mDragItemType, this, pListBoxElement->mIndex );
 			UIGetCurrentCursorPosition( &mDragRectMouseOriginal.x, &mDragRectMouseOriginal.y );
+			return( TRUE );
 		}
 	}
 	else if ( bIsHeld ) 
@@ -155,21 +156,30 @@ UIXListBoxEntry*		pListBoxElement = mListBoxEntriesFlatList[ulIndex];
 	}
 	else  // Just released
 	{
+		// TODO - Unify all this complex drag handling somewhere below
+		if ( ( mpDragHeldEntry ) &&
+			 ( UIX::GetDragDestinationHover() != NULL ) &&
+			 ( UIX::GetDragDestinationHover() != this ) )
+		{
+			mpDragHeldEntry = NULL;
+			UIX::EndDragItemType( mDragItemType );
+			return( TRUE );
+		}
 		mpDragHeldEntry = NULL;
-		UIX::EndDragItemType( mDragItemType );
 	}
-
+	return( FALSE );
 }
 
 
-void	UIXListBox::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
+BOOL	UIXListBox::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
 {
 UIXListBox*		pListBox = (UIXListBox*)UIX::FindUIXObjectByID( ulIDParam );
 
 	if ( pListBox )
 	{
-		pListBox->HoldHandler( ulParam, bIsHeld, bFirstPress );
+		return( pListBox->HoldHandler( ulParam, bIsHeld, bFirstPress ) );
 	}
+	return( FALSE );
 }
 
 const UIXListBoxEntry*	UIXListBox::GetElementByListIndex( int index ) const

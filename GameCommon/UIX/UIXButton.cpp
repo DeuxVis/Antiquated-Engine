@@ -58,6 +58,12 @@ void	UIXButton::EnableLabelEdit( fnLabelEditCallback callbackFunc )
 	PlatformKeyboardActivate( 0, mTitle.c_str(), "" );
 }
 
+void	UIXButton::SetDraggable( int nDragItemType, uint32 ulDragParam )
+{
+	mDragItemType = nDragItemType;
+	mDragItemParam = ulDragParam;
+}
+
 void	UIXButton::Initialise( eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL bIsBlocking, uint32 ulCol, int iconNum )
 {
 	if ( szTitle )
@@ -80,6 +86,38 @@ UIXRECT		UIXButton::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect
 {
 UIXRECT		localRect = GetLocalPositionRect();
 UIXRECT		drawRect = GetActualRenderRect( displayRect );
+
+	SetLastRenderRect(drawRect);
+	
+	if ( UIHoverItem(  drawRect.x, drawRect.y, drawRect.w, drawRect.h ) == TRUE )
+	{
+		UIHoverIDSet( UIX_BUTTON, 0, GetID() );
+	}
+	if ( CheckDragHoverRegion( UIXRECT( drawRect.x, drawRect.y, drawRect.w, drawRect.h ) ) )
+	{
+		pInterface->OutlineBox( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x808080c0 );	
+		UIX::HoverAcceptDragItem( this );
+	}
+
+	if ( mbIsBeingDragged )
+	{
+	int		nMouseX, nMouseY;
+	int		nMoveDist;
+
+		// Check we've moved at least a bit away from the click pos otherwise its not really a drag
+		UIGetCurrentCursorPosition( &nMouseX, &nMouseY );
+		nMoveDist = abs(mDragRectMouseOriginal.x - nMouseX) + abs(mDragRectMouseOriginal.y - nMouseY );
+		if ( nMoveDist > 4 )
+		{
+		UIXRECT	xGrabOffset( nMouseX - mDragRectMouseOriginal.x, nMouseY - mDragRectMouseOriginal.y, 0, 0 );
+		UIXRECT xNewRect = mDragRectOriginal;
+
+			xNewRect.x += xGrabOffset.x;
+			xNewRect.y += xGrabOffset.y;
+			pInterface->Rect( 2, xNewRect.x, xNewRect.y, xNewRect.w, xNewRect.h, 0x40303030 );
+			pInterface->Text( 2, xNewRect.x + 5, xNewRect.y + 2, 0x80a0a0a0, 0, mTitle.c_str() );	
+		}
+	}
 
 	switch( mMode)
 	{
@@ -158,6 +196,10 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 				pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x30FFe0c0 );				
 			}
 		}
+		if ( mulRightPressButtonID )
+		{
+			UIX::CheckForRightButtonPress( this, drawRect, mulRightPressButtonID, mulRightPressButtonParam );	
+		}
 		break;
 	case UIXBUTTON_ICON:
 		{
@@ -199,6 +241,31 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 		// TODO - Properly centre the title
 		pInterface->Text( 1, drawRect.x + 6, drawRect.y + 1, 0xd0a0a0a0, 1, mTitle.c_str() );
 		break;
+	case UIXBUTTON_TEXT_WITH_COLLAPSABLE:
+		{
+		int		nFont = 3;
+		int		stringHeight = pInterface->GetStringHeight( mTitle.c_str(), nFont );
+		
+			pInterface->TextRight( 0, drawRect.x + drawRect.w, drawRect.y + ((drawRect.h-stringHeight)/2), 0xD0c0c0d0, 3, mTitle.c_str() );
+
+			if ( UIX::CheckForPress( this, drawRect, mulButtonID, mulButtonParam ) )
+			{			
+			UIXRECT		cogRect = drawRect;
+				cogRect.x += 2;
+				cogRect.y += 6;
+				cogRect.h -= 4;
+				cogRect.w = cogRect.h;
+				if ( !mbIsCollapsed )
+				{
+					pInterface->Triangle( 1, cogRect.x, cogRect.y, cogRect.x + 8, cogRect.y, cogRect.x + 4, cogRect.y + 8, 0xa0a0a0a0, 0xa0a0a0a0, 0xa0a0a0a0 );	
+				}
+				else
+				{
+					pInterface->Triangle( 1, cogRect.x, cogRect.y, cogRect.x + 6, cogRect.y + 4, cogRect.x, cogRect.y + 8, 0xa0a0a0a0, 0xa0a0a0a0, 0xa0a0a0a0 );	
+				}
+			}
+		}
+		break;
 	case UIXBUTTON_TEXT_WITH_SETTINGS:
 		{
 		int		nFont = 3;
@@ -232,3 +299,52 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 	return( displayRect );
 }
 
+
+BOOL		UIXButton::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress )
+{
+	if ( mDragItemType != 0 )
+	{
+		if ( bFirstPress )
+		{
+			mbIsBeingDragged = TRUE;
+			mDragRectOriginal = GetLastRenderRect();
+			UIX::SetDragItemType( mDragItemType, this, mDragItemParam );
+			UIGetCurrentCursorPosition( &mDragRectMouseOriginal.x, &mDragRectMouseOriginal.y );
+		}
+		else if ( bIsHeld ) 
+		{
+		
+		}
+		else  // Just released
+		{
+			if ( ( mbIsBeingDragged ) &&
+				 ( UIX::GetDragDestinationHover() != NULL ) &&
+				 ( UIX::GetDragDestinationHover() != this ) )
+			{
+				mbIsBeingDragged = FALSE;
+				UIX::EndDragItemType( mDragItemType );
+				return( TRUE );
+			}
+			mbIsBeingDragged = FALSE;
+		}
+	}
+	return( FALSE );
+}
+
+
+BOOL		UIXButton::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
+{
+UIXButton*		pButton = (UIXButton*)UIX::FindUIXObjectByID( ulIDParam );
+
+	if ( pButton )
+	{
+		return( pButton->HoldHandler( ulParam, bIsHeld, bFirstPress ) );
+	}
+	return( FALSE );
+}
+
+void		UIXButton::RegisterControlHandlers()
+{
+	UIRegisterHoldHandler( UIX_BUTTON, HoldHandlerStatic );
+
+}

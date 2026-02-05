@@ -19,8 +19,8 @@ protected:
 	virtual bool	OnSelected( int nButtonID, uint32 ulParam );
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
 
-	void			HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress );
-	static void		HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
+	BOOL			HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress );
+	static BOOL		HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
 	static void		RegisterControlHandlers();
 	
 	UIXRECT					GetLastRenderRect() const { return( mLastHeaderRender ); }

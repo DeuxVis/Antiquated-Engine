@@ -5,11 +5,12 @@
 #include "../UI/UI.h"
 #include "UIXDropdown.h"
 
-UIXDropdownEntry::UIXDropdownEntry( UIXDropdown* pParent, const char* szTitle, uint32 ulUserParam )
+UIXDropdownEntry::UIXDropdownEntry( UIXDropdown* pParent, const char* szTitle, uint32 ulUserParam, BOOL bGreyed )
 {
 	mTitle = szTitle;
 	mulUserParam = ulUserParam;
 	mpDropdown = pParent;
+	mbGreyed = bGreyed;
 
 }
 	
@@ -107,8 +108,6 @@ int			entryIndex = 0;
 	int			nMaxDropdownH;
 	bool		bScrollbarRequired = false;
 	int			nMaxNumEntriesInView = 1;
-
-
 		
 		expandedRect.y += renderRect.h + 1;
 		expandedRect.h = (mDropdownEntries.size() * 14) + 4;
@@ -161,11 +160,18 @@ int			entryIndex = 0;
 			if ((entryIndex >= mpScrollbar->GetScrollPosition()) &&
 				(entryIndex < mpScrollbar->GetScrollPosition() + nMaxNumEntriesInView))
 			{
-				pInterface->TextLimitWidth(2, lineRect.x + 3, lineRect.y, lineRect.w, 0xc0d0d0d0, 3, listEntry->GetText().c_str());
-
-				if (UIX::CheckForPress(this, lineRect, UIX_DROPDOWN_ENTRY, entryIndex))
+				if ( listEntry->IsGreyed() )
 				{
-					pInterface->Rect(1, lineRect.x, lineRect.y, lineRect.w, lineRect.h, 0xa0808080);
+					pInterface->TextLimitWidth(2, lineRect.x + 3, lineRect.y, lineRect.w, 0x80606060, 3, listEntry->GetText().c_str());			
+				}
+				else
+				{
+					pInterface->TextLimitWidth(2, lineRect.x + 3, lineRect.y, lineRect.w, 0xc0d0d0d0, 3, listEntry->GetText().c_str());
+
+					if (UIX::CheckForPress(this, lineRect, UIX_DROPDOWN_ENTRY, entryIndex))
+					{
+						pInterface->Rect(1, lineRect.x, lineRect.y, lineRect.w, lineRect.h, 0xa0808080);
+					}
 				}
 				lineRect.y += 14;
 			}
@@ -231,9 +237,9 @@ void		UIXDropdown::SetSelectedElementIndex( int index )
 	}
 }
 
-UIXDropdownEntry*	UIXDropdown::AddElement( const char* szElementName, uint32 ulElementParam )
+UIXDropdownEntry*	UIXDropdown::AddElement( const char* szElementName, uint32 ulElementParam, BOOL bGreyed )
 {
-UIXDropdownEntry*		pNewEntry = new UIXDropdownEntry( this, szElementName, ulElementParam );
+UIXDropdownEntry*		pNewEntry = new UIXDropdownEntry( this, szElementName, ulElementParam, bGreyed );
 
 	mDropdownEntries.push_back( pNewEntry );
 	return( pNewEntry );

@@ -11,7 +11,8 @@ enum
 };
 
 typedef	void(*UIButtonHandler)( int nButtonID, uint32 ulParam, uint32 ulIDParam );
-typedef	void(*UIHoldHandler)( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
+// UIHoldHandler should return TRUE if it has handled the MouseUp action and no further ui should react
+typedef	BOOL(*UIHoldHandler)( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
 
 typedef	void(*fnValueChangeCallback)( int hDropdownHandle, int nNewSelectedParam, void* pUserParam );
 

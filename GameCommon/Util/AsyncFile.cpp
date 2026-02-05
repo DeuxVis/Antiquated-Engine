@@ -210,7 +210,7 @@ public:
 	static	AsyncFileSelector&		Get();
 	~AsyncFileSelector();
 
-	BOOL	Add( int mode, const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback );
+	BOOL	Add( int mode, const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback, const char* szRootFolder = NULL );
 
 	void	ThreadFunc();
 	void	UpdatePendingCallbacks();
@@ -222,6 +222,7 @@ private:
 	std::string		mFileFilter;
 	std::string		mDialogTitle;
 	std::string		mDefaultFolder;
+	std::string		mRootFolder;
 	int				mFlags;
 	int				mMode;
 	fnAsyncFileSelectorCallback		mfnCallback = NULL;
@@ -289,11 +290,7 @@ void	AsyncFileSelector::ThreadFunc()
 				bRet = SysGetSaveFilenameDialog( szFileFilter, mDialogTitle.c_str(), mDefaultFolder.c_str(), mFlags, acSelectedFile );
 				break;
 			case 2:
-				{
-				char		acCurrentDir[MAX_PATH];	
-					SysGetCurrentDir( MAX_PATH, acCurrentDir );
-					bRet = SysBrowseForFolderDialog( mDialogTitle.c_str(), acCurrentDir, acSelectedFile, mDefaultFolder.c_str() );
-				}
+				bRet = SysBrowseForFolderDialog( mDialogTitle.c_str(), mRootFolder.c_str(), acSelectedFile, mDefaultFolder.c_str() );
 				break;
 			}
 
@@ -334,7 +331,7 @@ long WINAPI AsyncFileSelectorThread(long lParam)
 	return( 0 );
 }
 
-BOOL	AsyncFileSelector::Add( int mode, const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback )
+BOOL	AsyncFileSelector::Add( int mode, const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback, const char* szRootFolder )
 {
 	// Only allow 1 file dialog open at a time
 	if ( !mfnCallback )
@@ -349,6 +346,16 @@ BOOL	AsyncFileSelector::Add( int mode, const char* szFileFilter, const char* szT
 		}
 		mDialogTitle = szTitle;
 		mDefaultFolder = szDefaultFolder;
+		if ( szRootFolder == NULL )
+		{
+		char		acCurrentDir[MAX_PATH];	
+			SysGetCurrentDir( MAX_PATH, acCurrentDir );		
+			mRootFolder = acCurrentDir;
+		}
+		else
+		{
+			mRootFolder = szRootFolder;
+		}
 		mFlags = nFlags;
 		mMode = mode;
 		if ( mhFileSelectorThread == 0 )
@@ -362,7 +369,7 @@ BOOL	AsyncFileSelector::Add( int mode, const char* szFileFilter, const char* szT
 	return( FALSE );
 }
 
-BOOL	SysSelectFolderDialogAsync( const char* szTitle, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback )
+BOOL	SysSelectFolderDialogAsync( const char* szTitle, const char* szRootFolder, const char* szDefaultFolder, int nFlags, fnAsyncFileSelectorCallback fnCallback )
 {
 char		acFullPathToDefaultFolder[512];
 
@@ -370,7 +377,7 @@ char		acFullPathToDefaultFolder[512];
 	strcat( acFullPathToDefaultFolder, "\\");
 	strcat( acFullPathToDefaultFolder, szDefaultFolder );
 
-	return( AsyncFileSelector::Get().Add( 2, NULL, szTitle, acFullPathToDefaultFolder, nFlags, fnCallback ) );
+	return( AsyncFileSelector::Get().Add( 2, NULL, szTitle, acFullPathToDefaultFolder, nFlags, fnCallback, szRootFolder ) );
 
 }
 

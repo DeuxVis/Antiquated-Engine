@@ -92,7 +92,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 		break;
 	case POPUP_MENU_LIST:
 		{
-		uint32		ulTextCol = 0xD0A0A0A0;
+		uint32		ulTextCol = 0xd0e0e0e0;
 			if ( mbIsChecked )
 			{
 			UIXRECT		checkedIconRect = drawRect;
@@ -102,6 +102,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 				checkedIconRect.w = checkedIconRect.h;
 				checkedIconRect.x += 2;
 
+				// TODO - This sho
 				pInterface->Rect( 0, checkedIconRect.x, checkedIconRect.y, checkedIconRect.w, checkedIconRect.h, 0xC05050d0 );
 			}
 
@@ -110,13 +111,14 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 				if ( UIX::IsMouseHover( drawRect ))
 				{
 					pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0xb0303030 );	
+					ulTextCol = 0xE0F0F0F0;
 				}
 			}
 			else
 			{
 				ulTextCol = 0x60606060;
 			}
-			pInterface->Text( 1, drawRect.x + 30, drawRect.y + 2, ulTextCol, 3, mText.c_str() );
+			pInterface->Text( 1, drawRect.x + 30, drawRect.y + 2, ulTextCol, 0, mText.c_str() );
 		}
 		break;
 	}

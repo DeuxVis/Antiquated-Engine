@@ -456,7 +456,7 @@ uint32		ulCol = 0xf0505070;
 			// Bar
 			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, nBarW, mRenderRect.h, 0xf0202020 );
 			// Value/Grab bar
-			pInterface->Rect( 0, mRenderRect.x + nBarW - 2, mRenderRect.y, 4, mRenderRect.h, 0xf0303040 );
+			pInterface->Rect( 0, mRenderRect.x + nBarW - 2, mRenderRect.y, 4, mRenderRect.h, 0xf0505080 );
 		}
 		break;
 	}

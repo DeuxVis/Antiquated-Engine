@@ -20,12 +20,14 @@ public:
 	const std::string&		GetText() const { return mTitle; }
 
 protected:
-	UIXDropdownEntry( UIXDropdown* pParent, const char* szTitle, uint32 ulUserParam );
+	UIXDropdownEntry( UIXDropdown* pParent, const char* szTitle, uint32 ulUserParam, BOOL bGreyed );
 
+	BOOL		IsGreyed() const { return mbGreyed; }
 private:
 	std::string						mTitle;
-	uint32							mulUserParam;
+	uint32							mulUserParam = 0;
 	UIXDropdown*					mpDropdown;
+	BOOL							mbGreyed = FALSE;
 };
 
 
@@ -35,7 +37,7 @@ friend class UIX;
 friend class UIXDropdownEntry;
 public:
 	~UIXDropdown();
-	UIXDropdownEntry*		AddElement(	const char* szElementName, uint32 ulElementParam );
+	UIXDropdownEntry*		AddElement(	const char* szElementName, uint32 ulElementParam, BOOL bGreyed = FALSE );
 
 	const UIXDropdownEntry*		GetElementByListIndex( int index ) const;
 

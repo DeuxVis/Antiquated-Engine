@@ -55,8 +55,8 @@ protected:
 	virtual bool			OnSelected( int nButtonID, uint32 ulParam );
 	virtual void		OnShutdown();
 
-	void			HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress );
-	static void		HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
+	BOOL			HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress );
+	static BOOL		HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
 	static void		RegisterControlHandlers();
 	BOOL			IsSelectable( ) { return( mSelectionChangedCallback != NULL ); }
 	uint32			GetNextIndex( UIXListBoxEntry* pListBoxEntry ) { mListBoxEntriesFlatList.push_back( pListBoxEntry ); return( mulNextElementIndex++ ); }
@@ -69,10 +69,13 @@ private:
 
 	std::vector<UIXListBoxEntry*>	mListBoxEntriesFlatList;
 
+	//--------------------  Drag n drop stuff
 	UIXListBoxEntry*	mpDragHeldEntry = NULL;
+	// todo - this stuff could probably be standardised into some form of standard draggable object
 	int					mDragItemType = 0;
 	UIXRECT				mDragRectOriginal;
 	UIXRECT				mDragRectMouseOriginal;
+	//---------------
 	fnListboxSelectionChangedCallback		mSelectionChangedCallback = NULL;
 };
 

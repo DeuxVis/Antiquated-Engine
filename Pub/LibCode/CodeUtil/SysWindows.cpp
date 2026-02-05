@@ -816,7 +816,14 @@ char	acFolderPath[512];
 
 	xBrowseInfo.hwndOwner = mhSysMainWindow;
 	xBrowseInfo.lpszTitle = szTitle;
-	xBrowseInfo.pidlRoot = ConvertPathToLpItemIdList(szRootPath);
+	if ( szRootPath[0] == 0 )
+	{
+		xBrowseInfo.pidlRoot = NULL;
+	}
+	else
+	{
+		xBrowseInfo.pidlRoot = ConvertPathToLpItemIdList(szRootPath);
+	}
 	xBrowseInfo.pszDisplayName = (LPSTR)acFolderPath;
 	xBrowseInfo.lpfn = BrowseCallbackProc;
 	xBrowseInfo.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;

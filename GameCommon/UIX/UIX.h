@@ -43,6 +43,7 @@ enum
 	UIX_TEXTBOX,
 	UIX_MENU_ITEM,
 	UIX_TAB_SELECT,
+	UIX_BUTTON,
 };
 
 enum eUIXBUTTON_MODE
@@ -54,6 +55,7 @@ enum eUIXBUTTON_MODE
 	UIXBUTTON_IMAGE,
 	UIXBUTTON_ICON,
 	UIXBUTTON_IMAGE_PATH,
+	UIXBUTTON_TEXT_WITH_COLLAPSABLE,
 };
 
 enum UIX_TEXT_FLAGS
@@ -240,6 +242,7 @@ public:
 	static void							SetDragItemType( int type, UIXObject* pxFromObject, uint32 param ) { msDragItemType = type; mspDragSource = pxFromObject; msDragSourceParam = param; }
 	static int							GetDragItemType() { return msDragItemType; }
 	static uint32						GetDragItemSourceParam() { return msDragSourceParam; }
+	static UIXObject*					GetDragDestinationHover() { return mspDragDestinationHover; }
 	static void							HoverAcceptDragItem( UIXObject* pxObject ) { mspDragDestinationHover = pxObject; }
 	static void							EndDragItemType( int type );
 
@@ -262,7 +265,7 @@ protected:
 	static std::map<uint32, UIXObject*>		msComponentIDMap;
 private:
 	static void		ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam );
-	static void		SliderHoldHandler( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
+	static BOOL		SliderHoldHandler( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
 
 	static uint32						msulNextObjectID;
 	static std::vector<UIXObject*>		msPagesList;

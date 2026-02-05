@@ -46,7 +46,7 @@ int		nScrollbarBoxY = rect.y;
 
 }
 
-void		UIXScrollbar::HoldHandler(uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress)
+BOOL		UIXScrollbar::HoldHandler(uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress)
 {
 	int		nMouseX, nMouseY;
 
@@ -74,18 +74,18 @@ void		UIXScrollbar::HoldHandler(uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirst
 	{
 		mbDidGrabScrollbar = FALSE;
 	}
+	return( FALSE );
 }
 
-void		UIXScrollbar::HoldHandlerStatic(int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress)
+BOOL		UIXScrollbar::HoldHandlerStatic(int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress)
 {
 	UIXScrollbar* pScrollbar = (UIXScrollbar*)UIX::FindUIXObjectByID(ulIDParam);
 
 	if (pScrollbar)
 	{
-		pScrollbar->HoldHandler(ulParam, bIsHeld, bFirstPress);
+		return( pScrollbar->HoldHandler(ulParam, bIsHeld, bFirstPress) );
 	}
-
-
+	return( FALSE );
 }
 
 void		UIXScrollbar::RegisterControlHandlers()

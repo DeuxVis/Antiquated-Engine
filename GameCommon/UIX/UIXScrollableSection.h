@@ -11,8 +11,8 @@ public:
 
 	void	RenderDirect(InterfaceInstance* pInterface, UIXRECT pDisplayRect, int nViewPageHeight, int nFullContentsHeight );
 
-	void			HoldHandler(uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress);
-	static void		HoldHandlerStatic(int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress);
+	BOOL			HoldHandler(uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress);
+	static BOOL		HoldHandlerStatic(int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress);
 	static void		RegisterControlHandlers();
 
 	virtual int		GetScrollPosition();

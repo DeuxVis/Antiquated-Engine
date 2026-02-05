@@ -150,8 +150,11 @@ bool	bHoldHandlerWasActioned = false;
 	{
 		if ( msHoldHandlerList[mnUIButtonIDHeld])
 		{			
-			msHoldHandlerList[mnUIButtonIDHeld]( mnUIButtonIDHeld, mulUIButtonIDHeldParam, mulUIButtonIDHeldID, FALSE, FALSE );
-			bHoldHandlerWasActioned = true;
+			if ( msHoldHandlerList[mnUIButtonIDHeld]( mnUIButtonIDHeld, mulUIButtonIDHeldParam, mulUIButtonIDHeldID, FALSE, FALSE ) )
+			{
+				mnUIButtonIDHeld = NOTFOUND;
+				return( TRUE );
+			}
 		}
 		mnUIButtonIDHeld = NOTFOUND;
 		bRet = TRUE;		

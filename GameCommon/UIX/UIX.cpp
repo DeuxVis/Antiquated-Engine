@@ -335,7 +335,7 @@ void		UIX::OnMouseWheel( float fOffset )
 	}
 }
 
-void		UIX::SliderHoldHandler( int nButtonID, uint32 ulIndex, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress  )
+BOOL		UIX::SliderHoldHandler( int nButtonID, uint32 ulIndex, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress  )
 {
 UIXSlider*		pSlider;
 
@@ -365,6 +365,8 @@ UIXSlider*		pSlider;
 	default:
 		break;
 	}
+
+	return( FALSE );
 }
 
 void		UIX::SetMousewheelHoverObject(UIXObject* pObject)
@@ -426,6 +428,7 @@ void		UIX::Initialise( int mode )
 	UIXCollapsableSection::RegisterControlHandlers();
 	UIXScrollableSection::RegisterControlHandlers();
 	UIXTextBox::RegisterControlHandlers();
+	UIXButton::RegisterControlHandlers();
 }
 
 void		UIX::Update( float delta )
