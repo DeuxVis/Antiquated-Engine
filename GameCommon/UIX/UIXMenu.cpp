@@ -85,7 +85,7 @@ void		UIXMenuItem::DoRender( InterfaceInstance* pInterface, UIXRECT rect )
 			ulTextCol = 0xe0e0e0e0;
 			UIX::CheckForPress(pMenuItem, rect, UIX_MENU_ITEM, 0);
 		}
-		pInterface->Text(0, rect.x + 5, rect.y + 2, ulTextCol, 3, pMenuItem->GetText());
+		pInterface->Text(0, rect.x + 5, rect.y + 1, ulTextCol, 0, pMenuItem->GetText());
 		rect.y += 18;
 	}
 }
@@ -128,7 +128,7 @@ uint32		ulHilightCol = 0x80808080;
 		selectRect = renderRect;
 		selectRect.x -= 3;
 		selectRect.w = stringWidth + 6;
-		selectRect.y -= 3;
+		selectRect.y -= 1;
 
 		pMenuItem->SetLastRenderRect(selectRect);
 		if ( UIX::IsMouseHover( selectRect ) )

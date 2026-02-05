@@ -15,6 +15,7 @@
 #include "UIXCheckbox.h"
 #include "UIXTextBox.h"
 #include "UIXText.h"
+#include "UIXPopupMenu.h"
 #include "UIXCustomRender.h"
 #include "UIXCollapsableSection.h"
 #include "UIXScrollableSection.h"
@@ -418,9 +419,9 @@ void		UIX::Initialise( int mode )
 	UIRegisterButtonPressHandler( UIX_LISTBOX_SELECT, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_TEXTBOX, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_MENU_ITEM, ButtonPressHandler );
+	UIRegisterButtonPressHandler( UIX_POPUP_MENU_ITEM, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_TAB_SELECT, ButtonPressHandler );
-	
-		
+			
 	UIRegisterHoldHandler( UIX_SLIDER_BAR, SliderHoldHandler );
 	UIRegisterHoldHandler( UIX_SLIDER_BAR_MINRANGE, SliderHoldHandler );
 	UIRegisterHoldHandler( UIX_SLIDER_BAR_MAXRANGE, SliderHoldHandler );
@@ -663,6 +664,15 @@ UIXTabBar*		pNewTabBar = new UIXTabBar( pxContainer, msulNextObjectID++, rect );
 	pxContainer->mContainsList.push_back( pNewTabBar );
 	return( pNewTabBar );
 
+}
+
+UIXPopupMenu*	UIX::AddPopupMenu( UIXObject* pxContainer, UIXRECT rect )
+{
+UIXPopupMenu*		pNewMenu = new UIXPopupMenu( pxContainer, msulNextObjectID++, rect );
+
+	pNewMenu->Initialise(  );
+	pxContainer->mContainsList.push_back( pNewMenu );
+	return( pNewMenu );
 }
 
 UIXMenu*		UIX::AddMenuBar( UIXObject* pxContainer, UIXRECT rect )

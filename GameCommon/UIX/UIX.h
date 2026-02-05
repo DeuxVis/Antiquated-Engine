@@ -22,6 +22,7 @@ class UIXCustomRender;
 class UIXCheckbox;
 class UIXModalPopup;
 class UIXMenu;
+class UIXPopupMenu;
 class UIXTabBar;
 
 #define		MAX_NUM_UIX_ICONS		32
@@ -44,6 +45,7 @@ enum
 	UIX_MENU_ITEM,
 	UIX_TAB_SELECT,
 	UIX_BUTTON,
+	UIX_POPUP_MENU_ITEM,
 };
 
 enum eUIXBUTTON_MODE
@@ -139,7 +141,10 @@ public:
 
 	virtual void		UpdateUIStateData( UIStateData* pData ) {}
 	virtual float		OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bByUserEditFlag ) { return( fNewValue ); }
+	
+	bool				HasSelectionCallback() { return( mfnSelectedCallback != NULL ); }
 
+	UIXObject*			GetParent() const { return(mpParent); }
 protected:
 	UIXObject( UIXObject* pParent, uint32 uID, UIXRECT rect );
 	virtual ~UIXObject();
@@ -177,10 +182,8 @@ protected:
 	std::vector<UIXObject*>&		GetChildObjectList() { return mContainsList; }
 
 	void		SetSelectedCallback( fnSelectedCallback callbackFunc, uint32 ulSelectParam ) { mfnSelectedCallback = callbackFunc; mulSelectParam = ulSelectParam; }
-	bool		HasSelectionCallback() { return( mfnSelectedCallback != NULL ); }
 
 	virtual void			OnEscape() {}
-	UIXObject* GetParent() const { return(mpParent); }
 private:
 	virtual bool		ShouldDisplayChildren() { return true; }
 	virtual bool		IncludeChildrenInOccupyCalc() { return true; }
@@ -235,7 +238,8 @@ public:
 	static UIXModalPopup*				AddModalPopup( UIXObject* pxContainer, UIXRECT rect );
 	static UIXMenu*						AddMenuBar( UIXObject* pxContainer, UIXRECT rect );
 	static UIXTabBar*					AddTabBar( UIXObject* pxContainer, UIXRECT rect );
-
+	static UIXPopupMenu*				AddPopupMenu( UIXObject* pxContainer, UIXRECT rect );
+	
 	static void							DeleteObject( UIXObject* pObject );
 	static UIXObject*					FindUIXObjectByID( uint32 ulObjectID );
 
