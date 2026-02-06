@@ -184,6 +184,7 @@ protected:
 	void		SetSelectedCallback( fnSelectedCallback callbackFunc, uint32 ulSelectParam ) { mfnSelectedCallback = callbackFunc; mulSelectParam = ulSelectParam; }
 
 	virtual void			OnEscape() {}
+	int				mChildContentsHeight = 0;
 private:
 	virtual bool		ShouldDisplayChildren() { return true; }
 	virtual bool		IncludeChildrenInOccupyCalc() { return true; }
@@ -197,7 +198,6 @@ private:
 	UIXRECT			mDisplayRect;
 	void*			mpUserObject = NULL;
 	bool			mbDeleteUserObjectOnDestroy = false;
-	int				mChildContentsHeight = 0;
 	UIXRECT			mLastRenderDisplayRect;
 	UIXObject*		mpParent;
 	fnSelectedCallback	mfnSelectedCallback = NULL;

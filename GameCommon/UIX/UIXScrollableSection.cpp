@@ -120,6 +120,7 @@ void	UIXScrollbar::StoreScrollState( UIXScrollbarRestoreState* pxOut )
 	pxOut->mScrollPosition = mScrollPosition;
 	pxOut->mScrollPositionScreen = mScrollPositionScreen;
 	pxOut->mFullBarHeight = mFullBarHeight;
+	pxOut->mContentsHeight = mChildContentsHeight;
 }
 	
 void	UIXScrollbar::RestoreScrollState( const UIXScrollbarRestoreState* pxIn )
@@ -128,7 +129,7 @@ void	UIXScrollbar::RestoreScrollState( const UIXScrollbarRestoreState* pxIn )
 	mScrollPosition = pxIn->mScrollPosition;
 	mScrollPositionScreen = pxIn->mScrollPositionScreen;
 	mFullBarHeight = pxIn->mFullBarHeight;
-
+	mChildContentsHeight = pxIn->mContentsHeight;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -217,11 +218,14 @@ void	UIXScrollableSection::OnPostChildrenRender( InterfaceInstance* pInterface )
 void	UIXScrollableSection::StoreScrollState( UIXScrollbarRestoreState* pxOut )
 {
 	mpScrollbar->StoreScrollState( pxOut );
+	pxOut->mContentsHeight = mChildContentsHeight;
+
 }
 
 void	UIXScrollableSection::RestoreScrollState( const UIXScrollbarRestoreState* pxIn )
 {
 	mpScrollbar->RestoreScrollState( pxIn );
+	mChildContentsHeight = pxIn->mContentsHeight;
 }
 
 int			UIXScrollableSection::GetScrollPosition()

@@ -10,6 +10,7 @@ struct UIXScrollbarRestoreState
 	int		mScrollPositionScreen = 0;
 	float	mfHeightPerUnit = 1.0f;
 	int		mFullBarHeight = 100;
+	int		mContentsHeight = 0;
 };
 	
 

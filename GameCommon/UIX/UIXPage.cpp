@@ -10,6 +10,18 @@ void	UIXPage::Initialise( const char* szTitle, BOOL bUseClipping )
 	mTitle = szTitle;
 }
 
+BOOL		UIXPage::IsWithinPage(int x, int y)
+{
+	if ((x >= mPageRenderRect.x) &&
+		 ( x < mPageRenderRect.x + mPageRenderRect.w ) &&
+		 ( y >= mPageRenderRect.y ) &&
+		 ( y < mPageRenderRect.y + mPageRenderRect.h ) )
+	{
+		return( TRUE );
+	}
+	return(FALSE);
+}
+
 UIXRECT		UIXPage::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
 UIXRECT		renderRect = GetActualRenderRect( displayRect );
