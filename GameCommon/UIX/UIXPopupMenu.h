@@ -14,8 +14,11 @@ public:
 	void		Initialise( const char* szText, fnSelectedCallback selectedCallback = NULL, uint32 ulSelectParam = 0 );
 	void		SetCheckbox( BOOL bIsCheckbox, BOOL bState ) { mbIsCheckbox = bIsCheckbox; mbIsChecked = bState; }
 	void		SetHeader( BOOL bIsHeader ) { mbIsHeader = bIsHeader; }
+	void		OnHover();
 
-	UIXPopupMenuItem*		AddHeaderMenuItem( const char* szMenuItemName );
+	int		Display( InterfaceInstance* pInterface, UIXRECT lineRect );
+
+	UIXPopupMenuItem*		AddHeaderMenuItem( const char* szMenuItemName, ... );
 	UIXPopupMenuItem*		AddMenuItem( const char* szMenuItemName, fnSelectedCallback selectedCallback = NULL, uint32 ulSelectParam = 0, BOOL bIsCheckbox = FALSE, BOOL bIsChecked = FALSE );
 	
 	const char* GetText() const { return mText.c_str(); }
@@ -29,6 +32,8 @@ public:
 
 	UIXRECT		GetLastRenderRect() const { return mLastRenderRect; }
 	void		SetLastRenderRect(UIXRECT rect) { mLastRenderRect = rect; }
+
+	void		SetExpanded( BOOL bFlag );
 
 protected:
 	virtual int			GetSelectionPriorityLayer() { return( 10 ); }
@@ -44,11 +49,13 @@ private:
 	BOOL			mbIndentForCheckbox = FALSE;
 	BOOL			mbIsHeader = FALSE;
 	UIXRECT			mLastRenderRect;
+	float			mfExpandDelayTime = 0.0f;
 };
 
 
 class UIXPopupMenu : public UIXObject
 {
+friend class UIXPopupMenuItem;
 public:
 	UIXPopupMenu( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
@@ -59,6 +66,9 @@ public:
 
 	virtual UIXRECT		OnRender( InterfaceInstance* pInterface, UIXRECT rect );
 	virtual void		OnPostRender( InterfaceInstance* pInterface, UIXRECT rect );
+
+protected:
+	void			ClearExpandedChildren();
 private:
 	virtual int		GetSelectionPriorityLayer() { return( 10 ); }
 	virtual bool		ShouldDisplayChildren() { return false; }

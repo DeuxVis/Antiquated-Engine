@@ -2,6 +2,8 @@
 #include <stdarg.h>
 #include "StandardDef.h"
 #include "InterfaceEx.h"
+
+#include "../Platform/Platform.h"
 #include "UIX.h"
 #include "UIXPopupMenu.h"
 
@@ -11,6 +13,33 @@ void	UIXPopupMenuItem::Initialise( const char* szText, fnSelectedCallback select
 {
 	mText = szText;
 	SetSelectedCallback( selectCallback, ulSelectParam );
+}
+
+
+UIXPopupMenuItem*		UIXPopupMenuItem::AddHeaderMenuItem( const char* text, ... )
+{
+UIXPopupMenuItem*		pNewMenuItem = new UIXPopupMenuItem(this, UIX::GetNextObjectID(), UIXRECT(0, 0, 0, 0));
+char		acString[2048];
+va_list		marker;
+uint32*		pArgs;
+
+	pArgs = (uint32*)( &text ) + 1;
+
+    va_start( marker, text );     
+	vsprintf( acString, text, marker );
+
+	pNewMenuItem->Initialise( acString );
+	pNewMenuItem->SetHeader( TRUE );
+	GetChildObjectList().push_back( pNewMenuItem );
+	return( pNewMenuItem );
+
+
+}
+
+void		UIXPopupMenuItem::SetExpanded( BOOL bFlag )
+{
+	mbIsExpanded = bFlag;
+	mfExpandDelayTime = 0.0f;
 }
 
 UIXPopupMenuItem*		UIXPopupMenuItem::AddMenuItem( const char* szMenuItemName, fnSelectedCallback selectCallback, uint32 ulSelectParam, BOOL bIsCheckbox, BOOL bIsChecked )
@@ -63,35 +92,116 @@ void		UIXPopupMenuItem::OnEscape()
 }
 */
 
+void	UIXPopupMenuItem::OnHover( )
+{
+	if ( mbIsExpanded == FALSE )
+	{
+		mfExpandDelayTime += PlatformGetFrameDelta();
+		if ( mfExpandDelayTime > 0.25f )
+		{
+		UIXPopupMenu*		pParentMenu = (UIXPopupMenu*)GetParent();
+			
+			pParentMenu->ClearExpandedChildren();
+			mbIsExpanded = TRUE;
+		}
+	}
+}
+
+int		UIXPopupMenuItem::Display( InterfaceInstance* pInterface, UIXRECT lineRect )
+{
+uint32	ulTextCol = 0xD0C0C0C0;
+UIXRECT	lineDividerRect( lineRect.x + 2, 0, lineRect.w - 2, 2 );
+UIXRECT		selectRect;
+uint32		ulHilightCol = 0x80808080;
+int			nHeightUsed = lineRect.h;
+
+	if ( *GetText() == '-' )
+	{
+		lineDividerRect.y = lineRect.y;	
+		pInterface->Rect( 0, lineDividerRect.x, lineDividerRect.y, lineDividerRect.w, lineDividerRect.h, 0xd0303030 );
+		nHeightUsed = 4;
+	}
+	else
+	{	
+		selectRect = lineRect;
+		selectRect.x -= 3;
+		SetLastRenderRect(selectRect);
+
+		if ( IsChecked() )
+		{
+		UIXRECT		checkedIconRect = lineRect;
+		
+			checkedIconRect.y += 2;
+			checkedIconRect.h -= 8;
+			checkedIconRect.w = checkedIconRect.h;
+			checkedIconRect.x += 2;
+
+			// TODO - This should be tick icon or somethin
+			pInterface->Rect( 0, checkedIconRect.x, checkedIconRect.y, checkedIconRect.w, checkedIconRect.h, 0xC05050d0 );
+		}
+
+		if ( HasSelectionCallback() )
+		{
+			if ( UIX::IsMouseHover( selectRect ) )
+			{
+				pInterface->Rect( 0, selectRect.x, selectRect.y, selectRect.w, selectRect.h, ulHilightCol );	
+				ulTextCol = 0xe0e0e0e0;
+
+				UIX::CheckForPress( this, selectRect, UIX_POPUP_MENU_ITEM, 0 );
+			}
+		}
+		else if ( HasChildren() )
+		{
+		UIXRECT		triRect = selectRect;
+
+			triRect.x += triRect.w - 15;
+			triRect.y += 3;
+			pInterface->Triangle( 1, triRect.x + 4, triRect.y, triRect.x + 10, triRect.y + 4, triRect.x + 4, triRect.y + 8, 0xa0a0a0a0, 0xa0a0a0a0, 0xa0a0a0a0 );	
+
+			if ( UIX::IsMouseHover( selectRect ) )
+			{
+				OnHover();
+			}
+		}
+		else
+		{
+			ulTextCol = 0x80606060;	
+		}
+
+
+		if ( IsCheckbox() )
+		{
+			pInterface->Text(0, lineRect.x + 30, lineRect.y, ulTextCol, 0, GetText() );		
+		}
+		else if ( IsHeader() )
+		{
+			ulTextCol = 0xd0C0A070;
+			pInterface->TextLimitWidth(0, lineRect.x + 5, lineRect.y, lineRect.w - 6, ulTextCol, 3, GetText() );		
+			nHeightUsed = 14;
+		}
+		else
+		{
+			pInterface->Text(0, lineRect.x + 5, lineRect.y, ulTextCol, 0, GetText() );
+		}
+	}
+	return( nHeightUsed );
+}
+
 void		UIXPopupMenuItem::DoRender( InterfaceInstance* pInterface, UIXRECT rect )
 {
 	int		nNumChildren = GetChildObjectList().size();
 	UIXPopupMenuItem* pMenuItem;
 
 	rect.h = nNumChildren * 20 + 4;
-	pInterface->ShadedRect(0, rect.x, rect.y, rect.w, rect.h, 0xFF202020, 0xFF202020, 0xFF181818, 0xFF181818);
+	pInterface->ShadedRect( 0, rect.x, rect.y, rect.w, rect.h, 0xFF101010, 0xFF101010, 0xFF080808, 0xFF080808 );
+	pInterface->OutlineBox( 0, rect.x, rect.y, rect.w, rect.h, 0x90606060 );
+
 	rect.y += 4;
+	rect.h = 17;
 	for ( UIXObject* pItem : GetChildObjectList() )
 	{
 		pMenuItem = (UIXPopupMenuItem*)pItem;
-		rect.h = 16;
-		uint32		ulTextCol = 0xd0d0d0d0;
-		uint32		ulHilightCol = 0x80808080;
-
-		// If no sub-items and no selection callback, this menu item is greyed out
-		if ( ( pMenuItem->GetChildObjectList().size() == 0 ) &&
-			 ( pMenuItem->HasSelectionCallback() == false ) )
-		{
-			ulTextCol = 0x80808080;
-		}
-		else if (UIX::IsMouseHover(rect))
-		{
-			pInterface->Rect(1, rect.x, rect.y, rect.w, rect.h, ulHilightCol);
-			ulTextCol = 0xe0e0e0e0;
-			UIX::CheckForPress(pMenuItem, rect, UIX_MENU_ITEM, 0);
-		}
-		pInterface->Text(0, rect.x + 5, rect.y + 1, ulTextCol, 0, pMenuItem->GetText());
-		rect.y += 18;
+		rect.y += pMenuItem->Display( pInterface, rect ) + 1;
 	}
 }
 
@@ -124,8 +234,18 @@ UIXPopupMenuItem*		pNewMenuItem = new UIXPopupMenuItem(this, UIX::GetNextObjectI
 	return( pNewMenuItem );
 }
 
+
 void	UIXPopupMenu::Initialise( )
 {
+}
+
+void	UIXPopupMenu::ClearExpandedChildren()
+{
+	for ( UIXObject* pChild : GetChildObjectList() )
+	{
+		UIXPopupMenuItem* pMenuItem = (UIXPopupMenuItem*)pChild;
+		pMenuItem->SetExpanded( FALSE );
+	}
 }
 
 UIXRECT		UIXPopupMenu::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
@@ -160,63 +280,7 @@ uint32		ulHilightCol = 0x80808080;
 	for ( UIXObject* pChild : GetChildObjectList() )
 	{
 		UIXPopupMenuItem* pMenuItem = (UIXPopupMenuItem*)pChild;
-		ulTextCol = 0xD0C0C0C0;
-
-		if ( *pMenuItem->GetText() == '-' )
-		{
- 			lineDividerRect.y = lineRect.y;	
-			pInterface->Rect( 0, lineDividerRect.x, lineDividerRect.y, lineDividerRect.w, lineDividerRect.h, 0xd0303030 );
-			lineRect.y += 4;
-		}
-		else
-		{	
-			selectRect = lineRect;
-			selectRect.x -= 3;
-			pMenuItem->SetLastRenderRect(selectRect);
-
-			if ( pMenuItem->IsChecked() )
-			{
-			UIXRECT		checkedIconRect = lineRect;
-			
-				checkedIconRect.y += 2;
-				checkedIconRect.h -= 8;
-				checkedIconRect.w = checkedIconRect.h;
-				checkedIconRect.x += 2;
-
-				// TODO - This should be tick icon or somethin
-				pInterface->Rect( 0, checkedIconRect.x, checkedIconRect.y, checkedIconRect.w, checkedIconRect.h, 0xC05050d0 );
-			}
-
-			if ( pMenuItem->HasSelectionCallback() )
-			{
-				if ( UIX::IsMouseHover( selectRect ) )
-				{
-					pInterface->Rect( 0, selectRect.x, selectRect.y, selectRect.w, selectRect.h, ulHilightCol );	
-					ulTextCol = 0xe0e0e0e0;
-
-					UIX::CheckForPress( pMenuItem, selectRect, UIX_POPUP_MENU_ITEM, 0 );
-				}
-			}
-			else
-			{
-				ulTextCol = 0x80606060;	
-			}
-
-			if ( pMenuItem->IsCheckbox() )
-			{
-				pInterface->Text(0, lineRect.x + 30, lineRect.y, ulTextCol, 0, pMenuItem->GetText() );		
-			}
-			else if ( pMenuItem->IsHeader() )
-			{
-				ulTextCol = 0xd0C0A070;
-				pInterface->TextLimitWidth(0, lineRect.x + 5, lineRect.y, lineRect.w - 6, ulTextCol, 3, pMenuItem->GetText() );		
-			}
-			else
-			{
-				pInterface->Text(0, lineRect.x + 5, lineRect.y, ulTextCol, 0, pMenuItem->GetText() );
-			}
-			lineRect.y += lineRect.h + 1;
-		}
+		lineRect.y += pMenuItem->Display( pInterface, lineRect ) + 1;
 	}
 
 	// ------------------------------- Render all child items
@@ -226,12 +290,12 @@ uint32		ulHilightCol = 0x80808080;
 		if (pMenuItem->IsExpanded())
 		{
 			UIXRECT		itemRect = pMenuItem->GetLastRenderRect();
-			itemRect.y += itemRect.h;
-			if ( itemRect.w < 150 ) itemRect.w = 150;
+			itemRect.x += itemRect.w + 5;
 			itemRect.h = pInterface->GetHeight() - (itemRect.y + 10);
 			pMenuItem->DoRender( pInterface, itemRect );
 		}
 	}
 
 }
+
 

@@ -143,7 +143,7 @@ public:
 	virtual float		OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bByUserEditFlag ) { return( fNewValue ); }
 	
 	bool				HasSelectionCallback() { return( mfnSelectedCallback != NULL ); }
-
+	bool				HasChildren() const { return( mContainsList.size() > 0 ); }
 	UIXObject*			GetParent() const { return(mpParent); }
 protected:
 	UIXObject( UIXObject* pParent, uint32 uID, UIXRECT rect );
