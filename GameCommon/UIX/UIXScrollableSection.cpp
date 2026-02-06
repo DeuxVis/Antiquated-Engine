@@ -114,6 +114,23 @@ void	UIXScrollbar::OnMouseWheel(float fOffset)
 	
 }
 
+void	UIXScrollbar::StoreScrollState( UIXScrollbarRestoreState* pxOut )
+{
+	pxOut->mfHeightPerUnit = mfHeightPerUnit;
+	pxOut->mScrollPosition = mScrollPosition;
+	pxOut->mScrollPositionScreen = mScrollPositionScreen;
+	pxOut->mFullBarHeight = mFullBarHeight;
+}
+	
+void	UIXScrollbar::RestoreScrollState( const UIXScrollbarRestoreState* pxIn )
+{
+	mfHeightPerUnit = pxIn->mfHeightPerUnit;
+	mScrollPosition = pxIn->mScrollPosition;
+	mScrollPositionScreen = pxIn->mScrollPositionScreen;
+	mFullBarHeight = pxIn->mFullBarHeight;
+
+}
+
 //------------------------------------------------------------------------------------------------
 // 
 UIXScrollableSection::~UIXScrollableSection()
@@ -142,46 +159,50 @@ void		UIXScrollableSection::OnMouseWheel(float fOffset)
 
 UIXRECT		UIXScrollableSection::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
-int		childContentsHeight = GetChildContentsHeight() + 4;
-
-	if ( childContentsHeight > displayRect.h )
+	if ( GetChildContentsHeight() > 0 )
 	{
-		pInterface->DrawAllElements();
-		pInterface->SetRenderCanvas();
-		mbIsUsingClippingCanvas = TRUE;
+	int		childContentsHeight = GetChildContentsHeight() + 4;
 
-		UIXRECT		localRect = GetLocalPositionRect();
-		UIXRECT		occupyRect = displayRect;
-		UIXRECT		drawRect = localRect;
-
-		drawRect.x += displayRect.x;
-		drawRect.y += displayRect.y;
-				
-		if ( UIHoverItem( drawRect.x, drawRect.y, drawRect.w, drawRect.h ) == TRUE )
+		if ( childContentsHeight > displayRect.h )
 		{
-			UIX::SetMousewheelHoverObject( this );
+			pInterface->DrawAllElements();
+			pInterface->SetRenderCanvas();
+			mbIsUsingClippingCanvas = TRUE;
+
+			UIXRECT		localRect = GetLocalPositionRect();
+			UIXRECT		occupyRect = displayRect;
+			UIXRECT		drawRect = localRect;
+
+			drawRect.x += displayRect.x;
+			drawRect.y += displayRect.y;
+				
+			if ( UIHoverItem( drawRect.x, drawRect.y, drawRect.w, drawRect.h ) == TRUE )
+			{
+				UIX::SetMousewheelHoverObject( this );
+			}
+
+			mPageRenderRect = drawRect;
+
+			mScrollbarLastRender.x = drawRect.x + drawRect.w - 12;
+			mScrollbarLastRender.y = drawRect.y + 1;;
+			mScrollbarLastRender.w = 12;
+			mScrollbarLastRender.h = displayRect.h;
+
+			mpScrollbar->RenderDirect(pInterface, mScrollbarLastRender, displayRect.h, childContentsHeight);
+
+			occupyRect.h = 0;
+			occupyRect.y = 0;
+			occupyRect.w = -16;
+			return occupyRect;
 		}
-
-		mPageRenderRect = drawRect;
-
-		mScrollbarLastRender.x = drawRect.x + drawRect.w - 12;
-		mScrollbarLastRender.y = drawRect.y + 1;;
-		mScrollbarLastRender.w = 12;
-		mScrollbarLastRender.h = displayRect.h;
-
-		mpScrollbar->RenderDirect(pInterface, mScrollbarLastRender, displayRect.h, childContentsHeight);
-
-		occupyRect.h = 0;
-		occupyRect.y = 0;
-		occupyRect.w = -16;
-		return occupyRect;
+		else
+		{
+			mbIsUsingClippingCanvas = FALSE;
+			mpScrollbar->SetScrollPosition(0);
+			return( UIXRECT( displayRect.x, 0, displayRect.w, 0) );
+		}
 	}
-	else
-	{
-		mbIsUsingClippingCanvas = FALSE;
-		mpScrollbar->SetScrollPosition(0);
-		return( UIXRECT( displayRect.x, 0, displayRect.w, 0) );
-	}
+	return( UIXRECT( displayRect.x, 0, displayRect.w, 0) );
 }
 
 void	UIXScrollableSection::OnPostChildrenRender( InterfaceInstance* pInterface )
@@ -191,6 +212,16 @@ void	UIXScrollableSection::OnPostChildrenRender( InterfaceInstance* pInterface )
 		pInterface->DrawAllElements();
 		pInterface->CopyRenderCanvasToBackBuffer( mPageRenderRect.x, mPageRenderRect.y, mPageRenderRect.w, mPageRenderRect.h );
 	}
+}
+
+void	UIXScrollableSection::StoreScrollState( UIXScrollbarRestoreState* pxOut )
+{
+	mpScrollbar->StoreScrollState( pxOut );
+}
+
+void	UIXScrollableSection::RestoreScrollState( const UIXScrollbarRestoreState* pxIn )
+{
+	mpScrollbar->RestoreScrollState( pxIn );
 }
 
 int			UIXScrollableSection::GetScrollPosition()

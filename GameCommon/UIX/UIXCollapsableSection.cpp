@@ -138,8 +138,6 @@ BOOL	UIXCollapsableSection::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BO
 		}
 		else  // Just released
 		{
-		int		mouseX, mouseY;
-
 			UIX::EndDragItemType( mDragItemType );
 			if ( ( UIX::GetDragDestinationHover() != NULL ) &&
 				 ( UIX::GetDragDestinationHover() != this ) )

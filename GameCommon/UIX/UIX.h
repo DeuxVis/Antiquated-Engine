@@ -145,6 +145,7 @@ public:
 	bool				HasSelectionCallback() { return( mfnSelectedCallback != NULL ); }
 	bool				HasChildren() const { return( mContainsList.size() > 0 ); }
 	UIXObject*			GetParent() const { return(mpParent); }
+	virtual int			GetScrollPosition() { return( 0 ); }
 protected:
 	UIXObject( UIXObject* pParent, uint32 uID, UIXRECT rect );
 	virtual ~UIXObject();
@@ -176,7 +177,6 @@ protected:
 	UIXRECT		GetLocalPositionRect() { return( mDisplayRect ); }
 	UIXRECT		GetActualRenderRect( UIXRECT parentRect );
 	int			GetChildContentsHeight() { return mChildContentsHeight; }
-	virtual int			GetScrollPosition() { return( 0 ); }
 	virtual int		GetSelectionPriorityLayer() { return( 0 ); }
 
 	std::vector<UIXObject*>&		GetChildObjectList() { return mContainsList; }

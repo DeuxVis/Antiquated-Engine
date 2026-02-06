@@ -115,18 +115,29 @@ int			entryIndex = 0;
 
 		nMaxDropdownH = pInterface->GetHeight() - (expandedRect.y + 4);
 		nMaxNumEntriesInView = (nMaxDropdownH - 4) / 14;
-		if (nMaxNumEntriesInView < 1) nMaxNumEntriesInView = 1;
 
-		if (nMaxNumEntriesInView < 5)
+		if ( nMaxNumEntriesInView < mDropdownEntries.size() )
 		{
-			expandedRect.h = (mDropdownEntries.size() * 14) + 4;
-			expandedRect.y = renderRect.y - expandedRect.h;
-			if (expandedRect.y < 10) expandedRect.y = 10;
-			nMaxDropdownH = renderRect.y - expandedRect.y;
-			nMaxNumEntriesInView = (nMaxDropdownH - 4) / 14;
-			if (nMaxNumEntriesInView < 1) nMaxNumEntriesInView = 1;
+		UIXRECT	dropUpRect = expandedRect;
+		int		nMaxDropUpRectH = nMaxDropdownH;
+		int		nDropUpMaxEntryCount;
+
+			dropUpRect.h = (mDropdownEntries.size() * 14) + 4;
+			dropUpRect.y = renderRect.y - dropUpRect.h;
+			if (dropUpRect.y < 10) dropUpRect.y = 10;
+			nMaxDropUpRectH = renderRect.y - dropUpRect.y;
+			nDropUpMaxEntryCount = (nMaxDropUpRectH - 4) / 14;
+
+			// Put the dropdown list above the box when appropriate
+			if ( nDropUpMaxEntryCount > nMaxNumEntriesInView )
+			{
+				expandedRect = dropUpRect;
+				nMaxDropdownH = nMaxDropUpRectH;
+				nMaxNumEntriesInView = nDropUpMaxEntryCount;
+			}
 		}
 
+		if (nMaxNumEntriesInView < 1) nMaxNumEntriesInView = 1;
 		UIXRECT		lineRect = expandedRect;
 		lineRect.y += 2;
 		lineRect.h = 14;

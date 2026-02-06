@@ -4,6 +4,16 @@
 #include <string>
 #include "UIX.h"
 
+struct UIXScrollbarRestoreState
+{
+	int		mScrollPosition = 0;
+	int		mScrollPositionScreen = 0;
+	float	mfHeightPerUnit = 1.0f;
+	int		mFullBarHeight = 100;
+};
+	
+
+
 class UIXScrollbar : public UIXObject
 {
 public:
@@ -15,9 +25,12 @@ public:
 	static BOOL		HoldHandlerStatic(int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress);
 	static void		RegisterControlHandlers();
 
-	virtual int		GetScrollPosition();
+	void	StoreScrollState( UIXScrollbarRestoreState* pxOut );
+	void	RestoreScrollState( const UIXScrollbarRestoreState* pxIn );
+
 	void			SetScrollPosition(int value) { mScrollPosition = value; }
 	virtual void	OnMouseWheel(float fOffset);
+	virtual int		GetScrollPosition();
 
 private:
 
@@ -42,6 +55,11 @@ class UIXScrollableSection : public UIXObject
 friend class UIX;
 public:
 
+	void	StoreScrollState( UIXScrollbarRestoreState* pxOut );
+	void	RestoreScrollState( const UIXScrollbarRestoreState* pxIn );
+
+	virtual int				GetScrollPosition(); 
+
 protected:
 	UIXScrollableSection( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 	virtual ~UIXScrollableSection();
@@ -55,7 +73,6 @@ protected:
 	static void		RegisterControlHandlers();
 	
 	UIXRECT					GetLastRenderRect() const { return(mScrollbarLastRender); }
-	virtual int				GetScrollPosition(); 
 	virtual void		OnPostChildrenRender( InterfaceInstance* pInterface );
 	virtual void		OnMouseWheel( float fOffset );
 

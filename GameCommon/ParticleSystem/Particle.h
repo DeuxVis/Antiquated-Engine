@@ -57,6 +57,10 @@ public:
 
 	void		SetNext( Particle* pNext ) { mpNext = pNext; }
 	Particle*	GetNext( void ) { return( mpNext ); }
+	void		KillSelf() { mType = IN_MORGUE; }
+protected:
+
+	float		mfTimeAlive = 0.0f;
 
 private:
 	void		DefaultRender( void );
@@ -67,7 +71,6 @@ private:
 	int			mType;
 	uint32		mulCol;
 	float		mfLongevity;
-	float		mfTimeAlive;
 	float		mfSpriteScale;
 	float		mfSpriteAspect = 1.0f;
 	float		mfRot = 0.0f;

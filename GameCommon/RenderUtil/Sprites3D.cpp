@@ -283,7 +283,7 @@ ENGINEMATRIX	xRotMat;
 		pxRotateAxis = &xRotAxis;
 	}
 	
-	EngineMatrixRotationAxis( &xRotMat, &xRotAxis, mfRot );
+	EngineMatrixRotationAxis( &xRotMat, pxRotateAxis, mfRot );
 
 	fUBase = (mnFrameNum % nNumPerRow) * fGridScale;
 	fVBase = (mnFrameNum / nNumPerRow) * fGridScale;

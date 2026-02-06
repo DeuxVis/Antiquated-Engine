@@ -195,7 +195,16 @@ uint32		ulCol = 0xf0505070;
 		{
 		int		nTextAreaW = 120;
 		int		nBarMaxW = renderRect.w - nTextAreaW;
-		int		nBarW = (int)(((mfCurrentVal-mfMinVal) * nBarMaxW) / (mfMaxVal-mfMinVal));
+		int		nBarW = 0;
+		
+			if ( mfMaxVal > mfMinVal )
+			{
+				nBarW = (int)(((mfCurrentVal-mfMinVal) * nBarMaxW) / (mfMaxVal-mfMinVal));
+			}
+			else
+			{
+				nBarW = 1;
+			}
 
 			// Show the text values to the left
 			UIXRECT		drawRect = renderRect;

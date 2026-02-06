@@ -78,6 +78,8 @@ public:
 	BOOL	IsAlive( void ) { return( mbIsAlive ); }
 	BOOL	WantsImmediateDelete( void ) { return( mbDeleteImmediately ); }
 
+	VECT	GetTangent( ) { return( mxLastValidTangent); }
+	VECT	GetSmoothedTangent( );
 
 	TrailListInternal*		GetNext( void ) { return( mpNext ); }
 	void			SetNext( TrailListInternal* pNext ) { mpNext = pNext; }
@@ -119,6 +121,7 @@ private:
 	int		mnType;
 	VECT	mxCurrentPos;
 	VECT	mxLastValidTangent;
+	VECT	mxPrevValidTangent;
 	VECT	mxLastValidRight;
 	float	mfScale;
 	float	mfAlpha;
@@ -188,6 +191,16 @@ BOOL	bSwitch = FALSE;
 	EngineVertexBufferUnlock( mhTrailVertexBuffer );
 }
 
+VECT	TrailListInternal::GetSmoothedTangent( )
+{
+VECT	xSmoothed;
+
+	VectAdd( &xSmoothed, &mxLastValidTangent, &mxPrevValidTangent );
+	VectNormalize( &xSmoothed );
+	return( xSmoothed );
+}
+
+
 
 uint32	TrailListInternal::GetColour( int nIndex )
 {
@@ -237,6 +250,9 @@ BOOL	TrailListInternal::GetPos( int nIndex, VECT* pxOut, VECT* pxTangent )
 
 void	TrailListInternal::AddPosImmediate( const VECT* pxIn, const VECT* pxTangent, uint32 ulTime, BOOL bIsVisible )
 {
+	mxPrevValidTangent = mxLastValidTangent;
+	mxLastValidTangent = *pxTangent;
+	
 	axTrailListInternal[ mnNextTrailPoint ].mbIsVisible = bIsVisible;
 	axTrailListInternal[ mnNextTrailPoint ].ulTintCol = mulTintCol;
 	axTrailListInternal[ mnNextTrailPoint ].xPos = *pxIn;
@@ -317,6 +333,7 @@ VECT	xEmpty;
 		// TODO - Compare the tangent with the previously added tangent
 		// If the difference is large, add another point midway  between this one and the last
 		fDot = VectDot( pxLastTangent, &xTangent );
+
 		if ( fDot < 0.9f )
 		{
 			AddMidPoint( pxIn, ulCurrentTick, 0, bIsVisible );
@@ -720,6 +737,17 @@ TrailListInternal*		pTrail = TrailFind( hHandle );
 	{
 		pTrail->SetAlpha(fAlpha);
 	}	
+}
+
+VECT		TrailGetDirection( TRAIL_HANDLE hHandle )
+{
+TrailListInternal*		pTrail = TrailFind( hHandle );
+	
+	if ( pTrail )
+	{
+		return( pTrail->GetTangent() );
+	}
+	return( VECT( 0.0f, 1.0f, 0.0f ) );
 }
 
 void		TrailSetFadeProp( TRAIL_HANDLE hHandle, uint32 ulFadeHoldTimeMS, uint32 ulFadeOutTimeMS )
