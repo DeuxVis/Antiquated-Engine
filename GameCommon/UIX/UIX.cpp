@@ -510,7 +510,7 @@ UIXRECT		pageDisplayRect;
 	msSelectionPriority = 0;
 	msPressedSelectionPriority = 0;
 	msMouseWheelHoverPriority = 0;
-	UIXRECT		rootRect( 0,0,pxInterface->GetWindowWidth(),pxInterface->GetWindowHeight());
+	UIXRECT		rootRect( 0,0,pxInterface->GetWidth(),pxInterface->GetHeight());
 	
 	for( UIXPage* pxPage : msPagesList )
 	{
@@ -518,7 +518,7 @@ UIXRECT		pageDisplayRect;
 		pxPage->Render( pxInterface, rootRect );
 	}
 
-	mxActivePageRegion = UIXRECT( 0,0,pxInterface->GetWindowWidth(),pxInterface->GetWindowHeight());
+	mxActivePageRegion = UIXRECT( 0,0,pxInterface->GetWidth(),pxInterface->GetHeight());
 
 	pxInterface->Draw();
 	for( UIXPage* pxObjects : msPagesList )
