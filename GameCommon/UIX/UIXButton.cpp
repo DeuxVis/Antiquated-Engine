@@ -89,7 +89,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
 	SetLastRenderRect(drawRect);
 	
-	if ( UIHoverItem(  drawRect.x, drawRect.y, drawRect.w, drawRect.h ) == TRUE )
+	if ( UIX::IsMouseHover( drawRect ) == TRUE )
 	{
 		UIHoverIDSet( UIX_BUTTON, 0, GetID() );
 	}

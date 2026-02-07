@@ -26,6 +26,7 @@ int			drawY = drawRect.y + (((drawRect.h - pInterface->GetStringHeight(mText.c_s
 		mDynamicTextFunc( this, 0, acBuff );
 		mText = acBuff;
 	}
+
 	// TODO - Use mFontFlags if set
 // TODO - These are bitflags and some should be combinable
 	switch( mFontFlags )

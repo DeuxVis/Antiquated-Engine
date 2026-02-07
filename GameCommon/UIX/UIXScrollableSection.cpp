@@ -35,7 +35,7 @@ int		nScrollbarBoxY = rect.y;
 	// Bar 
 	pInterface->Rect(1, nBarX, nBarY, nBarW, nBarH, 0xc0505050);
 
-	if (UIHoverItem(nBarX, nBarY, nBarW, nBarH) == TRUE)
+	if (UIX::IsMouseHover(nBarX, nBarY, nBarW, nBarH) == TRUE)
 	{
 		int		nMouseX, nMouseY;
 
@@ -176,7 +176,7 @@ UIXRECT		UIXScrollableSection::OnRender( InterfaceInstance* pInterface, UIXRECT 
 			drawRect.x += displayRect.x;
 			drawRect.y += displayRect.y;
 				
-			if ( UIHoverItem( drawRect.x, drawRect.y, drawRect.w, drawRect.h ) == TRUE )
+			if ( UIX::IsMouseHover( drawRect ) == TRUE )
 			{
 				UIX::SetMousewheelHoverObject( this );
 			}

@@ -66,7 +66,7 @@ BOOL	bMouseIsOverSectionHeader = FALSE;
 	mLastHeaderRender = UIXRECT( X,Y, nHeaderW, headerH );
 	pInterface->Rect( 0, X, Y, nHeaderW, headerH, ulCol );
 		
-	if ( UIHoverItem( X, Y, nHeaderW, headerH ) == TRUE )
+	if ( UIX::IsMouseHover( X, Y, nHeaderW, headerH ) == TRUE )
 	{
 		UIHoverIDSet( UIX_COLLAPSABLE_SECTION_HEADER, 0, GetID() );
 		bMouseIsOverSectionHeader = TRUE;

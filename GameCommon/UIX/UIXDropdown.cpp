@@ -116,7 +116,7 @@ int			entryIndex = 0;
 		nMaxDropdownH = pInterface->GetHeight() - (expandedRect.y + 4);
 		nMaxNumEntriesInView = (nMaxDropdownH - 4) / 14;
 
-		if ( nMaxNumEntriesInView < mDropdownEntries.size() )
+		if ( nMaxNumEntriesInView < (int)mDropdownEntries.size() )
 		{
 		UIXRECT	dropUpRect = expandedRect;
 		int		nMaxDropUpRectH = nMaxDropdownH;
@@ -159,7 +159,7 @@ int			entryIndex = 0;
 			expandedRect.h = nMaxDropdownH;
 		}
 
-		if (UIHoverItem(expandedRect.x, expandedRect.y, expandedRect.w, expandedRect.h) == TRUE)
+		if (UIX::IsMouseHover(expandedRect) == TRUE)
 		{
 			UIX::SetMousewheelHoverObject(this);
 		}

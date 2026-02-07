@@ -31,7 +31,7 @@ UIXRECT			UIXListBoxEntry::Render( InterfaceInstance* pInstance, UIXRECT rect )
 
 	if ( mbSelectable )
 	{
-		if ( UIHoverItem(  rect.x, rect.y, rect.w, 19 ) == TRUE )
+		if ( UIX::IsMouseHover( rect.x, rect.y, rect.w, 19 ) == TRUE )
 		{
 			UIHoverIDSet( UIX_LISTBOX, mIndex, mpListBox->GetID() );
 			ulTextCol = 0xE0F0F0F0;

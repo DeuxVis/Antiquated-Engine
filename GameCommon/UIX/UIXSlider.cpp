@@ -234,7 +234,7 @@ uint32		ulCol = 0xf0505070;
 			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, nBarMaxW, mRenderRect.h, 0xf0080808 );
 			// INDICATOR (MIN)
 			ulCol = 0xf0505070;
-			if ( UIHoverItem( mRenderRect.x + nMinBarPos - 7, mRenderRect.y,  8, mRenderRect.h ) == TRUE )
+			if ( UIX::IsMouseHover( mRenderRect.x + nMinBarPos - 7, mRenderRect.y,  8, mRenderRect.h ) == TRUE )
 			{
 				UIHoverIDSet( UIX_SLIDER_BAR_MINRANGE, 0, GetID() );
 				ulCol = 0xf0a08050;
@@ -243,7 +243,7 @@ uint32		ulCol = 0xf0505070;
 			pInterface->Rect( 0, mRenderRect.x + nMinBarPos - 6, mRenderRect.y + 6, 6, mRenderRect.h - 6, ulCol );
 			// INDICATOR (MAX)
 			ulCol = 0xf0505070;
-			if ( UIHoverItem( mRenderRect.x + nMaxBarPos - 1, mRenderRect.y, 8, mRenderRect.h ) == TRUE )
+			if ( UIX::IsMouseHover( mRenderRect.x + nMaxBarPos - 1, mRenderRect.y, 8, mRenderRect.h ) == TRUE )
 			{
 				UIHoverIDSet( UIX_SLIDER_BAR_MAXRANGE, 0, GetID() );
 				ulCol = 0xf0a08050;
@@ -257,7 +257,7 @@ uint32		ulCol = 0xf0505070;
 			// Value/Grab bar
 			pInterface->Rect( 0, mRenderRect.x + nBarW - 2, mRenderRect.y, 4, mRenderRect.h, 0xf0303040 );
 
-			if ( UIHoverItem( mRenderRect.x + nBarW - 3, mRenderRect.y, 6, mRenderRect.h ) == TRUE )
+			if ( UIX::IsMouseHover( mRenderRect.x + nBarW - 3, mRenderRect.y, 6, mRenderRect.h ) == TRUE )
 			{
 				UIHoverIDSet( UIX_SLIDER_BAR, 0, GetID() );
 			}
@@ -303,7 +303,7 @@ uint32		ulCol = 0xf0505070;
 			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, nBarMaxW, mRenderRect.h, 0xf0080808 );
 			// INDICATOR (MIN)
 			ulCol = 0xf0505070;
-			if ( UIHoverItem( mRenderRect.x + nMinBarPos - 7, mRenderRect.y, 8, mRenderRect.h ) == TRUE )
+			if ( UIX::IsMouseHover( mRenderRect.x + nMinBarPos - 7, mRenderRect.y, 8, mRenderRect.h ) == TRUE )
 			{
 				UIHoverIDSet( UIX_SLIDER_BAR_MINRANGE, 0, GetID() );
 				ulCol = 0xf0a08050;
@@ -312,7 +312,7 @@ uint32		ulCol = 0xf0505070;
 			pInterface->Rect( 0, mRenderRect.x + nMinBarPos - 6, mRenderRect.y + 6, 6, mRenderRect.h - 6, ulCol );
 			// INDICATOR (MAX)
 			ulCol = 0xf0505070;
-			if ( UIHoverItem( mRenderRect.x + nMaxBarPos - 1, mRenderRect.y, 8, mRenderRect.h ) == TRUE )
+			if ( UIX::IsMouseHover( mRenderRect.x + nMaxBarPos - 1, mRenderRect.y, 8, mRenderRect.h ) == TRUE )
 			{
 				UIHoverIDSet( UIX_SLIDER_BAR_MAXRANGE, 0, GetID() );
 				ulCol = 0xf0a08050;
@@ -345,7 +345,7 @@ uint32		ulCol = 0xf0505070;
 //			pInterface->Text( 1, X + 110, lineY + 4, 0xd0e0e0e0, 3, "%.1f", angleMod );
 			// BACKGROUND
 			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, nBarMaxW, mRenderRect.h, 0xf0010101 );
-			if ( UIHoverItem( mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h ) == TRUE )
+			if ( UIX::IsMouseHover( mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h ) == TRUE )
 			{
 				UIHoverIDSet( UIX_SLIDER_BAR, 0, GetID() );
 			}
@@ -371,7 +371,7 @@ uint32		ulCol = 0xf0505070;
 			// Background
 			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h, 0xf0080808 );
 				
-			if ( UIHoverItem( mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h ) == TRUE )
+			if ( UIX::IsMouseHover( mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h ) == TRUE )
 			{
 				UIHoverIDSet( UIX_SLIDER_BAR, 0, GetID() );
 				ulKnobCol = 0xf0505070;
@@ -419,7 +419,7 @@ uint32		ulCol = 0xf0505070;
 			//			pInterface->Text( 1, X + 110, lineY + 4, 0xd0e0e0e0, 3, "%.1f", angleMod );
 						// BACKGROUND
 			pInterface->Rect(0, mRenderRect.x, mRenderRect.y, nBarMaxW, mRenderRect.h, 0xf0010101);
-			if (UIHoverItem(mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h) == TRUE)
+			if (UIX::IsMouseHover(mRenderRect) == TRUE)
 			{
 				UIHoverIDSet(UIX_SLIDER_BAR, 0, GetID());
 			}
@@ -454,7 +454,7 @@ uint32		ulCol = 0xf0505070;
 			// Background
 			pInterface->Rect( 0, mRenderRect.x, mRenderRect.y, nBarMaxW, mRenderRect.h, 0xf0080808 );
 				
-			if ( UIHoverItem( mRenderRect.x, mRenderRect.y, mRenderRect.w, mRenderRect.h ) == TRUE )
+			if ( UIX::IsMouseHover( mRenderRect ) == TRUE )
 			{
 				UIHoverIDSet( UIX_SLIDER_BAR, 0, GetID() );
 			}

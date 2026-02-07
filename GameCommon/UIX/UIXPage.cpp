@@ -14,10 +14,11 @@ UIXRECT		UIXPage::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect )
 {
 UIXRECT		renderRect = GetActualRenderRect( displayRect );
 
+	mPageRenderRect = renderRect;
+	UIX::SetActivePageRegion( mPageRenderRect );
 	if ( mbUseClipping )
 	{
 		pInterface->DrawAllElements();
-		mPageRenderRect = displayRect;
 	//	pInterface->SetViewport( rect.x, rect.y, rect.w, rect.h );
 		pInterface->SetRenderCanvas();
 	}

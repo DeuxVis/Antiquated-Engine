@@ -24,7 +24,7 @@
 #include "UIXModalPopup.h"
 
 uint32						UIX::msulNextObjectID = 2001;
-std::vector<UIXObject*>		UIX::msPagesList;
+std::vector<UIXPage*>		UIX::msPagesList;
 std::map<uint32, UIXObject*>	UIX::msComponentIDMap;
 int							UIX::msDragItemType = 0;
 UIXObject*					UIX::mspDragDestinationHover = NULL;
@@ -32,6 +32,7 @@ UIXObject*					UIX::mspDragSource = NULL;
 UIXObject*					UIX::mspModalObject = NULL;
 UIXObject*					UIX::mspMousewheelHoverObject = NULL;
 UIXObject*					UIX::mspTextEditFocusObject = NULL;
+UIXRECT						UIX::mxActivePageRegion;
 int							UIX::msSelectionPriority = 0;
 int							UIX::msPressedSelectionPriority = 0;
 int							UIX::msMouseWheelHoverPriority = 0;
@@ -262,7 +263,7 @@ int	type = UIX::GetDragItemType();
 	if ( ( type != 0 ) &&
 		 ( CanReceiveDragItem(type) ) )
 	{
-		if ( UIHoverItem( dragReceiveRegion.x, dragReceiveRegion.y, dragReceiveRegion.w, dragReceiveRegion.h) )
+		if ( UIX::IsMouseHover( dragReceiveRegion ) )
 		{
 			OnHoverDragItem(type);
 			return( TRUE );
@@ -298,6 +299,25 @@ void		UIXObject::SetDragReceiveCallback( int dragType, fnDragReceiveCallback fun
 	mDragMapParams[dragType] = ulDragDestParam;
 }
 
+
+BOOL	UIX::IsRectInActivePageRegion(UIXRECT rect)
+{
+	if (rect.x + rect.w < mxActivePageRegion.x) return(FALSE);
+	if (rect.x > mxActivePageRegion.x + mxActivePageRegion.w) return(FALSE);
+	if (rect.y + rect.h < mxActivePageRegion.y) return(FALSE);
+	if (rect.y > mxActivePageRegion.y + mxActivePageRegion.h) return(FALSE);
+	return(TRUE);
+}
+
+BOOL	UIX::IsInActivePageRegion(int x, int y)
+{
+	if (x < mxActivePageRegion.x) return(FALSE);
+	if (x > mxActivePageRegion.x + mxActivePageRegion.w) return(FALSE);
+	if (y < mxActivePageRegion.y) return(FALSE);
+	if (y > mxActivePageRegion.y + mxActivePageRegion.h) return(FALSE);
+	return(TRUE);
+}
+
 //--------------------------------------------------------------------------------------------------
 // IDParam must always be UIXObject's unique ID ( obj->GetID() )  to use this handler
 //
@@ -317,7 +337,7 @@ void	UIX::OnKeyUp(int keyCode)
 	switch (keyCode)
 	{
 	case KEY_ESCAPE:
-		for (UIXObject* pxObjects : msPagesList)
+		for (UIXPage* pxObjects : msPagesList)
 		{
 			pxObjects->KeyUp( keyCode );
 		}
@@ -385,12 +405,15 @@ BOOL		UIX::CheckForRightButtonPress( UIXObject* pxObject, UIXRECT rect, uint32 u
 {
 	if ( msSelectionPriority >= msPressedSelectionPriority )
 	{
-		if ( UIIsRightPressed( rect.x, rect.y, rect.w, rect.h ) == TRUE )
+		if ( IsRectInActivePageRegion( rect ) )
 		{
-			UIRightPressIDSet( ulButtonID, ulButtonParam, pxObject->GetID() );
-			msPressedSelectionPriority = msSelectionPriority;
+			if ( UIIsRightPressed( rect.x, rect.y, rect.w, rect.h ) == TRUE )
+			{
+				UIRightPressIDSet( ulButtonID, ulButtonParam, pxObject->GetID() );
+				msPressedSelectionPriority = msSelectionPriority;
+			}
+			return( IsMouseHover( rect ) );
 		}
-		return( IsMouseHover( rect ) );
 	}
 	return( FALSE );
 }
@@ -399,13 +422,16 @@ BOOL		UIX::CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, 
 {
 	if ( msSelectionPriority >= msPressedSelectionPriority )
 	{
-		if ( UIIsPressed( rect.x, rect.y, rect.w, rect.h ) == TRUE )
+		if ( IsRectInActivePageRegion( rect ) )
 		{
-			UIPressIDSet( ulButtonID, ulButtonParam, pxObject->GetID() );
-			msPressedSelectionPriority = msSelectionPriority;
-		}
+			if ( UIIsPressed( rect.x, rect.y, rect.w, rect.h ) == TRUE )
+			{
+				UIPressIDSet( ulButtonID, ulButtonParam, pxObject->GetID() );
+				msPressedSelectionPriority = msSelectionPriority;
+			}
 
-		return( IsMouseHover( rect ) );
+			return( IsMouseHover( rect ) );
+		}
 	}
 	return( FALSE );
 }
@@ -434,7 +460,7 @@ void		UIX::Initialise( int mode )
 
 void		UIX::Update( float delta )
 {
-	for( UIXObject* pxObjects : msPagesList )
+	for( UIXPage* pxObjects : msPagesList )
 	{
 		pxObjects->Update( delta );
 	}
@@ -442,7 +468,7 @@ void		UIX::Update( float delta )
 
 void		UIX::Reset()
 {
-	for( UIXObject* pxObjects : msPagesList )
+	for( UIXPage* pxObjects : msPagesList )
 	{
 		DeleteObject( pxObjects );
 	}
@@ -450,10 +476,22 @@ void		UIX::Reset()
 }
 
 
+BOOL		UIX::IsMouseHover( int x, int y, int w, int h )
+{
+	if (IsRectInActivePageRegion(UIXRECT(x, y, w, h)))
+	{
+		return ( UIHoverItem(x, y, w, h) );
+	}
+	return(FALSE);
+}
 
 BOOL		UIX::IsMouseHover( UIXRECT rect )
 {
-	return ( UIHoverItem( rect.x, rect.y, rect.w, rect.h ) );
+	if ( IsRectInActivePageRegion(rect))
+	{
+		return ( UIHoverItem( rect.x, rect.y, rect.w, rect.h ) );
+	}
+	return( FALSE );
 }
 
 void		UIX::Render( InterfaceInstance* pxInterface )
@@ -471,14 +509,17 @@ UIXRECT		pageDisplayRect;
 	msPressedSelectionPriority = 0;
 	msMouseWheelHoverPriority = 0;
 	UIXRECT		rootRect( 0,0,pxInterface->GetWindowWidth(),pxInterface->GetWindowHeight());
-
-	for( UIXObject* pxObjects : msPagesList )
+	
+	for( UIXPage* pxPage : msPagesList )
 	{
-		pxObjects->Render( pxInterface, rootRect );
+		mxActivePageRegion = rootRect;
+		pxPage->Render( pxInterface, rootRect );
 	}
 
+	mxActivePageRegion = UIXRECT( 0,0,pxInterface->GetWindowWidth(),pxInterface->GetWindowHeight());
+
 	pxInterface->Draw();
-	for( UIXObject* pxObjects : msPagesList )
+	for( UIXPage* pxObjects : msPagesList )
 	{
 		pxObjects->PostRender( pxInterface );
 	}
@@ -488,7 +529,7 @@ UIXRECT		pageDisplayRect;
 
 void		UIX::CloseAllMenus()
 {
-	for( UIXObject* pxPages : msPagesList )
+	for( UIXPage* pxPages : msPagesList )
 	{
 		pxPages->CloseAllMenus();
 	}
@@ -497,7 +538,7 @@ void		UIX::CloseAllMenus()
 
 void		UIX::Shutdown()
 {
-	for( UIXObject* pObject : msPagesList )
+	for( UIXPage* pObject : msPagesList )
 	{
 		msComponentIDMap[pObject->GetID()] = NULL;
 		msComponentIDMap.erase( pObject->GetID() );

@@ -116,6 +116,18 @@ struct UIXRECT
 	void	ConsumeVertical( int amount ) { y += amount; h -= amount; }
 	void	ConsumeHorizontal( int amount ) { x += amount; w -= amount; }
 
+	BOOL	IsWithinRect( int vx, int vy ) 
+	{ 
+		if ( ( vx >= x ) && 
+			 ( vx <= x + w ) && 
+			 ( vy >= y ) && 
+			 ( vy <= y + h ) )
+		{
+			return( TRUE );
+		}
+		return( FALSE );
+	}
+
 	int x;
 	int y;
 	int w;
@@ -173,10 +185,11 @@ protected:
 	virtual void		OnHoverDragItem( int dragType ) {}
 	virtual void		OnReceiveDragItem( int dragType, UIXObject* pxSourceObject, uint32 ulDragParam );
 	bool				CanReceiveDragItem( int dragType ) { return( mDragMap[dragType] ); }
-	
+
 	UIXRECT		GetLocalPositionRect() { return( mDisplayRect ); }
 	UIXRECT		GetActualRenderRect( UIXRECT parentRect );
 	int			GetChildContentsHeight() { return mChildContentsHeight; }
+	int			GetChildContentsWidth() { return mChildContentsWidth; }		// childcontentswidth needs implementing for use by Page 
 	virtual int		GetSelectionPriorityLayer() { return( 0 ); }
 
 	std::vector<UIXObject*>&		GetChildObjectList() { return mContainsList; }
@@ -198,6 +211,7 @@ private:
 	void*			mpUserObject = NULL;
 	bool			mbDeleteUserObjectOnDestroy = false;
 	int				mChildContentsHeight = 0;
+	int				mChildContentsWidth = 0;
 	UIXRECT			mLastRenderDisplayRect;
 	UIXObject*		mpParent;
 	fnSelectedCallback	mfnSelectedCallback = NULL;
@@ -211,6 +225,7 @@ private:
 class UIX
 {
 friend class UIXObject;
+friend class UIXPage;
 public:
 
 	static void		Initialise( int mode );
@@ -255,7 +270,12 @@ public:
 	static void							SetTextEditFocus( UIXObject* pObject );
 	static UIXObject*					GetTextEditFocus() { return( mspTextEditFocusObject ); }
 
+	static BOOL							IsOffscreen( int x, int y );
+	static BOOL							IsInActivePageRegion( int x, int y );
+	static BOOL							IsRectInActivePageRegion( UIXRECT rect );
 	static BOOL							IsMouseHover( UIXRECT rect );
+	static BOOL							IsMouseHover( int x, int y, int w, int h );
+
 	static BOOL							CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam );
 	static BOOL							CheckForRightButtonPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam );
 
@@ -265,6 +285,7 @@ public:
 
 		static uint32						GetNextObjectID();
 protected:
+	static void							SetActivePageRegion(UIXRECT rect) { mxActivePageRegion = rect; }
 
 	static std::map<uint32, UIXObject*>		msComponentIDMap;
 private:
@@ -272,7 +293,7 @@ private:
 	static BOOL		SliderHoldHandler( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
 
 	static uint32						msulNextObjectID;
-	static std::vector<UIXObject*>		msPagesList;
+	static std::vector<UIXPage*>		msPagesList;
 	static int							msDragItemType;
 	static UIXObject*					mspDragDestinationHover;
 	static UIXObject*					mspDragSource;
@@ -280,6 +301,7 @@ private:
 	static UIXObject*					mspTextEditFocusObject;
 	static uint32						msDragSourceParam ;
 	static UIXObject*					mspModalObject;
+	static UIXRECT						mxActivePageRegion;
 	static int							msSelectionPriority;
 	static int							msPressedSelectionPriority;
 	static int							msMouseWheelHoverPriority;
