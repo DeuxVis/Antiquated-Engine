@@ -708,6 +708,9 @@ LPGRAPHICSDEVICE	pNewGraphicsDevice;
 		}
 		mLastUsedD3dpp = d3dpp;
 
+		mnWindowWidth = mLastUsedD3dpp.BackBufferWidth;
+		mnWindowHeight = mLastUsedD3dpp.BackBufferHeight;
+
 		pNewGraphicsDevice = mpInterfaceInternals->mpInterfaceD3DDevice;
 		if ( pNewGraphicsDevice == NULL )
 		{
