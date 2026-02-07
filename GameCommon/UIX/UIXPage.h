@@ -15,6 +15,8 @@ public:
 	virtual void		OnPostChildrenRender( InterfaceInstance* pInterface );
 
 	UIXRECT		GetPageRenderRect() { return( mPageRenderRect ); }
+	BOOL		IsWithinPage(int x, int y);
+
 private:
 	UIXRECT		mPageRenderRect;
 	BOOL		mbUseClipping = FALSE;

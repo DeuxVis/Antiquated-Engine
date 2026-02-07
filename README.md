@@ -6,7 +6,7 @@ The code contained here was generated over many years as part of various hobby p
 
 It is not well designed, well implemented, well structured or well.. anything .. it just is what it is. Sorry, Adrian. Considering that most of it was written in a rush very late at night, often after a few whiskeys, its always surprising any of it works at all. (Which it probably doesnt)
 
-This github project has mostly been created for the sake of posterity rather than any expectation of practical value, although the code is still in active use in the old game. 
+This github project has mostly been created for the sake of posterity rather than any expectation of practical value, although the code is still in active use in the old game (and, strangely enough, in things like https://gamesformay.com/Elemental ). 
 
 Overall structure of the repo
 -----------------------------
@@ -24,10 +24,8 @@ In addition to the 2 sets of framework code there is:
 
 Preconditions
 -------------
-
-- For obscure reasons relating to the functioning of edit and continue (i.e. its inability to do what i need it to do in later versions), I keep around a version of Visual Studio 2013 express, which is where most of the project & solution files will come from. They should generally be compatable with newer versions (I guess..) though you may have some work to do to use anything other than the V120 toolchain
 - Executables will get placed in the Exe folder which contains some required data files. When debugging you'll need to set your working directory there for things to be happy.
-- If you were to try to use any parts of this in an external project, you'd need to put **[path_to_antiquated_repo]\Pub\Include**  somewhere in your project's include path to keep things happy.
+- If you were to try to use any parts of this in an external project, (why? for the love of god, why?) you'd probably need to put **[path_to_antiquated_repo]\Pub\Include**  somewhere in your project's include path to keep things happy.
 
 Disclaimer
 --------------
