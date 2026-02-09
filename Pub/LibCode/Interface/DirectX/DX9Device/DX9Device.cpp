@@ -492,11 +492,11 @@ int adapterIndex = 0;
 
 	if ( nBackBufferMinW > 0 )
 	{
-		if (pD3Dpp->BackBufferWidth < nBackBufferMinW)
+		if ((int)pD3Dpp->BackBufferWidth < nBackBufferMinW)
 		{
 			pD3Dpp->BackBufferWidth = nBackBufferMinW;
 		}
-		if (pD3Dpp->BackBufferHeight < nBackBufferMinH)
+		if ((int)pD3Dpp->BackBufferHeight < nBackBufferMinH)
 		{
 			pD3Dpp->BackBufferHeight = nBackBufferMinH;
 		}

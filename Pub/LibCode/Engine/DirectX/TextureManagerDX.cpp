@@ -7,6 +7,7 @@
 #include <StandardDef.h>
 #include <Rendering.h>
 #include <Interface.h>
+#include <InterfaceEx.h>
 
 //#include "../../Universal/GameCode/FrontEnd/Screens/FEVideoOptions.h"		// TEMP - for debug indicators
 
@@ -578,6 +579,27 @@ int		nFormatsLoop = 0;
 	}
 #endif
 	return( 0 );
+}
+
+int				EngineTextureCreateInterfaceOverlayEx(InterfaceInstance* pInterface, int nLayer, TEXTURE_HANDLE hTexture )
+{
+	if (hTexture >= 0)
+	{
+		if (maTextureReferences[hTexture].nState == TEXTURE_STATE_LOADED)
+		{
+			maTextureReferences[hTexture].nUsed++;
+			return(pInterface->mpTexturedOverlays->CreateOverlayDirect(nLayer, maTextureReferences[hTexture].pTexture, hTexture));
+		}
+		else
+		{
+			return(TexturedOverlayCreate(nLayer, NULL));
+		}
+	}
+	else
+	{
+		return(NOTFOUND);
+	}
+
 }
 
 int				EngineTextureCreateInterfaceOverlay( int nLayer, TEXTURE_HANDLE hTexture )

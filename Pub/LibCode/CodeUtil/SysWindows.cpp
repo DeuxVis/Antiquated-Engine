@@ -925,18 +925,18 @@ BOOL	SysDeleteFile( const char* szFilename )
 
 /***************************************************************************
  * Function    : SysGetAllFilesInFolder
- * Params      :
- * Returns     :
- * Description : 
+ * Params      :  Use *.* for szFilenameSearch to get all files, or specify a search string like *.txt to get just text files
+ * Description : Calls the provided callback function once for each file in the specified folder, 
+				 providing the full path to the file as a parameter. Does not recurse into subfolders.
  ***************************************************************************/
-void		SysGetAllFilesInFolder( const char* szSrcFolder, fnDirListingCallback callback )
+void		SysGetAllFilesInFolder(const char* szSrcFolder, const char* szFilenameSearch, fnDirListingCallback callback)
 {
 WIN32_FIND_DATA FileData; 
 char	acString[256];
 HANDLE hSearch; 
 BOOL fFinished = FALSE; 
 
-	sprintf( acString, "%s/*.*", szSrcFolder );	  
+	sprintf( acString, "%s/%s", szSrcFolder, szFilenameSearch);
 	hSearch = FindFirstFile(acString, &FileData); 
 
 	if (hSearch != INVALID_HANDLE_VALUE) 
@@ -963,6 +963,7 @@ BOOL fFinished = FALSE;
 		FindClose(hSearch);
 	}
 }
+
 
 
 /***************************************************************************

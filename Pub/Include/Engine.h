@@ -16,8 +16,12 @@
 #include "EngineMaths.h"
 #include "CodeUtil.h"
 
+
 // ---------------------------------------------------- Engine - Main C interfaces
 #ifdef __cplusplus
+
+class InterfaceInstance;
+
 extern "C"
 {
 #endif
@@ -226,6 +230,7 @@ extern TEXTURE_HANDLE	EngineCreateRenderTargetTexture( int nWidth, int nHeight, 
 extern void				EngineSetRenderTargetTexture( TEXTURE_HANDLE handle, uint32 ulClearCol, BOOL bClear );
 extern void				EngineRestoreRenderTarget( void );
 
+extern int				EngineTextureCreateInterfaceOverlayEx( InterfaceInstance* pInterface, int nLayer, TEXTURE_HANDLE);
 extern int				EngineTextureCreateInterfaceOverlay( int nLayer, TEXTURE_HANDLE );
 extern TEXTURE_HANDLE	ModelRenderGeneratePreviewImage( int nModelHandle, VECT* pxPos, VECT* pxRot, float fScale );
 

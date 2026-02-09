@@ -144,7 +144,7 @@ extern BOOL		SysSetCurrentDir( const char* szDir );
 extern BOOL		SysDoesDirExist( const char* szDir );
 extern void		SysRecurseCopyFolders( const char* szFolder, const char* szCopyRoot );
 extern void		SysCopyFolderContents( const char* szSrcFolder, const char* szDestFolder );
-extern void		SysGetAllFilesInFolder( const char* szSrcFolder, fnDirListingCallback callback );
+extern void		SysGetAllFilesInFolder( const char* szSrcFolder, const char* szFileSearch, fnDirListingCallback callback );
 
 extern int		SysGetFileSize( FILE* );
 extern BYTE*	SysFileAllocateAndLoad( const char* szFilename, int* pnMemSizeOut );
