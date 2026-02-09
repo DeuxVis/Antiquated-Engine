@@ -21,8 +21,6 @@ extern BOOL		mboRenderLineAlpha;
 extern void InterfaceTurnOffTextureFiltering( void );
 extern void InterfaceTurnOnTextureFiltering( int );
 extern void		InterfaceSetIsUsingDefaultFonts( BOOL bUsingDefaultFonts );
-extern void InterfaceReleaseForDeviceReset( void );
-extern void InterfaceRestorePostDeviceReset( void );
 
 enum eInterfaceTextureFormat
 { 
@@ -73,7 +71,7 @@ public:
 	LPGRAPHICSTEXTURE	LoadTextureFromArchive( const char* szFilename, int boReduceFilter, int boMipFilter, int nArchiveHandle );
 	LPGRAPHICSTEXTURE	LoadTextureFromFileInMemDX( const char* szFilename, BYTE* pbMem, int nMemSize, int boReduceFilter, int boMipFilter, BOOL bReadable );
 
-	BOOL				GetDXDeviceCreateParams( HWND hWindow, BOOL boMinPageSize, D3DPRESENT_PARAMETERS* pD3Dpp, int nBackBufferMinW = 0, int nBackBufferMinH = 0 );
+	BOOL				GetDXDeviceCreateParams( HWND hWindow, BOOL boMinPageSize, D3DPRESENT_PARAMETERS* pD3Dpp, int nBackBufferMinW = 0, int nBackBufferMinH = 0, BOOL bFullscreen = FALSE, int nRequestedMonitorNum = -1 );
 
 	void		SetViewport( int X, int Y, int W, int H );
 	void		SetRenderCanvas();

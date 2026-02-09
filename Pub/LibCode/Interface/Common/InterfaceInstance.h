@@ -15,6 +15,9 @@ struct InterfaceRECT
 	int		h = 0;
 };
 
+typedef	void(*fnInterfaceCallback)( InterfaceInstance* pxInterface );
+
+
 class InterfaceInstance
 {
 public:
@@ -61,6 +64,7 @@ public:
 
 	BOOL		IsInRender( void );
 	void		FreeAll( void );
+	void		ChangeDisplay( BOOL bFullScreen, int nMonitorNum );
 	void		ReleaseForDeviceReset( void );
 	void		RestorePostDeviceReset( void );
 
@@ -68,6 +72,7 @@ public:
 	int			GetWidth( void );
 	int			GetCentreX( void );
 	int			GetCentreY( void );
+	BOOL		IsFullscreen() { return(mboFullScreen); }	
 
 	void		SetTextureAsCurrentDirect( void* pTexture );
 	void		EnableTextureFiltering( BOOL bFlag );
@@ -83,7 +88,7 @@ public:
 	const InterfaceRECT&		GetDrawDimensions() const { return( m_DrawRect );} 
 	void		SetDrawRegion( int nX, int nY, int nWidth, int nHeight );
 	void		SetRenderSurfaceSize( int W, int H ) { mnRenderSurfaceWidth = W; mnRenderSurfaceHeight = H; }
-
+	void		SetInitialSize( BOOL bFullscreen, int width, int height, BOOL bSmallMode = FALSE );
 	BOOL		LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags );
 
 	// TODO - Make these private and expose all the functionality through this top level interface
@@ -94,9 +99,18 @@ public:
 
 	void		DrawAllElements( void );
 	float		GetFPS() { return( mfInterfaceFPS ); }
+	BOOL		HasWindowChanged() { return( mboHasWindowChanged );}
+
+	void		RegisterDeviceResetCallbacks(fnInterfaceCallback fnPreReset, fnInterfaceCallback fnPostReset) { mfnPreDeviceResetCallback = fnPreReset; mfnPostDeviceResetCallback = fnPostReset; }
+
 protected:
 	void		SetDevice( void* pDevice );		// oldschool
+	void		CreateD3DInstanceIfNeeded();
 
+	void	 UpdateWindowStyle( HWND hWindow, BOOL boFullScreen );
+
+	fnInterfaceCallback	mfnPreDeviceResetCallback = NULL;
+	fnInterfaceCallback	mfnPostDeviceResetCallback = NULL;
 
 	BOOL	mboInterfaceInitialised = FALSE;
 	bool	mbIsInScene = false;
@@ -110,6 +124,11 @@ protected:
 	int		mnWindowWidth = 700;
 	int		mnWindowHeight = 600;
 	float	mfInterfaceFPS = 0.0f;
+	BOOL	mboFullScreen = FALSE;
+	BOOL	mboCurrentlyFullscreen = FALSE;
+	BOOL	mboHasWindowChanged = FALSE;
+	int		mnRequestedMonitorNum = NOTFOUND;
+	
 
 };
 

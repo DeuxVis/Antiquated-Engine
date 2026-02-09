@@ -6,6 +6,7 @@
 
 #include "../Win32/Interface-Win32.h"
 #include "InterfaceCommon.h"
+#include "InterfaceInstance.h"
 #include "InterfaceUtil.h"
 #include "InterfaceDevice.h"
 
@@ -42,21 +43,6 @@ BOOL					InterfaceIsOversized( void )
 
 INTERFACE_API void InterfaceSetInitialSize( BOOL boFullScreen, int nFullScreenSizeX, int nFullScreenSizeY , BOOL boSmallFlag )
 {
-//	mcd3dUtilApp.m_bWindowed = !boFullScreen;
-	mnDesiredWidth = nFullScreenSizeX;
-	mnDesiredHeight = nFullScreenSizeY;
-
-	if ( !boFullScreen )
-	{
-#ifdef WIN32
-		InterfaceWin32SetInitialWindowSize( nFullScreenSizeX, nFullScreenSizeY );
-#endif
-	}
-
-#ifdef WIN32
-	OnSetInitialSize( boFullScreen, nFullScreenSizeX, nFullScreenSizeY, boSmallFlag );
-#endif
-
-//	mboSmall = boSmallFlag;	// todo
+	InterfaceInstanceMain()->SetInitialSize(boFullScreen, nFullScreenSizeX, nFullScreenSizeY, boSmallFlag);
 }
 

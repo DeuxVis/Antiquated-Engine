@@ -12,7 +12,6 @@ extern void	InterfaceWin32SetInitialWindowSize( int sizeX, int sizeY );
 
 extern void	InterfaceSetWindowStyle( HWND hWindow, bool bFullscreen );
 
-extern void	InterfaceSetWindowHasChanged( BOOL );
 
 extern HWND						mhwndInterfaceMain;
 

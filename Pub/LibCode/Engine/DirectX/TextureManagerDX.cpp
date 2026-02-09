@@ -1557,9 +1557,22 @@ uint32 iID;
 	}
 }
 
+void	EngineTextureManagerReleaseAllTextures() 
+{
+	for( int loop = 0; loop < MAX_TEXTURES_IN_MANAGER; loop++ )
+	{
+		if ( maTextureReferences[ loop ].pTexture )
+		{
+			maTextureReferences[ loop ].pTexture->Release();
+			maTextureReferences[ loop ].pTexture = NULL;
+		}
+	}
+	ZeroMemory( maTextureReferences, sizeof( TEXTURE_REFERENCES ) * MAX_TEXTURES_IN_MANAGER );
+}
 
 void	EngineTextureManagerFreeDX( BOOL boCompletely )
 {
+	EngineTextureManagerReleaseAllTextures();
 	if ( boCompletely )
 	{
 		mboTextureManagerKillThread = TRUE;

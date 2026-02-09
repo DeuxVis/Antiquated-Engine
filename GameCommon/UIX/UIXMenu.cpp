@@ -85,7 +85,12 @@ void		UIXMenuItem::DoRender( InterfaceInstance* pInterface, UIXRECT rect )
 			ulTextCol = 0xe0e0e0e0;
 			UIX::CheckForPress(pMenuItem, rect, UIX_MENU_ITEM, 0);
 		}
-		pInterface->Text(0, rect.x + 5, rect.y + 1, ulTextCol, 0, pMenuItem->GetText());
+
+		if ( pMenuItem->mbIsChecked )
+		{
+			pInterface->Rect(1, rect.x + 3, rect.y + 2, 12, rect.h - 4, 0xd02030b0 );	
+		}
+		pInterface->Text(0, rect.x + 20, rect.y + 1, ulTextCol, 0, pMenuItem->GetText());
 		rect.y += 18;
 	}
 }
@@ -160,6 +165,8 @@ void		UIXMenu::OnPostRender( InterfaceInstance* pInterface, UIXRECT rect )
 			itemRect.y += itemRect.h;
 			if ( itemRect.w < 150 ) itemRect.w = 150;
 			itemRect.h = pInterface->GetHeight() - (itemRect.y + 10);
+
+			itemRect.w += 20;
 			pMenuItem->DoRender( pInterface, itemRect );
 		}
 	}

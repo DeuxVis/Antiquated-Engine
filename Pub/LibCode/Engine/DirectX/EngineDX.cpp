@@ -822,38 +822,31 @@ LPGRAPHICSDEVICE	EngineGetDXDevice(void)
 	return( mpEngineDevice );
 }
 
-int		mnLastSetVertexFormat = NOTFOUND;
-
 void	EngineSetVertexFormat( int nVertexFormat )
 {
 #ifdef TUD11
 	PANIC_IF( TRUE, "DX11 EngineSetVertexFormat TBI" );
 #else
- 	if ( nVertexFormat != mnLastSetVertexFormat )
+	switch( nVertexFormat )
 	{
-		mnLastSetVertexFormat = nVertexFormat;
-
-		switch( nVertexFormat )
-		{
-		default:
-			mpEngineDevice->SetFVF( D3DFVF_CUSTOMVERTEX );
-			break;
-		case VERTEX_FORMAT_NORMAL:
-			mpEngineDevice->SetFVF( D3DFVF_CUSTOMVERTEX );
-			break;
-		case VERTEX_FORMAT_2UVS:
-			mpEngineDevice->SetFVF( D3DFVF_LANDRENDERVERTEX );
-			break;
-		case VERTEX_FORMAT_XYZ:
-		    mpEngineDevice->SetFVF( D3DFVF_XYZ );
-			break;
-		case VERTEX_FORMAT_SHADOWVERTEX:
-		    mpEngineDevice->SetFVF( D3DFVF_SHADOWVERTEX );
-			break;
-		case VERTEX_FORMAT_FLATVERTEX:
-		    mpEngineDevice->SetFVF( D3DFVF_FLATVERTEX );
-			break;
-		}
+	default:
+		mpEngineDevice->SetFVF( D3DFVF_CUSTOMVERTEX );
+		break;
+	case VERTEX_FORMAT_NORMAL:
+		mpEngineDevice->SetFVF( D3DFVF_CUSTOMVERTEX );
+		break;
+	case VERTEX_FORMAT_2UVS:
+		mpEngineDevice->SetFVF( D3DFVF_LANDRENDERVERTEX );
+		break;
+	case VERTEX_FORMAT_XYZ:
+	    mpEngineDevice->SetFVF( D3DFVF_XYZ );
+		break;
+	case VERTEX_FORMAT_SHADOWVERTEX:
+	    mpEngineDevice->SetFVF( D3DFVF_SHADOWVERTEX );
+		break;
+	case VERTEX_FORMAT_FLATVERTEX:
+	    mpEngineDevice->SetFVF( D3DFVF_FLATVERTEX );
+		break;
 	}
 #endif
 }
@@ -1363,11 +1356,9 @@ void	EngineSetBlendMode( int nBlendMode )
 #endif
 }
 
-int		manEngineColourMode[4] = { NOTFOUND };
 
 void	EngineResetColourMode( void )
 {
-	manEngineColourMode[0] = NOTFOUND;
 }
 
 //--------------------------------------------------
@@ -1377,10 +1368,6 @@ void	EngineResetColourMode( void )
 //--------------------------------------------------
 void	EngineSetColourMode( int nTexLayer, int nColourMode )
 {
-	if ( nColourMode != manEngineColourMode[nTexLayer] )
-	{
-		manEngineColourMode[nTexLayer] = nColourMode;
-
 #ifdef TUD11
 		PANIC_IF( TRUE, "DX11 EngineSetColourMode TBI" );
 #else
@@ -1428,87 +1415,50 @@ void	EngineSetColourMode( int nTexLayer, int nColourMode )
 			break;
 		}
 #endif
-	}
 }
 
 
-int		mnEngineAlphaBlendState = NOTFOUND;
 //--------------------------------------------------
 // EngineEnableAlphaBlend
 //	Enables or disables semi-transparent blending
 //--------------------------------------------------
 void	EngineEnableBlend( int nFlag )
 {
-	if ( nFlag != mnEngineAlphaBlendState )
-	{
-		mnEngineAlphaBlendState = nFlag;
-		mpEngineDevice->SetRenderState( D3DRS_ALPHABLENDENABLE, nFlag );
-	}
+	mpEngineDevice->SetRenderState( D3DRS_ALPHABLENDENABLE, nFlag );
 }
-
-int		mnEngineLightingFlag = TRUE;
 
 void	EngineEnableLighting( int nFlag )
 {
-	if ( nFlag != mnEngineLightingFlag )
-	{
-		mpEngineDevice->SetRenderState( D3DRS_LIGHTING, nFlag );
-		mnEngineLightingFlag = nFlag;
-
-		ModelMaterialsEnableLighting( nFlag );
-	}
+	mpEngineDevice->SetRenderState( D3DRS_LIGHTING, nFlag );
+	ModelMaterialsEnableLighting( nFlag );
 }
-
-int		mnEngineStateFog = NOTFOUND;
 
 void	EngineEnableFog( int nFlag )
 {
-	if ( mnEngineStateFog != nFlag )
+	if ( ModelRenderingIsShadowPass() == TRUE )
 	{
-		mnEngineStateFog = nFlag;
-		if ( ModelRenderingIsShadowPass() == TRUE )
-		{
-			mpEngineDevice->SetRenderState( D3DRS_FOGENABLE, 0 );//nFlag );
-			mnEngineStateFog = 0;
-		}
-		else
-		{
-			mpEngineDevice->SetRenderState( D3DRS_FOGENABLE, nFlag );
-		}
+		mpEngineDevice->SetRenderState( D3DRS_FOGENABLE, 0 );//nFlag );
+	}
+	else
+	{
+		mpEngineDevice->SetRenderState( D3DRS_FOGENABLE, nFlag );
 	}
 }
-
-int		mnEngineCurrentZTest = NOTFOUND;
 
 void	EngineEnableZTest( int nFlag )
 {
-	if ( mnEngineCurrentZTest != nFlag )
-	{
-		mnEngineCurrentZTest = nFlag;
-	    mpEngineDevice->SetRenderState( D3DRS_ZENABLE, nFlag );
-	}
+    mpEngineDevice->SetRenderState( D3DRS_ZENABLE, nFlag );
 }
 
-int		mnCurrentSpecularFlag = 0;
 
 void	EngineEnableSpecular( int nFlag )
 {
-	if ( mnCurrentSpecularFlag != nFlag)
-	{
-		mpEngineDevice->SetRenderState( D3DRS_SPECULARENABLE, nFlag );
-		mnCurrentSpecularFlag = nFlag;
-	}
+	mpEngineDevice->SetRenderState( D3DRS_SPECULARENABLE, nFlag );
 }
-
-int		mnEngineCurrentZWrite = NOTFOUND;
 
 void	EngineEnableZWrite( int nFlag )
 {
-	if ( mnEngineCurrentZWrite != nFlag )
-	{
-		mnEngineCurrentZWrite = nFlag;
-		mpEngineDevice->SetRenderState( D3DRS_ZWRITEENABLE, nFlag );
-	}
+	mpEngineDevice->SetRenderState( D3DRS_ZWRITEENABLE, nFlag );
 }
 
 void	EngineEnableWireframe( int nFlag )

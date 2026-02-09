@@ -863,4 +863,19 @@ SpriteGroup*	pSpriteGroups = mspSpriteGroups;
 
 	}
 
+	mpEngineDevice->SetRenderState( D3DRS_LIGHTING, FALSE );
+    mpEngineDevice->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+	/*
+	        lpDevice->SetRenderState( D3DRS_SHADEMODE, D3DSHADE_GOURAUD );
+	    lpDevice->SetRenderState( D3DRS_SPECULARENABLE, FALSE );
+        lpDevice->SetRenderState( D3DRS_CULLMODE, D3DCULL_NONE );
+        lpDevice->SetRenderState( D3DRS_ZENABLE, FALSE );
+        lpDevice->SetRenderState( D3DRS_ZWRITEENABLE, FALSE );
+        lpDevice->SetRenderState( D3DRS_LIGHTING, FALSE );
+        lpDevice->SetRenderState( D3DRS_COLORVERTEX, TRUE );
+        lpDevice->SetRenderState( D3DRS_FILLMODE,  D3DFILL_SOLID );
+        lpDevice->SetRenderState( D3DRS_ALPHABLENDENABLE, FALSE );
+	    lpDevice->SetRenderState( D3DRS_AMBIENT, 0xFFFFFFFF );  //?
+        lpDevice->SetRenderState( D3DRS_CLIPPING, TRUE );
+		*/
 }

@@ -10,13 +10,6 @@
 #include "../Common/InterfaceDevice.h"
 
 
-void		OnSetInitialSize( BOOL boFullScreen, int nFullScreenSizeX, int nFullScreenSizeY , BOOL boSmallFlag )
-{
-	glViewport( 0,0, InterfaceGetWidth(), InterfaceGetHeight() );
-
-}
-
-
 
 void		OnSetWindowSize( BOOL boFullScreen, int nWidth, int nHeight )
 {

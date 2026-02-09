@@ -20,8 +20,6 @@
 #define		INITIAL_SCREEN_TOP			100
 #define		INITIAL_SCREEN_BOTTOM		600
 
-BOOL		mboHasWindowChanged = FALSE;
-BOOL		mboFullScreen = FALSE;
 
 HWND		mhwndInterfaceMain = NULL;
 
@@ -93,24 +91,9 @@ void PanicImpl( const char* szErrorString )
  ***************************************************************************/
 INTERFACE_API BOOL InterfaceDoesNeedChanging ( void )
 {
-//	if ( InterfaceGetD3DDevice() != NULL )
-//	{
-#ifndef USING_OPENGL
-	if ( InterfaceIsVRMode() == TRUE ) 
-//		 && ( EngineHasOculus() == TRUE ) )
-	{
-		return( FALSE );
-	}
-#endif
-	return( mboHasWindowChanged );
-//	}
-//	return( FALSE );
+	return( InterfaceInstanceMain()->HasWindowChanged() );
 }
 
-void	InterfaceSetWindowHasChanged( BOOL bFlag )
-{
-	mboHasWindowChanged = bFlag;
-}
 
 INTERFACE_API void InterfaceInitWindow( const char* pcString, void* pVoidWinClass, BOOL bAllowResize )
 {
@@ -161,7 +144,6 @@ HWND hWnd = 0;
 	}
 
 	mhwndInterfaceMain = hWnd;
-
 }
 
 
@@ -267,8 +249,7 @@ void	InterfaceSetWindowStyle( HWND hWindow, bool bFullscreen )
  ***************************************************************************/
 INTERFACE_API BOOL InterfaceIsFullscreen ( void )
 {
-//	mboFullScreen = !mcd3dUtilApp.m_bWindowed;
-	return( mboFullScreen );
+	return( FALSE );
 }
 
 /***************************************************************************

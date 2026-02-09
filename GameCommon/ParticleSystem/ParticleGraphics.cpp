@@ -94,6 +94,12 @@ void		ParticleGraphic::Init( const char* szTextureName, float fGridScale, BOOL b
 
 
 //-------------------------------------------------------------------------------------------------
+void		ParticleGraphicsInit()
+{
+
+}
+
+
 void		ParticleGraphicsShutdown( )
 {
 ParticleGraphic*		pParticleGraphic = mspParticleGraphics;

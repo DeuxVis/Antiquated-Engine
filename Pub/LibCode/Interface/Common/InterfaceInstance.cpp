@@ -44,6 +44,21 @@ LPGRAPHICSDEVICE		pGraphicsDevice = (LPGRAPHICSDEVICE)pDevice;
 	mpFontSystem->SetGraphicsDevice( pGraphicsDevice );
 }
 
+void InterfaceInstance::SetInitialSize(BOOL boFullScreen, int width, int height, BOOL bSmallMode)
+{
+	if ( !boFullScreen )
+	{
+#ifdef WIN32
+		SetInitialWindowSize( width, height );
+#endif
+	}
+
+	mboFullScreen = boFullScreen;
+	 
+//	mboSmall = boSmallFlag;	// todo
+
+}
+
 BOOL		InterfaceInstance::LoadFont( int nFontNum, const char* pcImageFileName, const char* pcLayoutFile, uint32 ulFlags )
 {
 	return( mpFontSystem->LoadFont( nFontNum, pcImageFileName, pcLayoutFile, ulFlags ) );

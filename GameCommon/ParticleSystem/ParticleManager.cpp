@@ -104,6 +104,15 @@ void	ParticleManagerDeleteParticle( Particle* pParticle )
 	pParticle->SetTypeID( IN_MORGUE );
 }
 
+void		ParticleManagerInitGraphics( void )
+{
+
+}
+
+void		ParticleManagerShutdownGraphics( void )
+{
+
+}
 
 
 void		ParticleManagerInit( void )

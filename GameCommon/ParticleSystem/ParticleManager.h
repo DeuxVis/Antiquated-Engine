@@ -14,4 +14,5 @@ extern Particle*	ParticleManagerAddParticle( const char* szParticleTypeName, con
 
 extern int		ParticleManagerGetRenderedParticleCount();
 
+
 #endif

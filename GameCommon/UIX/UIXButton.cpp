@@ -226,7 +226,11 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 				pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x20FFFFFF );				
 			}
 		}
-		UIX::DrawIcon( pInterface, mIconNum, UIXRECT(drawRect.x + 1, drawRect.y + 1, drawRect.w - 2, drawRect.h - 2), 0xE0D0D0D0 );
+		drawRect.x += ((drawRect.w - 19)/2);
+		drawRect.y += ((drawRect.h - 19)/2);
+		drawRect.w = 19;
+		drawRect.h = 19;
+		UIX::DrawIcon( pInterface, mIconNum, drawRect, 0xE0D0D0D0 );
 		break;		
 	case UIXBUTTON_PLAIN_RECT:
 		pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, mulCol );

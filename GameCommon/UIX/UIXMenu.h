@@ -13,10 +13,13 @@ public:
 
 	const char* GetText() const { return mText.c_str(); }
 	UIXMenuItem*		AddMenuItem( const char* szMenuItemName, fnSelectedCallback selectedCallback = NULL, uint32 ulSelectParam = 0);
+	void		SetChecked(BOOL bFlag) { mbIsChecked = bFlag; }
+	void		SetHeader(BOOL bFlag) { mbIsHeader = bFlag; }
 
 	void		DoRender( InterfaceInstance* pInterface, UIXRECT rect );
 	virtual bool		OnSelected( int nButtonID, uint32 ulParam );
 	bool			IsExpanded() const { return mbIsExpanded; }
+
 
 	UIXRECT		GetLastRenderRect() const { return mLastRenderRect; }
 	void	SetLastRenderRect(UIXRECT rect) { mLastRenderRect = rect; }
@@ -32,6 +35,9 @@ private:
 
 	std::string		mText;
 	bool			mbIsExpanded = false;	
+	BOOL			mbIsChecked = FALSE;	
+	BOOL			mbIsHeader = FALSE;	
+	
 	UIXRECT			mLastRenderRect;
 
 };

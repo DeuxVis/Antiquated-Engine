@@ -67,6 +67,7 @@ extern INTERFACE_API void	InterfaceFree( void );
 
 extern BOOL					InterfaceIsOversized( void );
 
+extern INTERFACE_API void	InterfaceChangeDisplay( BOOL bFullScreen, int nMonitorNum );
 
 /***************************************************
  ******  Interface - Main Update Functions  ********
@@ -206,6 +207,9 @@ typedef int		INTERFACE_DEVICE_HANDLE;
 extern INTERFACE_API INTERFACE_DEVICE_HANDLE	InterfaceAdditionalDisplayDevice( HWND hWindow );
 extern INTERFACE_API void	InterfaceSwitchDevice( INTERFACE_DEVICE_HANDLE hNewDevice );
 
+extern int					InterfaceGetNumMonitors();
+extern void					InterfaceGetMonitorDimensions( int nMonitorNum, int* pnOutW, int* pnOutH );
+
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------
@@ -253,7 +257,6 @@ extern INTERFACE_API int InterfaceGetWindowPositionY( void );
 extern INTERFACE_API void InterfaceSetWindowSize( BOOL boFullScreen, int nWidth, int nHeight, BOOL boAdjust );
 extern INTERFACE_API void InterfaceInitSmall( void );
 
-extern INTERFACE_API void InterfaceGetInitialScreenSize( int*, int* );
 extern INTERFACE_API void InterfaceSetInitialSmall( BOOL );
 
 extern INTERFACE_API float	InterfaceGetFPS( void );

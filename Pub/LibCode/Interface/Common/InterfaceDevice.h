@@ -10,7 +10,6 @@ extern "C"				// All interfaces use a C-linkage
 
 
 extern void		OnSetWindowSize( BOOL boFullScreen, int nWidth, int nHeight );
-extern void		OnSetInitialSize( BOOL boFullScreen, int nFullScreenSizeX, int nFullScreenSizeY , BOOL boSmallFlag );
 
 
 

@@ -869,10 +869,6 @@ void InterfaceInstance::FreeAll( void )
 	}
 }
 
-INTERFACE_API void InterfaceReleaseForDeviceReset( void )
-{
-	InterfaceInstanceMain()->ReleaseForDeviceReset();
-}
 
 void InterfaceInstance::ReleaseForDeviceReset( void )
 {
@@ -884,10 +880,6 @@ void InterfaceInstance::ReleaseForDeviceReset( void )
 	FreeOverlays();
 }
 
-INTERFACE_API void InterfaceRestorePostDeviceReset( void )
-{
-	InterfaceInstanceMain()->RestorePostDeviceReset();
-}
 
 void InterfaceInstance::RestorePostDeviceReset( void )
 {

@@ -188,6 +188,7 @@ int SortModesCallback( const VOID* arg1, const VOID* arg2 )
 
 
 
+BOOL		mboOldFullScreenFlag = FALSE;
 
 //-----------------------------------------------------------------------------
 // Name: BuildDeviceList()
@@ -204,7 +205,7 @@ HRESULT CD3DApplication::BuildDeviceList()
     BOOL bHALIsDesktopCompatible = FALSE;
     BOOL bHALIsSampleCompatible = FALSE;
 
-	m_bWindowed = !mboFullScreen;
+	m_bWindowed = !mboOldFullScreenFlag;
 
     // Loop through all the adapters on the system (usually, there's just one
     // unless more than one graphics card is present).
@@ -415,9 +416,10 @@ HRESULT CD3DApplication::BuildDeviceList()
             // Select any 640x480 mode for default (but prefer a 16-bit mode)
             for( m=0; m<pDevice->dwNumModes; m++ )
             {
-			int		nInitialWidth, nInitialHeight;
+			int		nInitialWidth = 900;
+			int		nInitialHeight = 600;
 
-				InterfaceGetInitialScreenSize( &nInitialWidth, &nInitialHeight );
+//				InterfaceGetInitialScreenSize( &nInitialWidth, &nInitialHeight );
                 if( ( (int)(pDevice->modes[m].Width) == nInitialWidth) && ( (int)(pDevice->modes[m].Height) == nInitialHeight) )
                 {
                     pDevice->dwCurrentMode = m;
@@ -467,7 +469,7 @@ HRESULT CD3DApplication::BuildDeviceList()
     {
         for( DWORD d=0; d < m_Adapters[a].dwNumDevices; d++ )
         {
-			if ( ( mboFullScreen ) || m_Adapters[a].devices[d].bWindowed )
+			if ( ( mboOldFullScreenFlag ) || m_Adapters[a].devices[d].bWindowed )
             {
                 m_Adapters[a].dwCurrentDevice = d;
                 m_dwAdapter = a;
@@ -1158,7 +1160,7 @@ INT_PTR CALLBACK CD3DApplication::SelectDeviceProc( HWND hDlg, UINT msg,
                 pAdapter->devices[dwNewDevice].MultiSampleType = NewMultiSampleType;
 
                 EndDialog( hDlg, IDOK );
-				mboFullScreen = !bNewWindowed;
+				mboOldFullScreenFlag = !bNewWindowed;
 	        }
             else
                 EndDialog( hDlg, IDCANCEL );
