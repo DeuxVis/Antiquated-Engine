@@ -2,9 +2,9 @@ Antiquated Engine
 --------------
 Old windows C/C++ game framework and legacy DX9 graphics engine
 
-The code contained here was generated over many years as part of various hobby projects largely centered around the game 'The Universal' (or 'A tractor' if you prefer), which was/is a never-quite-good-enough attempt at making a distributed MMO in the early 2000s, and more recently as part of **https://store.steampowered.com/app/4363750/Elemental/**.  
+The code contained here was generated over many years as part of various hobby projects largely centered around the game 'The Universal' (or 'A tractor' if you prefer), which was/is a never-quite-good-enough attempt at making a distributed MMO in the early 2000s. More recently this code as found a use as part of **https://store.steampowered.com/app/4363750/Elemental/** because I'm an old hippy and like to recycle.  
 
-It is not well designed, well implemented, well structured or well.. anything .. it just is what it is. Sorry, Adrian. Considering that most of it was written in a rush very late at night, often after a few whiskeys, its always surprising any of it works at all. (Which it probably doesnt)
+None of this is well designed, well implemented, well structured or well.. anything .. it just is what it is. Sorry, Adrian. Considering that most of it was written in a rush very late at night, often after a few whiskeys, its always surprising any of it works at all. (Which it probably doesnt)
 
 This github project has mostly been created for the sake of posterity rather than any expectation of practical value, although the code is still in active use in the old game and things like https://gamesformay.com/Elemental. 
 
