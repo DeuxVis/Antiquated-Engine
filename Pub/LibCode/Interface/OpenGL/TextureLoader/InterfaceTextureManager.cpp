@@ -145,6 +145,19 @@ int			nHandle;
 }
 
 
+INTERFACE_API int	InterfaceGetTextureAsync(const char* szFilename, int nFlags)
+{
+	glTexture* pTexture;
+	int			nHandle;
+
+	nHandle = InterfaceTextureManagerGetNewTexture(&pTexture);
+
+	// Quickee test main thread implementation
+	ms_TextureLoader.LoadTextureFromDisk(szFilename, pTexture);
+
+	return(nHandle);
+}
+
 
 INTERFACE_API int  InterfaceGetTextureFromFileInMem( const char* szFilename, unsigned char* pbMem, int nMemSize, int nFlags )
 {

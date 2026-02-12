@@ -85,8 +85,14 @@ INTERFACE_API int	InterfaceLoadTexture( const char* szFilename, int nFlags )
 	return( InterfaceGetTexture( szFilename, nFlags ) );
 }
 
-INTERFACE_API int	InterfaceLoadTextureFromArchive( const char* szFilename, int nFlags, int nArchiveHandle )
+INTERFACE_API int	InterfaceLoadTextureAsync(const char* szFilename, int nFlags)
 {
-	return( InterfaceGetTextureInternal( szFilename, nFlags, nArchiveHandle ) );
+	return(InterfaceGetTextureAsync(szFilename, nFlags));
+}
+
+
+INTERFACE_API int	InterfaceLoadTextureFromArchive( const char* szFilename, int nFlags, int nArchiveHandle, BOOL bAsync)
+{
+	return( InterfaceGetTextureInternal( szFilename, nFlags, nArchiveHandle, bAsync) );
 }
 

@@ -39,15 +39,23 @@ typedef struct
 
 #define		MAX_INTERNAL_TEXTURES_LOADED		256
 
-
-typedef struct
+enum eLoadState
 {
-	LPGRAPHICSTEXTURE		pTexture;
+	LOADSTATE_NOTLOADED = 0,
+	LOADSTATE_LOADING,
+	LOADSTATE_LOADED,
+};
+
+struct INTERNAL_TEXTURES
+{
+	LPGRAPHICSTEXTURE		pTexture = NULL;
 	char					acFilename[128];
 	uint32					ulLastTouched;
-	int						nRefCount;
+	int						nRefCount = 0;
+	eLoadState				nLoadState = LOADSTATE_NOTLOADED;
 
-} INTERNAL_TEXTURES;
+} ;
+
 
 typedef struct
 {
@@ -68,6 +76,14 @@ enum
 	TEX_OVLY_RECT,
 	TEX_OVLY_TRI,
 	TEX_OVLY_SPRITE,
+};
+
+class TexturedOverlays;
+
+struct AsyncInfo
+{
+	TexturedOverlays* pInstance;
+	int nHandle;	
 };
 
 class TexturedOverlays : public InterfaceModule
@@ -96,7 +112,7 @@ public:
 	void		AddSprite( int nOverlayNum, int nX, int nY, float fTexGrid, int nTexGridNum, uint32 ulCol, float fRotAngle, float fScale );
 	
 	int			GetTextureFromFileInMem( const char* szFilename, unsigned char* pbMem, int nMemSize, int nFlags );
-	int			GetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle );
+	int			GetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle, BOOL bAsync );
 	int			CreateBlankTexture( int nWidth, int nHeight, int Mode);
 	void		ReleaseTexture( int nTextureHandle );
 
@@ -108,6 +124,12 @@ public:
 	void		ExportTexture( int nTextureHandle, const char* szFilename, int nMode );
 
 private:
+	void			SyncLoadTexture(const char* szFilename, int nFlags, int nArchiveHandle, int nHandle);
+	void			AsyncLoadTexture(const char* szFilename, int nFlags, int nArchiveHandle, int nHandle);
+	
+	void			AsyncLoadCallback(const char* szFilename, BYTE* pbMem, int nMemSize, int nHandle );
+	static void		AsyncLoadCallbackStatic(const char* szFilename, BYTE* pbMem, int nMemSize, void* pUserObj);
+
 	TEXTURED_RECT_DEF*		GetNextRect( int nOverlayNum );
 	void					AddTexturedTriVertices( FLATVERTEX** ppVertices, TEXTURED_RECT_DEF* pxRectDef );
 	void					AddTexturedRectVertices( FLATVERTEX** ppVertices, TEXTURED_RECT_DEF* pxRectDef );

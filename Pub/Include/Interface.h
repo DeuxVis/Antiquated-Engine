@@ -144,10 +144,12 @@ extern INTERFACE_API void	InterfaceSetFontGlobalScale( float fScale );
 extern int		InterfaceTextGetHeightUsed( const char* szString, int nFont, int width );
 
 // ------------- Texture loading 
+extern INTERFACE_API int	InterfaceLoadTextureAsync(const char* szFilename, int nFlags);
 extern INTERFACE_API int	InterfaceLoadTexture( const char* szFilename, int nFlags );
 extern INTERFACE_API int	InterfaceLoadTextureFromArchive( const char* szFilename, int nFlags, int nArchiveHandle );
 extern INTERFACE_API int	InterfaceCreateBlankTexture( int nWidth, int nHeight, int Mode);
 extern INTERFACE_API int	InterfaceGetTexture( const char* szFilename, int nFlags );
+extern INTERFACE_API int	InterfaceGetTextureAsync(const char* szFilename, int nFlags);
 extern INTERFACE_API int	InterfaceGetTextureFromFileInMem( const char* szFilename, unsigned char* pbMem, int nMemSize, int nFlags );
 extern INTERFACE_API int	InterfaceGetTextureSize( int nTextureHandle, int* pnW, int* pnH );
 extern INTERFACE_API BYTE*	InterfaceLockTexture( int nTextureHandle, int* pnPitch, int* pnFormat, int nFlags );

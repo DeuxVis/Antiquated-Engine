@@ -1131,7 +1131,7 @@ int		nLoop = 0;
 	return( NOTFOUND );
 }
 
-INTERFACE_API int InterfaceGetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle )
+INTERFACE_API int InterfaceGetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle, BOOL bAsync)
 {
 int		nHandle;
 
@@ -1205,7 +1205,7 @@ int		nHandle;
 
 INTERFACE_API int InterfaceGetTexture( const char* szFilename, int nFlags )
 {
-	return( InterfaceGetTextureInternal( szFilename, nFlags, NOTFOUND ) );
+	return( InterfaceGetTextureInternal( szFilename, nFlags, NOTFOUND, FALSE ) );
 }
 
 

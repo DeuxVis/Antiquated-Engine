@@ -1075,7 +1075,90 @@ int		nLoop = 0;
 	return( NOTFOUND );
 }
 
-int TexturedOverlays::GetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle )
+// Strictly not allowed but i dont care.. lets assume the .cpp is included by the app too
+#include "../../../GameCommon/Util/AsyncFile.h"
+
+void	TexturedOverlays::AsyncLoadCallback(const char* szFilename, BYTE* pbMem, int nMemSize, int nHandle )
+{
+	maxInternalTextures[nHandle].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureFromFileInMemDX(szFilename, pbMem, nMemSize, 1, 1, FALSE);
+}
+
+void	TexturedOverlays::AsyncLoadCallbackStatic(const char* szFilename, BYTE* pbMem, int nMemSize, void* pUserObj)
+{
+AsyncInfo* pInfo = (AsyncInfo*)pUserObj;
+int nHandle = pInfo->nHandle;
+	
+	if (nHandle >= 0)
+	{
+		pInfo->pInstance->AsyncLoadCallback(szFilename, pbMem, nMemSize, nHandle);
+	}
+	delete pInfo;
+}
+
+
+void TexturedOverlays::AsyncLoadTexture(const char* szFilename, int nFlags, int nArchiveHandle, int nHandle)
+{
+	AsyncInfo* pInfo = new AsyncInfo;
+	pInfo->nHandle = nHandle;
+	pInfo->pInstance = this;
+
+	AsyncFile	fileLoader(szFilename, AsyncLoadCallbackStatic, (void*)pInfo);
+}
+
+void TexturedOverlays::SyncLoadTexture(const char* szFilename, int nFlags, int nArchiveHandle, int nHandle)
+{
+	switch (nFlags)
+	{
+	case 0:			// No mipping
+	case 2:			// Used when a texture needs to be lockable
+	case 4:			// Used when a texture needs to be lockable
+	default:
+		if (nArchiveHandle > 0)
+		{
+			maxInternalTextures[nHandle].pTexture = InterfaceLoadTextureFromArchiveDX(szFilename, 1, 1, nArchiveHandle);
+		}
+		else
+		{
+			maxInternalTextures[nHandle].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureDX(szFilename, 1, 1, FALSE);
+		}
+		break;
+	case 1:			// Mipmaps
+		if (nArchiveHandle > 0)
+		{
+			maxInternalTextures[nHandle].pTexture = InterfaceLoadTextureFromArchiveDX(szFilename, 0, 0, nArchiveHandle);
+		}
+		else
+		{
+			maxInternalTextures[nHandle].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureDX(szFilename, 0, 0, FALSE);
+		}
+		break;
+	case 3:		// feck knows
+		if (nArchiveHandle > 0)
+		{
+			maxInternalTextures[nHandle].pTexture = InterfaceLoadTextureFromArchiveDX(szFilename, 2, 0xFF, nArchiveHandle);
+		}
+		else
+		{
+			maxInternalTextures[nHandle].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureDX(szFilename, 2, 0xFF, FALSE);
+		}
+		break;
+	}
+
+	// if Load ok
+	if (maxInternalTextures[nHandle].pTexture)
+	{
+		maxInternalTextures[nHandle].nRefCount = 1;
+		maxInternalTextures[nHandle].ulLastTouched = GetTickCount();
+
+		if (strlen(szFilename) < 127)
+		{
+			strcpy(maxInternalTextures[nHandle].acFilename, szFilename);
+		}
+	}
+}
+
+
+int TexturedOverlays::GetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle, BOOL bAsync )
 {
 int		nHandle;
 
@@ -1092,54 +1175,13 @@ int		nHandle;
 
 	if ( nHandle != NOTFOUND )
 	{
-		switch( nFlags )
+		if ( bAsync == FALSE )
 		{
-		case 0:			// No mipping
-		case 2:			// Used when a texture needs to be lockable
-		case 4:			// Used when a texture needs to be lockable
-		default:
-			if ( nArchiveHandle > 0 )
-			{
-				maxInternalTextures[ nHandle ].pTexture = InterfaceLoadTextureFromArchiveDX( szFilename, 1, 1, nArchiveHandle );
-			}
-			else
-			{
-				maxInternalTextures[ nHandle ].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureDX( szFilename, 1, 1, FALSE );
-			}
-			break;
-		case 1:			// Mipmaps
-			if ( nArchiveHandle > 0 )
-			{
-				maxInternalTextures[ nHandle ].pTexture = InterfaceLoadTextureFromArchiveDX( szFilename, 0, 0, nArchiveHandle );
-			}
-			else
-			{
-				maxInternalTextures[ nHandle ].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureDX( szFilename, 0, 0, FALSE );
-			}
-			break;
-		case 3:		// feck knows
-			if ( nArchiveHandle > 0 )
-			{
-				maxInternalTextures[ nHandle ].pTexture = InterfaceLoadTextureFromArchiveDX( szFilename, 2, 0xFF, nArchiveHandle );
-			}
-			else
-			{
-				maxInternalTextures[ nHandle ].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureDX( szFilename, 2, 0xFF, FALSE );
-			}
-			break;
+			SyncLoadTexture( szFilename, nFlags, nArchiveHandle, nHandle );
 		}
-
-		// Load failed
-		if ( !maxInternalTextures[ nHandle ].pTexture )
+		else
 		{
-			return( NOTFOUND );
-		}
-		maxInternalTextures[ nHandle ].nRefCount = 1;
-		maxInternalTextures[ nHandle ].ulLastTouched = GetTickCount();
-
-		if ( strlen( szFilename ) < 127 ) 
-		{
-			strcpy( maxInternalTextures[ nHandle ].acFilename, szFilename );
+			AsyncLoadTexture( szFilename, nFlags, nArchiveHandle, nHandle );
 		}
 	}
 
@@ -1460,16 +1502,21 @@ int			InterfaceFindTexture( const char* szFilename )
 }
 
 
-INTERFACE_API int InterfaceGetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle )
+INTERFACE_API int InterfaceGetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle, BOOL bAsync )
 {
-	return( InterfaceInstanceMain()->mpTexturedOverlays->GetTextureInternal( szFilename, nFlags, nArchiveHandle ));
+	return( InterfaceInstanceMain()->mpTexturedOverlays->GetTextureInternal( szFilename, nFlags, nArchiveHandle, bAsync ));
 }
 
 
 
 INTERFACE_API int InterfaceGetTexture( const char* szFilename, int nFlags )
 {
-	return( InterfaceGetTextureInternal( szFilename, nFlags, NOTFOUND ) );
+	return( InterfaceGetTextureInternal( szFilename, nFlags, NOTFOUND, FALSE ) );
+}
+
+INTERFACE_API int	InterfaceGetTextureAsync(const char* szFilename, int nFlags)
+{
+	return(InterfaceGetTextureInternal(szFilename, nFlags, NOTFOUND, TRUE ));
 }
 
 

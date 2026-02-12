@@ -10,7 +10,7 @@ extern "C"				// All interfaces use a C-linkage
 
 extern void		InterfaceUnpackCol( unsigned int ulARGBCol, float* pfRed, float* pfGreen, float* pfBlue, float* pfAlpha );
 
-extern int		InterfaceGetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle );
+extern int		InterfaceGetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle, BOOL bAsync);
 
 extern INTERFACE_API BOOL InterfaceIsZBufferLockable( void );
 extern INTERFACE_API void InterfaceSetZBufferLockable( BOOL );

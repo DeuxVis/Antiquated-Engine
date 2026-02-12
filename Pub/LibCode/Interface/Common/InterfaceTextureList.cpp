@@ -75,7 +75,7 @@ int		nHandle;
 }
 
 
-int	InterfaceGetTextureInternal( const char* szFilename, int nFlags, int hArchive )
+int	InterfaceGetTextureInternal( const char* szFilename, int nFlags, int hArchive, BOOL bAsync)
 {
 int		nHandle;
 

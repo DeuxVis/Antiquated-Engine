@@ -9,7 +9,7 @@ extern "C"				// All interfaces use a C-linkage
 
 
 
-extern  int	InterfaceGetTextureInternal( const char* szFilename, int nFlags, int hArchive );
+extern  int	InterfaceGetTextureInternal( const char* szFilename, int nFlags, int hArchive, BOOL bAsync);
 
 extern void		InterfaceTextureListInit( void );
 extern void		InterfaceTextureListNewFrame( void );

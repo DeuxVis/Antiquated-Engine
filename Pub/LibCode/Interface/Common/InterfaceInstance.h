@@ -36,7 +36,8 @@ public:
 	int		GetStringHeight( const char* pcString, int nFont );
 
 	// Textures
-	int			GetTexture( const char* szFilename, int nFlags );
+	int			LoadTextureAsync(const char* szFilename, int nFlags);
+	int			GetTexture( const char* szFilename, int nFlags, BOOL bAsync = FALSE );
 	void		ReleaseTexture( int nTextureHandle );
 	int			LoadTextureFromFileInMem( const char* szFilename, unsigned char* pbMem, int nMemSize, int nFlags );
 	// Textured Overlays

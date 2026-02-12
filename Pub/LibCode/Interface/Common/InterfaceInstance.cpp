@@ -217,9 +217,14 @@ int			InterfaceInstance::LoadTextureFromFileInMem( const char* szFilename, unsig
 	return( mpTexturedOverlays->GetTextureFromFileInMem( szFilename, pbMem, nMemSize, nFlags ) );
 }
 
-int			InterfaceInstance::GetTexture( const char* szFilename, int nFlags )
+int			InterfaceInstance::LoadTextureAsync(const char* szFilename, int nFlags)
 {
-	return( mpTexturedOverlays->GetTextureInternal( szFilename, nFlags, NOTFOUND ) );
+	return(mpTexturedOverlays->GetTextureInternal(szFilename, nFlags, NOTFOUND, TRUE));
+}
+
+int			InterfaceInstance::GetTexture( const char* szFilename, int nFlags, BOOL bAsync )
+{
+	return( mpTexturedOverlays->GetTextureInternal( szFilename, nFlags, NOTFOUND, bAsync ) );
 }
 
 int		InterfaceInstance::CreateNewTexturedOverlayForEngineTexture( int nLayer, int nEngineTextureHandle )
