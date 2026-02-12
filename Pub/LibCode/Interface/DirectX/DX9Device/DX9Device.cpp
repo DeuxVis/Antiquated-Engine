@@ -41,9 +41,6 @@ u64		mullInterfaceLastPresentTick = 0;
 BOOL	mboCurrentlyFullscreen = FALSE;
 
 
-//#ifndef STANDALONE
-static CD3DApplication		mcd3dUtilApp;
-//#endif
 ENGINEMATERIAL mxStandardMat;
 
 void	InterfaceGetLastUsedD3DPP( D3DPRESENT_PARAMETERS* pPP )
@@ -62,9 +59,6 @@ INTERFACE_API LPGRAPHICS	InterfaceGetD3D( void )
 
 void		OnSetWindowSize( BOOL boFullScreen, int nWidth, int nHeight )
 {
-//#ifndef STANDALONE
-	mcd3dUtilApp.m_bWindowed = !boFullScreen;
-//#endif
 }
 
 
@@ -398,29 +392,25 @@ void	InterfaceInternalsDX::CopyRenderCanvasToBackBuffer( int X, int Y, int W, in
 {
 IDirect3DSurface9*		pBackBuffer;
 RECT		sourceRect = { X, Y, X + W, Y + H };
+RECT		destRect = { X, Y, X + W, Y + H };
 POINT		destPoint = { X, Y };
 HRESULT		hr;
 
 	mpInterfaceD3DDevice->SetRenderTarget( 0, mspInterfaceNormalRenderTarget );
 	mspInterfaceNormalRenderTarget->Release();
 
-	hr = mpInterfaceD3DDevice->GetRenderTargetData( mspInterfaceRenderCanvas, mspInterfaceRenderCanvasSysMem );
-	if ( FAILED( hr ))
-	{
-	int			error = 0;
-		error++;
-	}
+//	hr = mpInterfaceD3DDevice->GetRenderTargetData( mspInterfaceRenderCanvas, mspInterfaceRenderCanvasSysMem );
+
 	mpInterfaceD3DDevice->GetBackBuffer( 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
 
-	hr = mpInterfaceD3DDevice->UpdateSurface( mspInterfaceRenderCanvasSysMem, &sourceRect, pBackBuffer, &destPoint );
+	mpInterfaceD3DDevice->StretchRect( mspInterfaceRenderCanvas, &sourceRect, pBackBuffer, &destRect, D3DTEXF_POINT );
+
+	// TODO - StretchRect might be better?
+	// Or, um, just drawPrimitive using the RTT?
+//	hr = mpInterfaceD3DDevice->UpdateSurface( mspInterfaceRenderCanvasSysMem, &sourceRect, pBackBuffer, &destPoint );
 
 	pBackBuffer->Release();
 
-	if ( FAILED( hr ))
-	{
-	int			error = 0;
-		error++;
-	}
 }
 
 int		InterfaceInternalsDX::GetDXDeviceCreateParams( HWND hWindow, BOOL boMinPageSize, D3DPRESENT_PARAMETERS* pD3Dpp, int nBackBufferMinW, int nBackBufferMinH, BOOL boFullscreen, int nRequestedMonitor )
@@ -520,6 +510,7 @@ int adapterIndex = 0;
 	}
 	//	    pD3Dpp->SwapEffect = D3DSWAPEFFECT_COPY_VSYNC;
 	pD3Dpp->SwapEffect = D3DSWAPEFFECT_DISCARD;
+//	pD3Dpp->SwapEffect = D3DSWAPEFFECT_OVERLAY;
 	pD3Dpp->BackBufferFormat = d3ddm.Format;
 	pD3Dpp->EnableAutoDepthStencil = TRUE;
 	pD3Dpp->AutoDepthStencilFormat = D3DFMT_D24S8;
@@ -955,15 +946,6 @@ INTERFACE_API void				InterfaceInitDisplayDevice( BOOL boMinRenderPageSize, int 
 }
 
 
-INTERFACE_API INT_PTR CALLBACK InterfaceVidOptionsDlgProc( HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam )
-{
-//#ifndef STANDALONE
-	return mcd3dUtilApp.SelectDeviceProc( hDlg, msg, wParam, lParam );
-//#else
-//	return( 0 );
-//#endif
-}
-
 
 uint32	mulRefCount;
 INTERFACE_API void InterfaceFreeAllD3D( void )
@@ -976,18 +958,12 @@ INTERFACE_API void InterfaceFreeAllD3D( void )
 		mpLegacyInterfaceD3DDeviceSingleton->EvictManagedResources();
 		mulRefCount = mpLegacyInterfaceD3DDeviceSingleton->Release();
 		mpLegacyInterfaceD3DDeviceSingleton = NULL;
-//#ifndef STANDALONE
-		mcd3dUtilApp.m_pd3dDevice = NULL;
-//endif
 	}
 
 	if( mpD3D != NULL )
 	{
 		mulRefCount = mpD3D->Release();
 		mpD3D = NULL;
-//#ifndef STANDALONE
-		mcd3dUtilApp.m_pD3D = NULL;
-//#endif
 	}
 
 }

@@ -298,10 +298,6 @@
     <ClCompile Include="..\LibCode\Interface\DirectX\DX11Device\DX11Device.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug OpenGL|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\LibCode\Interface\DirectX\DX9Device\d3dapp.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug OpenGL|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\LibCode\Interface\DirectX\DX9Device\DX9Device.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug OpenGL|Win32'">true</ExcludedFromBuild>
@@ -386,14 +382,6 @@
     <ClInclude Include="..\LibCode\Interface\Common\InterfaceOptions.h" />
     <ClInclude Include="..\LibCode\Interface\Common\Overlays\TexturedOverlays.h" />
     <ClInclude Include="..\LibCode\Interface\DirectX\DX11Device\DX11Device.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug OpenGL|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\LibCode\Interface\DirectX\DX9Device\d3dapp.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug OpenGL|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="..\LibCode\Interface\DirectX\DX9Device\d3dres.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug OpenGL|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\LibCode\Interface\DirectX\DX9Device\d3dutil.h">

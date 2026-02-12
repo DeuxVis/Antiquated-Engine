@@ -102,9 +102,6 @@
     <ClCompile Include="..\LibCode\Interface\Common\Canvas.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\LibCode\Interface\DirectX\DX9Device\d3dapp.cpp">
-      <Filter>DirectX\DX9Device</Filter>
-    </ClCompile>
     <ClCompile Include="..\LibCode\Interface\DirectX\DX9Device\DX9Device.cpp">
       <Filter>DirectX\DX9Device</Filter>
     </ClCompile>
@@ -163,12 +160,6 @@
     </ClInclude>
     <ClInclude Include="..\Include\Canvas.h">
       <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\LibCode\Interface\DirectX\DX9Device\d3dapp.h">
-      <Filter>DirectX\DX9Device</Filter>
-    </ClInclude>
-    <ClInclude Include="..\LibCode\Interface\DirectX\DX9Device\d3dres.h">
-      <Filter>DirectX\DX9Device</Filter>
     </ClInclude>
     <ClInclude Include="..\LibCode\Interface\DirectX\DX9Device\d3dutil.h">
       <Filter>DirectX\DX9Device</Filter>
