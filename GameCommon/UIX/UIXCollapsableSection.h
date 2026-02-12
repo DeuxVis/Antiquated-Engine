@@ -19,9 +19,7 @@ protected:
 	virtual bool	OnSelected( int nButtonID, uint32 ulParam );
 	virtual UIXRECT		OnRender( InterfaceInstance* pInstance, UIXRECT pDisplayRect );
 
-	BOOL			HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress );
-	static BOOL		HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress );
-	static void		RegisterControlHandlers();
+	virtual BOOL		OnDragHoldUpdate(uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress);
 	
 	UIXRECT					GetLastRenderRect() const { return( mLastHeaderRender ); }
 
@@ -34,10 +32,6 @@ private:
 	int					mMode = 0;
 
 	UIXRECT				mLastHeaderRender;
-
-	int					mDragItemType = 0;
-	UIXRECT				mDragRectOriginal;
-	UIXRECT				mDragRectMouseOriginal;
 	UIXRECT				mHeaderRect;
 };
 

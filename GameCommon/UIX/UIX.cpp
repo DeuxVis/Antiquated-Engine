@@ -118,11 +118,12 @@ void	UIXObject::CloseAllMenus()
 
 UIXRECT		UIXObject::GetActualRenderRect( UIXRECT parentRect )
 {
-UIXRECT		renderRect = GetLocalPositionRect();		// This is our local position, relative to 0,0 within whatever container we're in
+UIXRECT		localRect = GetLocalPositionRect();		// This is our local position, relative to 0,0 within whatever container we're in
+UIXRECT		renderRect = localRect;
 
 	if ( renderRect.x < 0 )
 	{
-		renderRect.x = parentRect.w + renderRect.x;	
+		renderRect.x = parentRect.x + (parentRect.w + renderRect.x);	
 	}
 	else
 	{
@@ -132,7 +133,7 @@ UIXRECT		renderRect = GetLocalPositionRect();		// This is our local position, re
 
 	if ( renderRect.w < 0 )
 	{
-		renderRect.w = (parentRect.w + (renderRect.w+1)) - renderRect.x;
+		renderRect.w = (parentRect.w + (renderRect.w+1)) - localRect.x;
 	}
 
 	return renderRect;
@@ -254,6 +255,97 @@ int			baseOccupyHeight;
 	}
 	UIX::msSelectionPriority -= GetSelectionPriorityLayer();
 	return( xUsedRect );
+}
+
+void	UIXObject::SetDraggable(int nDragItemType, uint32 ulDragParam)
+{
+	mDragItemType = nDragItemType;
+	mDragItemParam = ulDragParam;
+}
+
+void	UIXObject::ActivateDragHold( UIXRECT rect, uint32 ulDragParam )
+{
+	mDragRectOriginal = rect;
+	mbIsBeingDragged = TRUE;
+	UIX::SetDragItemType(mDragItemType, this, ulDragParam);
+	UIGetCurrentCursorPosition(&mDragRectMouseOriginal.x, &mDragRectMouseOriginal.y);
+}
+
+
+UIXRECT		UIXObject::GetDragOffset()
+{
+int		nMouseX, nMouseY;
+
+	UIGetCurrentCursorPosition(&nMouseX, &nMouseY);
+	
+	return(UIXRECT(nMouseX - mDragRectMouseOriginal.x, nMouseY - mDragRectMouseOriginal.y, 0, 0) );
+}
+
+BOOL		UIXObject::DragHasMoved()
+{
+	int	nMouseX, nMouseY;
+
+	// Check we've moved at least a bit away from the click pos otherwise its not really a drag
+	UIGetCurrentCursorPosition(&nMouseX, &nMouseY);
+	int nMoveDist = abs(mDragRectMouseOriginal.x - nMouseX) + abs(mDragRectMouseOriginal.y - nMouseY);
+
+	// Arbitrarily, mouse must have moved at least 4px to count as a drag move
+	if (nMoveDist > 4)
+	{
+		return(TRUE);
+	}
+	return(FALSE);
+}
+
+BOOL		UIXObject::HoldHandler(uint32 ulParam, BOOL bIsHeld, BOOL bFirstPress)
+{
+	BOOL	bCustomHandler = OnDragHoldUpdate(ulParam, bIsHeld, bFirstPress);
+
+	if (bCustomHandler == FALSE)
+	{
+		if (mDragItemType != 0)
+		{
+			if (bFirstPress)
+			{
+				ActivateDragHold( mDraggableRenderRect, mDragItemParam);
+			}
+			else if (bIsHeld)
+			{
+
+			}
+			else  // Just released
+			{
+				if ((mbIsBeingDragged) &&
+					(UIX::GetDragDestinationHover() != NULL) &&
+					(UIX::GetDragDestinationHover() != this))
+				{
+					mbIsBeingDragged = FALSE;
+					UIX::EndDragItemType(mDragItemType);
+					return(TRUE);
+				}
+				mbIsBeingDragged = FALSE;
+				UIX::EndDragItemType(mDragItemType);
+			}
+		}
+	}
+	return(bCustomHandler);
+}
+
+BOOL		UIXObject::HoldHandlerStatic(int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress)
+{
+UIXObject* pObject = UIX::FindUIXObjectByID(ulIDParam);
+
+	if (pObject)
+	{
+		return(pObject->HoldHandler(ulParam, bIsHeld, bFirstPress));
+	}
+	return(FALSE);
+}
+
+
+void	UIXObject::RegisterDragControlHandler( int nButtonID )
+{
+	UIRegisterHoldHandler(nButtonID, HoldHandlerStatic);
 }
 
 BOOL	UIXObject::CheckDragHoverRegion( UIXRECT dragReceiveRegion )
@@ -438,6 +530,15 @@ BOOL		UIX::CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, 
 	return( FALSE );
 }
 
+void		UIX::OnInterfaceDraw()
+{
+	for (int loop = 0; loop < MAX_NUM_UIX_ICONS; loop++)
+	{
+		mshUIXIconOverlays[loop] = NOTFOUND;
+	}
+	UIOnInterfaceDraw();
+}
+
 void		UIX::Initialise( int mode )
 {
 	UIRegisterButtonPressHandler( UIX_COLLAPSABLE_SECTION_HEADER, ButtonPressHandler );
@@ -453,11 +554,20 @@ void		UIX::Initialise( int mode )
 	UIRegisterHoldHandler( UIX_SLIDER_BAR, SliderHoldHandler );
 	UIRegisterHoldHandler( UIX_SLIDER_BAR_MINRANGE, SliderHoldHandler );
 	UIRegisterHoldHandler( UIX_SLIDER_BAR_MAXRANGE, SliderHoldHandler );
-	UIXListBox::RegisterControlHandlers();
-	UIXCollapsableSection::RegisterControlHandlers();
-	UIXScrollableSection::RegisterControlHandlers();
+
+	// These two do custom hold handling (e.g. for scrollbars, value scroll)
 	UIXTextBox::RegisterControlHandlers();
-	UIXButton::RegisterControlHandlers();
+	UIXScrollableSection::RegisterControlHandlers();
+
+	// -----------------------------------------------
+	// ----- Object types implementing drag and drop --
+	UIXCollapsableSection::RegisterDragControlHandler(UIX_COLLAPSABLE_SECTION_HEADER);
+	UIXListBox::RegisterDragControlHandler(UIX_LISTBOX);
+	UIXButton::RegisterDragControlHandler(UIX_BUTTON);
+	UIXCustomRender::RegisterDragControlHandler(UIX_CUSTOM_RENDER);
+
+	InterfaceSetDrawCallback(OnInterfaceDraw );
+
 }
 
 void		UIX::Update( float delta )
@@ -496,17 +606,12 @@ BOOL		UIX::IsMouseHover( UIXRECT rect )
 	return( FALSE );
 }
 
+
 void		UIX::Render( InterfaceInstance* pxInterface )
 {
 UIXRECT		pageDisplayRect;
 
 	mspDragDestinationHover = NULL;
-
-	for ( int loop = 0; loop < MAX_NUM_UIX_ICONS; loop++ )
-	{
-		mshUIXIconOverlays[loop] = NOTFOUND;
-	}
-
 	msSelectionPriority = 0;
 	msPressedSelectionPriority = 0;
 	msMouseWheelHoverPriority = 0;
@@ -690,11 +795,11 @@ uint32		UIX::GetNextObjectID()
 	return(msulNextObjectID++);
 }
 
-UIXCustomRender*	UIX::AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam )
+UIXCustomRender*	UIX::AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam, fnCustomDragHoldHandlerCallback dragFunc)
 {
 UIXCustomRender*		pNewCustomRender = new UIXCustomRender( pxContainer, msulNextObjectID++, rect );
 
-	pNewCustomRender->Initialise( renderFunc, ulUserParam );
+	pNewCustomRender->Initialise( renderFunc, ulUserParam, dragFunc );
 	pxContainer->mContainsList.push_back( pNewCustomRender );
 	return( pNewCustomRender );
 }

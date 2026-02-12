@@ -90,6 +90,18 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 			pInterface->Rect( 0, drawRect.x + 1, drawRect.y + 2, drawRect.w - 3, drawRect.h - 3, 0xd0808080 );
 		}
 		break;
+	case STANDARD_CHECKBOX_WITH_LABEL:
+		{
+		uint32		ulTextCol = 0xd0e0e0e0;
+			pInterface->OutlineBox(0, drawRect.x, drawRect.y, drawRect.h, drawRect.h, 0xC0505050);
+
+			if (mbIsChecked)
+			{
+				pInterface->Rect(0, drawRect.x + 1, drawRect.y + 2, drawRect.h - 3, drawRect.h - 3, 0xd0808080);
+			}
+			pInterface->Text(1, drawRect.x + drawRect.h + 2, drawRect.y + 3, ulTextCol, 3, mText.c_str());
+		}
+		break;
 	case POPUP_MENU_LIST:
 		{
 		uint32		ulTextCol = 0xd0e0e0e0;
@@ -123,7 +135,10 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 		break;
 	}
 
-	UIX::CheckForPress( this, drawRect, UIX_CHECKBOX, 0 );
+	if (UIX::IsMouseHover(drawRect))
+	{
+		UIX::CheckForPress(this, drawRect, UIX_CHECKBOX, 0);
+	}
 	
 	displayRect.h = 0;
 	displayRect.y = GetLocalPositionRect().y + GetLocalPositionRect().h + 1;		// displayRect.y returns the lowest point we drew to

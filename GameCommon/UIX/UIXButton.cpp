@@ -58,11 +58,6 @@ void	UIXButton::EnableLabelEdit( fnLabelEditCallback callbackFunc )
 	PlatformKeyboardActivate( 0, mTitle.c_str(), "" );
 }
 
-void	UIXButton::SetDraggable( int nDragItemType, uint32 ulDragParam )
-{
-	mDragItemType = nDragItemType;
-	mDragItemParam = ulDragParam;
-}
 
 void	UIXButton::Initialise( eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL bIsBlocking, uint32 ulCol, int iconNum )
 {
@@ -87,7 +82,7 @@ UIXRECT		UIXButton::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect
 UIXRECT		localRect = GetLocalPositionRect();
 UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
-	SetLastRenderRect(drawRect);
+	SetDraggableRenderRect(drawRect);
 	
 	if ( UIX::IsMouseHover( drawRect ) == TRUE )
 	{
@@ -99,24 +94,16 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 		UIX::HoverAcceptDragItem( this );
 	}
 
-	if ( mbIsBeingDragged )
+	// Check we've moved at least a bit away from the click pos otherwise its not really a drag
+	if ( IsDragHoldActive() && DragHasMoved())
 	{
-	int		nMouseX, nMouseY;
-	int		nMoveDist;
+	UIXRECT	xGrabOffset = GetDragOffset();
+	UIXRECT xNewRect = GetInitialDragRect();
 
-		// Check we've moved at least a bit away from the click pos otherwise its not really a drag
-		UIGetCurrentCursorPosition( &nMouseX, &nMouseY );
-		nMoveDist = abs(mDragRectMouseOriginal.x - nMouseX) + abs(mDragRectMouseOriginal.y - nMouseY );
-		if ( nMoveDist > 4 )
-		{
-		UIXRECT	xGrabOffset( nMouseX - mDragRectMouseOriginal.x, nMouseY - mDragRectMouseOriginal.y, 0, 0 );
-		UIXRECT xNewRect = mDragRectOriginal;
-
-			xNewRect.x += xGrabOffset.x;
-			xNewRect.y += xGrabOffset.y;
-			pInterface->Rect( 2, xNewRect.x, xNewRect.y, xNewRect.w, xNewRect.h, 0x40303030 );
-			pInterface->Text( 2, xNewRect.x + 5, xNewRect.y + 2, 0x80a0a0a0, 0, mTitle.c_str() );	
-		}
+		xNewRect.x += xGrabOffset.x;
+		xNewRect.y += xGrabOffset.y;
+		pInterface->Rect( 2, xNewRect.x, xNewRect.y, xNewRect.w, xNewRect.h, 0x40303030 );
+		pInterface->Text( 2, xNewRect.x + 5, xNewRect.y + 2, 0x80a0a0a0, 0, mTitle.c_str() );	
 	}
 
 	switch( mMode)
@@ -304,51 +291,5 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 }
 
 
-BOOL		UIXButton::HoldHandler( uint32 ulElementIndex, BOOL bIsHeld, BOOL bFirstPress )
-{
-	if ( mDragItemType != 0 )
-	{
-		if ( bFirstPress )
-		{
-			mbIsBeingDragged = TRUE;
-			mDragRectOriginal = GetLastRenderRect();
-			UIX::SetDragItemType( mDragItemType, this, mDragItemParam );
-			UIGetCurrentCursorPosition( &mDragRectMouseOriginal.x, &mDragRectMouseOriginal.y );
-		}
-		else if ( bIsHeld ) 
-		{
-		
-		}
-		else  // Just released
-		{
-			if ( ( mbIsBeingDragged ) &&
-				 ( UIX::GetDragDestinationHover() != NULL ) &&
-				 ( UIX::GetDragDestinationHover() != this ) )
-			{
-				mbIsBeingDragged = FALSE;
-				UIX::EndDragItemType( mDragItemType );
-				return( TRUE );
-			}
-			mbIsBeingDragged = FALSE;
-		}
-	}
-	return( FALSE );
-}
 
 
-BOOL		UIXButton::HoldHandlerStatic( int nButtonID, uint32 ulParam, uint32 ulIDParam, BOOL bIsHeld, BOOL bFirstPress )
-{
-UIXButton*		pButton = (UIXButton*)UIX::FindUIXObjectByID( ulIDParam );
-
-	if ( pButton )
-	{
-		return( pButton->HoldHandler( ulParam, bIsHeld, bFirstPress ) );
-	}
-	return( FALSE );
-}
-
-void		UIXButton::RegisterControlHandlers()
-{
-	UIRegisterHoldHandler( UIX_BUTTON, HoldHandlerStatic );
-
-}

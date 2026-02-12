@@ -46,6 +46,7 @@ enum
 	UIX_TAB_SELECT,
 	UIX_BUTTON,
 	UIX_POPUP_MENU_ITEM,
+	UIX_CUSTOM_RENDER,
 };
 
 enum eUIXBUTTON_MODE
@@ -81,6 +82,7 @@ enum UIX_SLIDER_MODE
 enum UIX_CHECKBOX_MODE
 {
 	STANDARD_CHECKBOX,
+	STANDARD_CHECKBOX_WITH_LABEL,
 	POPUP_MENU_LIST,
 	ICON_CHECKBOX,
 	HILIGHT_CHECKBOX,
@@ -92,6 +94,7 @@ enum UIX_VALUE_CALLBACK_FLAGS
 	EMPTY,
 	IS_BEING_MODIFIED,
 };
+
 
 // Value Update callbacks are used by sliders etc to both inform the user of the current value(s) of the slider and accept changes to the value from the outside
 typedef	float(*fnValueUpdateCallback)( uint32 ulUIXObjectID, float fUIXValue, float fUIXMinRangeVal, float fUIXMaxRangeValue, uint32 ulUserParam, BOOL bIsUIHeld );
@@ -135,6 +138,7 @@ struct UIXRECT
 };
 
 typedef	UIXRECT(*fnCustomRenderCallback)( UIXObject* pObj, InterfaceInstance* pInterface, UIXRECT rect, uint32 ulUserParam );
+typedef	BOOL(*fnCustomDragHoldHandlerCallback)(UIXObject* pObj, uint32 ulParam, BOOL bIsHeld, BOOL bFirstPress);
 
 class UIXObject
 {
@@ -142,14 +146,18 @@ friend class UIX;
 public:
 	uint32			GetID() { return( mulID ); }
 
-	void		SetDragReceiveCallback( int dragType, fnDragReceiveCallback func, uint32 ulDestParam );
-
+	//------------------------------------------ User params
 	void*				GetUserObject() { return mpUserObject; }
 	void				SetUserObject( void* pObject, bool bDeleteOnShutdown = false ) { mpUserObject = pObject; mbDeleteUserObjectOnDestroy = bDeleteOnShutdown; }
 
 	BOOL				DoesHaveUserParamEx( const char* szKey ) { return( (mUserParamExList.find(szKey) != mUserParamExList.end()) ); }
 	int					GetUserParamEx( const char* szKey ) { return( mUserParamExList[szKey] ); }
 	void				SetUserParamEx( const char* szKey, int nValue ) { mUserParamExList[szKey] = nValue; }
+	//------------------------------------------
+
+	void				SetDragReceiveCallback(int dragType, fnDragReceiveCallback func, uint32 ulDestParam);
+	void				SetDraggable(int nDragItemType, uint32 ulDragParam);
+	//------------------------------------------
 
 	virtual void		UpdateUIStateData( UIStateData* pData ) {}
 	virtual float		OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bByUserEditFlag ) { return( fNewValue ); }
@@ -158,6 +166,9 @@ public:
 	bool				HasChildren() const { return( mContainsList.size() > 0 ); }
 	UIXObject*			GetParent() const { return(mpParent); }
 	virtual int			GetScrollPosition() { return( 0 ); }
+
+	// For custom drag activation
+	void				ActivateDragHold(UIXRECT rect, uint32 ulDragParam);
 protected:
 	UIXObject( UIXObject* pParent, uint32 uID, UIXRECT rect );
 	virtual ~UIXObject();
@@ -171,6 +182,7 @@ protected:
 	virtual bool		OnSelected( int nButtonID, uint32 ulParam ) { return( true ); }		// Returns true to indicate we should continue to call any other selectionCallbacks (i.e. we can guarantee the current object is still valid (HACK))
 	virtual void		OnCloseAllMenus() {}
 	virtual void		EndEdit() {}
+	virtual void		OnEscape() {}
 
 	void		Update( float delta );
 	UIXRECT		Render( InterfaceInstance* pInterface, UIXRECT rect );
@@ -180,24 +192,57 @@ protected:
 	void		SelectObject( int nButtonID, uint32 ulParam );
 	void		CloseAllMenus();
 
-	BOOL		CheckDragHoverRegion( UIXRECT dragReceiveRegion );
+	std::vector<UIXObject*>& GetChildObjectList() { return mContainsList; }
+	UIXRECT			GetLocalPositionRect() { return(mDisplayRect); }
+	UIXRECT			GetActualRenderRect(UIXRECT parentRect);
+	int				GetChildContentsHeight() { return mChildContentsHeight; }
+	int				GetChildContentsWidth() { return mChildContentsWidth; }		// childcontentswidth needs implementing for use by Page 
+	virtual int		GetSelectionPriorityLayer() { return(0); }
 
+	void		SetSelectedCallback(fnSelectedCallback callbackFunc, uint32 ulSelectParam) { mfnSelectedCallback = callbackFunc; mulSelectParam = ulSelectParam; }
+
+	//---------DRAG N DROP-------- Things for the uix object type to implement to support drag n drop
+	// ******************************
+	// DRAG an item:
+	// - Make sure <UIX_ID> is listed in    UIX::Initialise   drag n drop section
+	// - Use  UIHoverIDSet( <UIX_ID>, mIndex, mpListBox->GetID() );
+
+	// - type implementation should update 'SetDraggableRenderRect' (sets the viusal rect that the user can drag)
+	//			(OR : Trigger ActivateDragHold 
+	// - in the type's OnRender, render the transparent drag item if ( IsDragHoldActive() && DragHasMoved )
+	//
+	// DROP an item:  (what a type needs to do to an accept a dragged item)
+	// 	
+	// - in type's OnRender :
+	//       if ( CheckDragHoverRegion( UIXRECT(dropRegion) ) )
+	//				---- Draw highlight to indicate you can accept the item
+	//				----- UIX::HoverAcceptDragItem(this);
+	//
+	// ( App uses SetDragReceiveCallback  to link the drag item type to a callback func )
+	//---------------------------------------------------------------
+
+	
 	virtual void		OnHoverDragItem( int dragType ) {}
 	virtual void		OnReceiveDragItem( int dragType, UIXObject* pxSourceObject, uint32 ulDragParam );
+	virtual BOOL		OnDragHoldUpdate(uint32 ulParam, BOOL bIsHeld, BOOL bFirstPress) { return(FALSE); }		// Optional
+	
+	void				SetDraggableRenderRect(UIXRECT rect) { mDraggableRenderRect = rect; }
+
+	// Core implementations for drag n drop--------------
+	BOOL				IsDraggable() { return(mDragItemType != 0); }
+	BOOL				IsDragHoldActive() { return(mbIsBeingDragged); }
+	BOOL				DragHasMoved();
+	UIXRECT				GetDragOffset();
+	UIXRECT				GetInitialDragRect() const { return(mDragRectOriginal); }
+	BOOL				CheckDragHoverRegion(UIXRECT dragReceiveRegion);
 	bool				CanReceiveDragItem( int dragType ) { return( mDragMap[dragType] ); }
+	BOOL				HoldHandler( uint32 ulParam, BOOL bIsHeld, BOOL bFirstPress);
+	static BOOL			HoldHandlerStatic(int nButtonID, uint32 ulParam, uint32 ulIndex, BOOL bIsHeld, BOOL bFirstPress);
+	static void			RegisterDragControlHandler( int nButtonID );
+	//-------------------------------------
 
-	UIXRECT		GetLocalPositionRect() { return( mDisplayRect ); }
-	UIXRECT		GetActualRenderRect( UIXRECT parentRect );
-	int			GetChildContentsHeight() { return mChildContentsHeight; }
-	int			GetChildContentsWidth() { return mChildContentsWidth; }		// childcontentswidth needs implementing for use by Page 
-	virtual int		GetSelectionPriorityLayer() { return( 0 ); }
+	int					mChildContentsHeight = 0;			// Cheeky
 
-	std::vector<UIXObject*>&		GetChildObjectList() { return mContainsList; }
-
-	void		SetSelectedCallback( fnSelectedCallback callbackFunc, uint32 ulSelectParam ) { mfnSelectedCallback = callbackFunc; mulSelectParam = ulSelectParam; }
-
-	virtual void			OnEscape() {}
-	int				mChildContentsHeight = 0;
 private:
 	virtual bool		ShouldDisplayChildren() { return true; }
 	virtual bool		IncludeChildrenInOccupyCalc() { return true; }
@@ -216,6 +261,17 @@ private:
 	UIXObject*		mpParent;
 	fnSelectedCallback	mfnSelectedCallback = NULL;
 	uint32				mulSelectParam = 0;
+
+	//--------------------  Drag n drop stuff
+	// todo - this stuff could probably be standardised into some form of standard draggable object
+
+	UIXRECT				mDraggableRenderRect;
+	int					mDragItemType = 0;
+	uint32				mDragItemParam = 0;
+	UIXRECT				mDragRectOriginal;
+	UIXRECT				mDragRectMouseOriginal;
+	BOOL				mbIsBeingDragged = FALSE;
+	//---------------
 
 };
 
@@ -236,6 +292,7 @@ public:
 	static void		OnMouseWheel( float fOffset );
 	static void		OnKeyUp( int keyCode );
 	static void		CloseAllMenus();
+	static void		OnInterfaceDraw();
 
 	static UIXObject*					AddPage( UIXRECT rect, const char* szTitle, BOOL bUseClipping = FALSE );
 	static UIXObject*					AddSubPage( UIXObject* pxContainer, UIXRECT rect, const char* szTitle, BOOL bUseClipping = FALSE );
@@ -248,7 +305,7 @@ public:
 	static UIXDropdown*					AddDropdown( UIXObject* pxContainer, UIXRECT rect );
 	static UIXText*						AddText( UIXObject* pxContainer, UIXRECT rect, uint32 ulCol = 0xc0c0c0c0, int font = 0, UIX_TEXT_FLAGS fontFlags = NONE,  const char* szTitle = NULL, ... );
 	static UIXShape*					AddShape( UIXObject* pxContainer, UIXRECT rect, int mode = 0, BOOL bBlocks = FALSE, uint32 ulCol1 = 0xC0C0C0C0, uint32 ulCol2 = 0xC0C0C0C0, uint32 ulButtonID = 0, uint32 ulButtonParam = 0 );
-	static UIXCustomRender*				AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam = 0  );
+	static UIXCustomRender*				AddCustomRender( UIXObject* pxContainer, UIXRECT rect, fnCustomRenderCallback renderFunc, uint32 ulUserParam = 0, fnCustomDragHoldHandlerCallback dragFunc = NULL);
 	static UIXCheckbox*					AddCheckbox( UIXObject* pxContainer, UIXRECT rect, UIX_CHECKBOX_MODE mode, BOOL bIsChecked, const char* szText, fnSelectedCallback selectedFunc, uint32 ulSelectParam = 0 );
 	static UIXModalPopup*				AddModalPopup( UIXObject* pxContainer, UIXRECT rect );
 	static UIXMenu*						AddMenuBar( UIXObject* pxContainer, UIXRECT rect );

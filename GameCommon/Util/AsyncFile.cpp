@@ -373,9 +373,17 @@ BOOL	SysSelectFolderDialogAsync( const char* szTitle, const char* szRootFolder, 
 {
 char		acFullPathToDefaultFolder[512];
 
-	SysGetCurrentDir( 256, acFullPathToDefaultFolder );
-	strcat( acFullPathToDefaultFolder, "\\");
-	strcat( acFullPathToDefaultFolder, szDefaultFolder );
+	// HACK - Detect absolute path 
+	if (szDefaultFolder[1] != ':')
+	{
+		SysGetCurrentDir(256, acFullPathToDefaultFolder);
+		strcat(acFullPathToDefaultFolder, "\\");
+		strcat(acFullPathToDefaultFolder, szDefaultFolder);
+	}
+	else
+	{
+		strcpy(acFullPathToDefaultFolder, szDefaultFolder);
+	}
 
 	return( AsyncFileSelector::Get().Add( 2, NULL, szTitle, acFullPathToDefaultFolder, nFlags, fnCallback, szRootFolder ) );
 

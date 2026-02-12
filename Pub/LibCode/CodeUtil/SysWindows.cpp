@@ -929,13 +929,40 @@ BOOL	SysDeleteFile( const char* szFilename )
  * Description : Calls the provided callback function once for each file in the specified folder, 
 				 providing the full path to the file as a parameter. Does not recurse into subfolders.
  ***************************************************************************/
-void		SysGetAllFilesInFolder(const char* szSrcFolder, const char* szFilenameSearch, fnDirListingCallback callback)
+void		SysGetAllFilesInFolder(const char* szSrcFolder, const char* szFilenameSearch, BOOL bIncludeSubFolders, fnDirListingCallback callback)
 {
 WIN32_FIND_DATA FileData; 
 char	acString[256];
 HANDLE hSearch; 
 BOOL fFinished = FALSE; 
 
+	if (bIncludeSubFolders)
+	{
+		sprintf(acString, "%s/*", szSrcFolder );
+		hSearch = FindFirstFile(acString, &FileData);
+		if (hSearch != INVALID_HANDLE_VALUE)
+		{
+			while (!fFinished)
+			{
+				if ((FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
+					(lstrcmp(FileData.cFileName, ".") != 0) &&
+					(lstrcmp(FileData.cFileName, "..") != 0))
+				{
+					sprintf(acString, "%s\\%s", szSrcFolder, FileData.cFileName);
+					callback(acString, TRUE );
+				}
+
+				if (!FindNextFile(hSearch, &FileData))
+				{
+					fFinished = TRUE;
+				}
+			}
+
+		}
+
+	}
+
+	fFinished = FALSE;
 	sprintf( acString, "%s/%s", szSrcFolder, szFilenameSearch);
 	hSearch = FindFirstFile(acString, &FileData); 
 
@@ -951,7 +978,7 @@ BOOL fFinished = FALSE;
 			else
 			{
 				sprintf( acString, "%s\\%s", szSrcFolder, FileData.cFileName );
-				callback( acString );
+				callback( acString, FALSE );
 			}
 	 
 		    if (!FindNextFile(hSearch, &FileData)) 

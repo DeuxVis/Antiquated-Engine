@@ -253,6 +253,22 @@ void		RemoveExtensionFromEndOfFileName(const char* szFilenameIn, const char* szE
 	*pcOutRunner = 0;
 }
 
+void		RemoveAnyPathFromStartOfFileName(const char* szFilenameIn, char* pcOut)
+{
+	const char* pcFilenameRunner = szFilenameIn + strlen(szFilenameIn);
+
+	while (pcFilenameRunner != szFilenameIn)
+	{
+		if ( ( *pcFilenameRunner == '\\') ||
+			 (*pcFilenameRunner == '/') )
+		{
+			pcFilenameRunner++;
+			break;
+		}
+		pcFilenameRunner--;
+	}
+	strcpy(pcOut, pcFilenameRunner);
+}
 
 void		RemovePathFromStartOfFileName( const char* szFilenameIn, const char* szPathToRemove, char* pcOut )
 {

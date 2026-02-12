@@ -131,7 +131,29 @@ char		acBuff[256];
 		strcpy( acBuff, PlatformKeyboardGetInputString(TRUE));
 	}
 	
-	pInterface->Text( 1, drawRect.x + 4, drawRect.y + (drawRect.h-10)/2, ulTextCol, 3, acBuff );
+	int		maxTextWidth = drawRect.w - 4;
+	int stringWidth = pInterface->GetStringWidth(acBuff, 3);
+	if (stringWidth >= maxTextWidth )
+	{
+		char* pcRunner = acBuff;
+		int	   stringLen = strlen(acBuff);
+
+		pInterface->Text(1, drawRect.x + 4, drawRect.y + (drawRect.h - 10) / 2, ulTextCol, 3, "..");
+
+		maxTextWidth -= 8;
+		while ((stringLen > 5) &&
+			(stringWidth >= maxTextWidth))
+		{
+			pcRunner += 3;
+			stringLen -= 3;
+			stringWidth = pInterface->GetStringWidth(pcRunner, 3);
+		}
+		pInterface->Text(1, drawRect.x + 12, drawRect.y + (drawRect.h - 10) / 2, ulTextCol, 3, pcRunner);
+	}
+	else
+	{
+		pInterface->Text(1, drawRect.x + 4, drawRect.y + (drawRect.h - 10) / 2, ulTextCol, 3, acBuff);
+	}
 
 	displayRect.h = 0;//
 	displayRect.y = GetLocalPositionRect().y + drawRect.h;		// displayRect.y returns the lowest point we drew to

@@ -15,6 +15,8 @@ extern void		GetDateString( uint32 ulUnixTime, char* pcOut );
 
 extern void		RemoveCurrentPathFromFileName( const char* szFilenameIn, char* pcOut );
 extern void		RemovePathFromStartOfFileName( const char* szFilenameIn, const char* szPathToRemove, char* pcOut );
+extern void		RemoveAnyPathFromStartOfFileName(const char* szFilenameIn, char* pcOut);
+
 extern void		RemoveExtensionFromEndOfFileName(const char* szFilenameIn, const char* szExtensionToRemove, char* pcOut);
 
 #endif
