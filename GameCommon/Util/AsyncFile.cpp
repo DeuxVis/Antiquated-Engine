@@ -31,15 +31,29 @@ class AsyncFileQueueInstance
 public:
 	AsyncFileQueueInstance() {}
 
-	AsyncFileQueueInstance( const char* szFilename, fnAsyncFileLoadCallback loadCallback, void* pUserParam )
+	AsyncFileQueueInstance( const char* szFilename, fnAsyncFileCallback loadCallback, void* pUserParam )
 	{
 		mFileName = szFilename;
-		mLoadCallback = loadCallback;
+		mCallback = loadCallback;
 		mpUserParam = pUserParam;
 	}
-	std::string					mFileName;
-	void*						mpUserParam;
-	fnAsyncFileLoadCallback		mLoadCallback;
+
+	AsyncFileQueueInstance( const char* szFilename, fnAsyncFileCallback saveCallback, BYTE* pbMem, int nMemSize, void* pUserParam )
+	{
+		mFileName = szFilename;
+		mCallback = saveCallback;
+		mpUserParam = pUserParam;
+		mpSaveMem = pbMem;
+		mnSaveMemSize = nMemSize;
+	}
+
+	std::string				mFileName;
+	void*					mpUserParam;
+	fnAsyncFileCallback		mCallback;
+
+	BYTE*					mpSaveMem = NULL;
+	int						mnSaveMemSize = 0;
+
 };
 
 
@@ -65,22 +79,24 @@ public:
 	static	AsyncFileManager&		Get();
 	~AsyncFileManager();
 
-	void	Add( const char* szFilename, fnAsyncFileLoadCallback loadCallback, void* pUserParam );
+	void	Add( const char* szFilename, fnAsyncFileCallback loadCallback, void* pUserParam );
+	void	AddSave( const char* szFilename, fnAsyncFileCallback saveCallback, BYTE* pbMem, int nMemSize, void* pUserParam );
 
 	void	LoadNext();
 	void	Shutdown();
 
 	void	UpdatePendingCallbacks();
 
-	std::vector<AsyncFileQueueInstance>&		GetLoadQueue() { return( mFileLoadQueue ); };
+	std::vector<AsyncFileQueueInstance>&		GetLoadQueue() { return( mFileQueue ); };
 private:
 
-	AsyncMutex		mLoadQueueMutex;
-	std::vector<AsyncFileQueueInstance>		mFileLoadQueue;
-	AsyncMutex		mCallbackQueueMutex;
-	std::vector<AsyncFilePendingCallbackResponse>		mPendingLoadCallbacks;
+	AsyncMutex		mQueueMutex;
+	std::vector<AsyncFileQueueInstance>		mFileQueue;
 
-	HANDLE mhFileLoadThread = 0;
+	AsyncMutex		mCallbackQueueMutex;
+	std::vector<AsyncFilePendingCallbackResponse>		mPendingCallbacks;
+
+	HANDLE mhFileThread = 0;
 };
 
 BOOL	msboAsyncFileLoaderKillThread = FALSE;
@@ -94,12 +110,12 @@ static AsyncFileManager		msSingleton;
 
 void	AsyncFileManager::Shutdown()
 {
-	if ( mhFileLoadThread != 0 )
+	if ( mhFileThread != 0 )
 	{
 		msboAsyncFileLoaderKillThread = TRUE;
 		Sleep(10);
-		CloseHandle( mhFileLoadThread );
-		mhFileLoadThread = 0;
+		CloseHandle( mhFileThread );
+		mhFileThread = 0;
 	}
 }
 
@@ -110,48 +126,72 @@ AsyncFileManager::~AsyncFileManager()
 
 void	AsyncFileManager::LoadNext()
 {
-	if ( !mFileLoadQueue.empty() )
+	if ( !mFileQueue.empty() )
 	{
-		mLoadQueueMutex.LockMutex();
-		AsyncFileQueueInstance	instance = mFileLoadQueue[0];
-		mFileLoadQueue.erase(mFileLoadQueue.begin());
-		mLoadQueueMutex.UnlockMutex();
+		mQueueMutex.LockMutex();
+		AsyncFileQueueInstance	instance = mFileQueue[0];
+		mFileQueue.erase(mFileQueue.begin());
+		mQueueMutex.UnlockMutex();
 
-		FILE*		pFile = SysFileOpen( instance.mFileName.c_str(), "rb");
-		if ( pFile )
+		if ( instance.mnSaveMemSize > 0 )
 		{
-		int		nMemSize = SysGetFileSize( pFile ); 
-		BYTE*		pbMem = (BYTE*)( SystemMalloc( nMemSize ) );
-			if ( pbMem )
+			FILE*		pFile = SysFileOpen( instance.mFileName.c_str(), "wb");
+			if ( pFile )
 			{
-				SysFileRead( pbMem, nMemSize, 1, pFile );
+				SysFileWrite( instance.mpSaveMem, instance.mnSaveMemSize, 1, pFile );
 				SysFileClose( pFile );
 
-				AsyncFilePendingCallbackResponse	response( instance, pbMem, nMemSize);
+				AsyncFilePendingCallbackResponse	response( instance, instance.mpSaveMem, instance.mnSaveMemSize);
 				mCallbackQueueMutex.LockMutex();
-				mPendingLoadCallbacks.push_back( response );
+				mPendingCallbacks.push_back( response );
 				mCallbackQueueMutex.UnlockMutex();
 			}
 			else
 			{
-				AsyncFilePendingCallbackResponse	response( instance, NULL, -2 );
+				AsyncFilePendingCallbackResponse	response( instance, NULL, -1 );
 				mCallbackQueueMutex.LockMutex();
-				mPendingLoadCallbacks.push_back( response );
-				mCallbackQueueMutex.UnlockMutex();
-			}
+				mPendingCallbacks.push_back( response );
+				mCallbackQueueMutex.UnlockMutex();		
+			}		
 		}
 		else
 		{
-			AsyncFilePendingCallbackResponse	response( instance, NULL, -1 );
-			mCallbackQueueMutex.LockMutex();
-			mPendingLoadCallbacks.push_back( response );
-			mCallbackQueueMutex.UnlockMutex();
+			FILE*		pFile = SysFileOpen( instance.mFileName.c_str(), "rb");
+			if ( pFile )
+			{
+			int		nMemSize = SysGetFileSize( pFile ); 
+			BYTE*		pbMem = (BYTE*)( SystemMalloc( nMemSize ) );
+				if ( pbMem )
+				{
+					SysFileRead( pbMem, nMemSize, 1, pFile );
+					SysFileClose( pFile );
+
+					AsyncFilePendingCallbackResponse	response( instance, pbMem, nMemSize);
+					mCallbackQueueMutex.LockMutex();
+					mPendingCallbacks.push_back( response );
+					mCallbackQueueMutex.UnlockMutex();
+				}
+				else
+				{
+					AsyncFilePendingCallbackResponse	response( instance, NULL, -2 );
+					mCallbackQueueMutex.LockMutex();
+					mPendingCallbacks.push_back( response );
+					mCallbackQueueMutex.UnlockMutex();
+				}
+			}
+			else
+			{
+				AsyncFilePendingCallbackResponse	response( instance, NULL, -1 );
+				mCallbackQueueMutex.LockMutex();
+				mPendingCallbacks.push_back( response );
+				mCallbackQueueMutex.UnlockMutex();
+			}
 		}
 	}
 
 }
 
-long WINAPI AsyncFileLoadThread(long lParam)
+long WINAPI AsyncFileThread(long lParam)
 { 
 	while( !msboAsyncFileLoaderKillThread )
 	{
@@ -161,45 +201,66 @@ long WINAPI AsyncFileLoadThread(long lParam)
 	return( 0 );
 }
 
-void		AsyncFileManager::Add( const char* szFilename, fnAsyncFileLoadCallback loadCallback, void* pUserParam )
-{
-	mLoadQueueMutex.LockMutex();
-	AsyncFileQueueInstance		instance( szFilename, loadCallback, pUserParam );
-	mFileLoadQueue.push_back( instance );
-	mLoadQueueMutex.UnlockMutex();
 
-	if ( mhFileLoadThread == 0 )
+void		AsyncFileManager::AddSave( const char* szFilename, fnAsyncFileCallback saveCallback, BYTE* pbMem, int nMemSize, void* pUserParam )
+{
+	mQueueMutex.LockMutex();
+	AsyncFileQueueInstance		instance( szFilename, saveCallback, pbMem, nMemSize, pUserParam );
+	mFileQueue.push_back( instance );
+	mQueueMutex.UnlockMutex();
+
+	if ( mhFileThread == 0 )
 	{
 	uint32 iID;
+		mhFileThread = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)AsyncFileThread,0,0,(LPDWORD)&iID);
+	}
+}
 
-		mhFileLoadThread = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)AsyncFileLoadThread,0,0,(LPDWORD)&iID);
+void		AsyncFileManager::Add( const char* szFilename, fnAsyncFileCallback loadCallback, void* pUserParam )
+{
+	mQueueMutex.LockMutex();
+	AsyncFileQueueInstance		instance( szFilename, loadCallback, pUserParam );
+	mFileQueue.push_back( instance );
+	mQueueMutex.UnlockMutex();
 
+	if ( mhFileThread == 0 )
+	{
+	uint32 iID;
+		mhFileThread = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)AsyncFileThread,0,0,(LPDWORD)&iID);
 	}
 }
 
 void	AsyncFileManager::UpdatePendingCallbacks()
 {
-	if ( !mPendingLoadCallbacks.empty() )
+	if ( !mPendingCallbacks.empty() )
 	{
 		mCallbackQueueMutex.LockMutex();
-		for( AsyncFilePendingCallbackResponse callback : mPendingLoadCallbacks )
+		for( AsyncFilePendingCallbackResponse callback : mPendingCallbacks )
 		{
-			callback.mQueueInstance.mLoadCallback( callback.mQueueInstance.mFileName.c_str(), callback.mpbMem, callback.mnMemSize, callback.mQueueInstance.mpUserParam );				
+			callback.mQueueInstance.mCallback( callback.mQueueInstance.mFileName.c_str(), callback.mpbMem, callback.mnMemSize, callback.mQueueInstance.mpUserParam );				
 			if ( callback.mpbMem )
 			{
 				SystemFree( callback.mpbMem );
 			}
 		}
-		mPendingLoadCallbacks.clear();
+		mPendingCallbacks.clear();
 		mCallbackQueueMutex.UnlockMutex();
 	}
 }
 
 //--------------------------------
 
-AsyncFile::AsyncFile( const char* szFilename, fnAsyncFileLoadCallback loadCallback, void* pUserObj )
+AsyncFile::AsyncFile( const char* szFilename, fnAsyncFileCallback loadCallback, void* pUserObj )
 {
 	AsyncFileManager::Get().Add( szFilename, loadCallback, pUserObj );
+}
+
+AsyncFileSave::AsyncFileSave( const char* szFilename, fnAsyncFileCallback saveCompleteCallback, BYTE* pbMem, int nMemSize, void* pUserObj )
+{
+	if ( nMemSize > 0 )
+	{
+		AsyncFileManager::Get().AddSave( szFilename, saveCompleteCallback, pbMem, nMemSize, pUserObj );
+	}
 }
 
 

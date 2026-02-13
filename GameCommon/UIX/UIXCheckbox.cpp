@@ -92,12 +92,18 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 		break;
 	case STANDARD_CHECKBOX_WITH_LABEL:
 		{
-		uint32		ulTextCol = 0xd0e0e0e0;
+		uint32		ulTextCol = 0xc0c0c0c0;
 			pInterface->OutlineBox(0, drawRect.x, drawRect.y, drawRect.h, drawRect.h, 0xC0505050);
 
 			if (mbIsChecked)
 			{
 				pInterface->Rect(0, drawRect.x + 1, drawRect.y + 2, drawRect.h - 3, drawRect.h - 3, 0xd0808080);
+				ulTextCol = 0xd0e0e0e0;
+			}
+		
+			if (UIX::IsMouseHover(drawRect))
+			{
+				ulTextCol = 0xe0f0f0f0;
 			}
 			pInterface->Text(1, drawRect.x + drawRect.h + 2, drawRect.y + 3, ulTextCol, 3, mText.c_str());
 		}

@@ -1069,7 +1069,8 @@ int		nLoop = 0;
 	
 	do
 	{
-		if ( maxInternalTextures[ nLoop ].pTexture == NULL )
+		if ( ( maxInternalTextures[ nLoop ].pTexture == NULL ) &&
+			 ( maxInternalTextures[ nLoop ].nLoadState != LOADSTATE_LOADING ) )		 
 		{
 			return( nLoop );
 		}
@@ -1085,6 +1086,7 @@ int		nLoop = 0;
 void	TexturedOverlays::AsyncLoadCallback(const char* szFilename, BYTE* pbMem, int nMemSize, int nHandle )
 {
 	maxInternalTextures[nHandle].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureFromFileInMemDX(szFilename, pbMem, nMemSize, 1, 1, FALSE);
+	maxInternalTextures[nHandle].nLoadState = LOADSTATE_LOADED;
 }
 
 void	TexturedOverlays::AsyncLoadCallbackStatic(const char* szFilename, BYTE* pbMem, int nMemSize, void* pUserObj)
@@ -1190,6 +1192,7 @@ int		nHandle;
 		}
 		else
 		{
+			maxInternalTextures[nHandle].nLoadState = LOADSTATE_LOADING;
 			AsyncLoadTexture( szFilename, nFlags, nArchiveHandle, nHandle );
 		}
 	}
