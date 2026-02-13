@@ -27,7 +27,7 @@ UIXRECT		occupyRect;
 	}
 
 	displayRect.h = 0;  // This is the position relative to our parent that any children will start drawing at
-	displayRect.y = GetLocalPositionRect().h + GetLocalPositionRect().y;	
+	displayRect.y = occupyRect.y + GetLocalPositionRect().y;	
 	return displayRect;
 }
 

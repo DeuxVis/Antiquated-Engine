@@ -843,9 +843,9 @@ int		nTexMod;
 
 void TexturedOverlays::ReleaseTexture( int nTextureHandle )
 {
-	if ( nTextureHandle != NOTFOUND )
+	if ( ( nTextureHandle != NOTFOUND ) && 
+		 ( nTextureHandle < MAX_INTERNAL_TEXTURES_LOADED ) )
 	{
-		nTextureHandle %= MAX_INTERNAL_TEXTURES_LOADED;
 #ifdef USING_OPENGL
 			// TODO 
 
@@ -967,6 +967,10 @@ int		nLoop;
 		PANIC_IF( TRUE,"Couldnt allocate memory for textured overlay buffer" );
 #endif
 	}
+}
+void*	TexturedOverlays::GetRawTexture( int nTextureHandle )
+{
+	return( (void*)maxInternalTextures[ nTextureHandle ].pTexture );
 }
 
 void	TexturedOverlays::ExportTexture( int nTextureHandle, const char* szFilename, int nMode )
@@ -1105,7 +1109,7 @@ void TexturedOverlays::AsyncLoadTexture(const char* szFilename, int nFlags, int 
 	AsyncFile	fileLoader(szFilename, AsyncLoadCallbackStatic, (void*)pInfo);
 }
 
-void TexturedOverlays::SyncLoadTexture(const char* szFilename, int nFlags, int nArchiveHandle, int nHandle)
+BOOL TexturedOverlays::SyncLoadTexture(const char* szFilename, int nFlags, int nArchiveHandle, int nHandle)
 {
 	switch (nFlags)
 	{
@@ -1154,7 +1158,9 @@ void TexturedOverlays::SyncLoadTexture(const char* szFilename, int nFlags, int n
 		{
 			strcpy(maxInternalTextures[nHandle].acFilename, szFilename);
 		}
+		return( TRUE );
 	}
+	return( FALSE );
 }
 
 
@@ -1177,7 +1183,10 @@ int		nHandle;
 	{
 		if ( bAsync == FALSE )
 		{
-			SyncLoadTexture( szFilename, nFlags, nArchiveHandle, nHandle );
+			if ( SyncLoadTexture( szFilename, nFlags, nArchiveHandle, nHandle ) == FALSE )
+			{
+				return( NOTFOUND );
+			}
 		}
 		else
 		{

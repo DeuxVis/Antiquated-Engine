@@ -358,7 +358,6 @@ D3DVIEWPORT9	viewData = { (DWORD)X, (DWORD)Y, (DWORD)W, (DWORD)H, 0.0f, 1.0f };
 
 
 IDirect3DSurface9*		mspInterfaceRenderCanvas = NULL;
-IDirect3DSurface9*		mspInterfaceRenderCanvasSysMem = NULL;
 IDirect3DSurface9*		mspInterfaceNormalRenderTarget = NULL;
 
 void	InterfaceInternalsDX::SetRenderCanvas()
@@ -372,7 +371,6 @@ void	InterfaceInternalsDX::SetRenderCanvas()
 		mpD3D->GetAdapterDisplayMode( D3DADAPTER_DEFAULT, &d3ddm );
 
 		mpInterfaceD3DDevice->CreateRenderTarget( surfaceW, surfaceH, d3ddm.Format, D3DMULTISAMPLE_NONE, 0, FALSE, &mspInterfaceRenderCanvas, NULL );	
-		mpInterfaceD3DDevice->CreateOffscreenPlainSurface( surfaceW, surfaceH, d3ddm.Format, D3DPOOL_SYSTEMMEM, &mspInterfaceRenderCanvasSysMem, NULL );
 	}
 
 	if ( mspInterfaceRenderCanvas )
@@ -399,17 +397,14 @@ HRESULT		hr;
 	mpInterfaceD3DDevice->SetRenderTarget( 0, mspInterfaceNormalRenderTarget );
 	mspInterfaceNormalRenderTarget->Release();
 
-//	hr = mpInterfaceD3DDevice->GetRenderTargetData( mspInterfaceRenderCanvas, mspInterfaceRenderCanvasSysMem );
-
 	mpInterfaceD3DDevice->GetBackBuffer( 0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer );
 
-	mpInterfaceD3DDevice->StretchRect( mspInterfaceRenderCanvas, &sourceRect, pBackBuffer, &destRect, D3DTEXF_POINT );
+	if ( pBackBuffer )
+	{
+		hr = mpInterfaceD3DDevice->StretchRect( mspInterfaceRenderCanvas, &sourceRect, pBackBuffer, &destRect, D3DTEXF_POINT );
 
-	// TODO - StretchRect might be better?
-	// Or, um, just drawPrimitive using the RTT?
-//	hr = mpInterfaceD3DDevice->UpdateSurface( mspInterfaceRenderCanvasSysMem, &sourceRect, pBackBuffer, &destPoint );
-
-	pBackBuffer->Release();
+		pBackBuffer->Release();
+	}
 
 }
 

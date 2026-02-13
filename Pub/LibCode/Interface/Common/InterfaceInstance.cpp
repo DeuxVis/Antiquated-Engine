@@ -227,6 +227,11 @@ int			InterfaceInstance::GetTexture( const char* szFilename, int nFlags, BOOL bA
 	return( mpTexturedOverlays->GetTextureInternal( szFilename, nFlags, NOTFOUND, bAsync ) );
 }
 
+void*		InterfaceInstance::GetRawTexture( int nHandle )
+{
+	return( mpTexturedOverlays->GetRawTexture( nHandle ) );
+}
+
 int		InterfaceInstance::CreateNewTexturedOverlayForEngineTexture( int nLayer, int nEngineTextureHandle )
 {
 	return( mpTexturedOverlays->CreateOverlayForEngineTexture( nLayer, nEngineTextureHandle ) );

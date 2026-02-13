@@ -122,9 +122,9 @@ public:
 
 	int			GetTextureSize( int nTextureHandle, int* pnW, int* pnH );
 	void		ExportTexture( int nTextureHandle, const char* szFilename, int nMode );
-
+	void*		GetRawTexture( int nTextureHandle );
 private:
-	void			SyncLoadTexture(const char* szFilename, int nFlags, int nArchiveHandle, int nHandle);
+	BOOL			SyncLoadTexture(const char* szFilename, int nFlags, int nArchiveHandle, int nHandle);
 	void			AsyncLoadTexture(const char* szFilename, int nFlags, int nArchiveHandle, int nHandle);
 	
 	void			AsyncLoadCallback(const char* szFilename, BYTE* pbMem, int nMemSize, int nHandle );

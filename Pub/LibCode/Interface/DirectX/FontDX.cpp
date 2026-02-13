@@ -355,17 +355,16 @@ bool	bHasStringsInThisLayer = false;
 		{
 			if ( maxTextBuffer[ nLoop ].nLayer == nLayer )
 			{
-				bHasStringsInThisLayer = true;
-				if ( bHasBegunStringRender == false )
-				{
-					StringRenderBegin();
-					bHasBegunStringRender = true;
-				}
-
 				fTextScale = 0.0f;
 				nFont = maxTextBuffer[ nLoop ].bFont;
 				if ( nFont == mnCurrentRenderFont )
 				{
+					bHasStringsInThisLayer = true;
+					if ( bHasBegunStringRender == false )
+					{
+						StringRenderBegin();
+						bHasBegunStringRender = true;
+					}
 					ulCol = InterfaceGetARGBForColour( maxTextBuffer[ nLoop ].nCol );
 
 					fTextScale = maxTextBuffer[nLoop].fScale;

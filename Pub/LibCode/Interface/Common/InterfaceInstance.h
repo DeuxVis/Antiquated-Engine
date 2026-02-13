@@ -103,7 +103,7 @@ public:
 	BOOL		HasWindowChanged() { return( mboHasWindowChanged );}
 
 	void		RegisterDeviceResetCallbacks(fnInterfaceCallback fnPreReset, fnInterfaceCallback fnPostReset) { mfnPreDeviceResetCallback = fnPreReset; mfnPostDeviceResetCallback = fnPostReset; }
-
+	void*		GetRawTexture( int nHandle );
 protected:
 	void		SetDevice( void* pDevice );		// oldschool
 	void		CreateD3DInstanceIfNeeded();

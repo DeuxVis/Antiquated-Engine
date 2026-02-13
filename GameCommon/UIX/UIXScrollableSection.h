@@ -82,7 +82,6 @@ private:
 	UIXRECT				mScrollbarLastRender;
 	UIXRECT				mPageRenderRect;
 
-	int					mSectionInternalSize = 0;
 	BOOL				mbIsUsingClippingCanvas = FALSE;
 
 	UIXScrollbar*		mpScrollbar = NULL;
