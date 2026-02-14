@@ -97,7 +97,14 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
 			if (mbIsChecked)
 			{
-				pInterface->Rect(0, drawRect.x + 1, drawRect.y + 2, drawRect.h - 3, drawRect.h - 3, 0xd0808080);
+				UIXRECT		iconRect = drawRect;
+				iconRect.x -= 2;
+				iconRect.y -= 1;
+				iconRect.w = 19;
+				iconRect.h = 19;
+				UIX::DrawIcon( pInterface, 11, iconRect, 0xd0d0d0d0 );
+
+//				pInterface->Rect(0, drawRect.x + 1, drawRect.y + 2, drawRect.h - 3, drawRect.h - 3, 0xd0808080);
 				ulTextCol = 0xd0e0e0e0;
 			}
 		

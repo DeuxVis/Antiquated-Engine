@@ -131,13 +131,14 @@ int			nHeightUsed = lineRect.h;
 		{
 		UIXRECT		checkedIconRect = lineRect;
 		
-			checkedIconRect.y += 2;
-			checkedIconRect.h -= 8;
+			checkedIconRect.h = 19;
 			checkedIconRect.w = checkedIconRect.h;
-			checkedIconRect.x += 2;
+			checkedIconRect.y -= 3;
+
+			UIX::DrawIcon( pInterface, 11, checkedIconRect, 0xd0d0d0d0 );
 
 			// TODO - This should be tick icon or somethin
-			pInterface->Rect( 0, checkedIconRect.x, checkedIconRect.y, checkedIconRect.w, checkedIconRect.h, 0xC05050d0 );
+//			pInterface->Rect( 0, checkedIconRect.x, checkedIconRect.y, checkedIconRect.w, checkedIconRect.h, 0xC05050d0 );
 		}
 
 		if ( HasSelectionCallback() )

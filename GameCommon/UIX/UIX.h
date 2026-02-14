@@ -137,7 +137,7 @@ struct UIXRECT
 	int h;
 };
 
-typedef	UIXRECT(*fnCustomRenderCallback)( UIXObject* pObj, InterfaceInstance* pInterface, UIXRECT rect, uint32 ulUserParam );
+typedef	UIXRECT(*fnCustomRenderCallback)( UIXObject* pObj, InterfaceInstance* pInterface, UIXRECT& rectInOut, uint32 ulUserParam );
 typedef	BOOL(*fnCustomDragHoldHandlerCallback)(UIXObject* pObj, uint32 ulParam, BOOL bIsHeld, BOOL bFirstPress);
 
 class UIXObject

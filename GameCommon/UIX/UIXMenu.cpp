@@ -88,7 +88,10 @@ void		UIXMenuItem::DoRender( InterfaceInstance* pInterface, UIXRECT rect )
 
 		if ( pMenuItem->mbIsChecked )
 		{
-			pInterface->Rect(1, rect.x + 3, rect.y + 2, 12, rect.h - 4, 0xd02030b0 );	
+			UIXRECT iconRect(rect.x, rect.y - 2, 19, 19 );//rect.h - 4);
+			
+			UIX::DrawIcon( pInterface, 11, iconRect, 0xd0d0d0d0 );
+//			pInterface->Rect(1, rect.x + 3, rect.y + 2, 12, rect.h - 4, 0xd02030b0 );	
 		}
 		pInterface->Text(0, rect.x + 20, rect.y + 1, ulTextCol, 0, pMenuItem->GetText());
 		rect.y += 18;

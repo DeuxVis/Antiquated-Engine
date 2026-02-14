@@ -848,11 +848,11 @@ float	fDelta = ( (float)(ullCurrentTick - mullPlatformLastTick ) ) * 0.000001f;
 		}
 		else
 		{
-			if ( mbHandCursorSet == TRUE )
-			{
+//			if ( mbHandCursorSet == TRUE )
+//			{
 				SetCursor( mhPlatformWin32ArrowCursor );
 				mbHandCursorSet = FALSE;
-			}
+//			}
 		}
 		mbActivateMouseOverCursor = FALSE;
 
