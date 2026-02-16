@@ -14,6 +14,7 @@ extern "C"
 extern void				PlatformInit( const char* szWindowName, BOOL bAllowResize, BOOL bAllowSleep );
 
 extern BOOL				PlatformUpdateFrame( void );
+extern void				PlatformUpdateCursor();
 
 extern float			PlatformGetFrameDelta( void );
 

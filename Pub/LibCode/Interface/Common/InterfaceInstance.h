@@ -37,6 +37,8 @@ public:
 
 	// Textures
 	int			LoadTextureAsync(const char* szFilename, int nFlags);
+	BOOL		DidLoadFail( int nHandle );
+	BOOL		HasFullyLoaded(int nHandle);
 	int			GetTexture( const char* szFilename, int nFlags, BOOL bAsync = FALSE );
 	void		ReleaseTexture( int nTextureHandle );
 	int			LoadTextureFromFileInMem( const char* szFilename, unsigned char* pbMem, int nMemSize, int nFlags );
@@ -54,7 +56,7 @@ public:
 
 	//------------------------------------------------------------------
 	void		InitD3D( HWND hWindow, BOOL bMinBackBufferSize, int nBackBufferMinW = 0, int nBackBufferMinH = 0 );
-
+	void		SetIsLinkedToEngine( BOOL bFlag ) { mbIsLinkedToEngine = bFlag; }
 	void		InitialiseInstance( BOOL bUseDefaultFonts );
 
 	int			NewFrame( uint32 ulCol );
@@ -80,10 +82,16 @@ public:
 	void		InitWindow( const char* pcString, void* pVoidWinClass, BOOL bAllowResize );
 	int			GetWindowWidth();
 	int			GetWindowHeight();
+	int			GetWindowX();
+	int			GetWindowY();
+	void		SetWindowPosition(int nLeft, int nTop);	
+	void		SetRenderBufferSize( int width, int height );
 	void		SetInitialWindowSize( int sizeX, int sizeY );
 	void		SetWindowSize( BOOL boFullScreen, int nWidth, int nHeight, BOOL boAdjust );
 	void		SetViewport( int X, int Y, int nWidth, int nHeight );
 	void		SetRenderCanvas();
+	void		SetBorderlessFullscreenMode( BOOL bFlag ) { mboBorderlessFullscreen = bFlag; }
+	BOOL		IsBorderlessFullscreenMode() { return(mboBorderlessFullscreen); }
 	void		CopyRenderCanvasToBackBuffer( int X, int Y, int W, int H );
 
 	const InterfaceRECT&		GetDrawDimensions() const { return( m_DrawRect );} 
@@ -117,6 +125,8 @@ protected:
 	bool	mbIsInScene = false;
 	HWND	mhWindow;
 	int		mnAdapterUsedForDevice = 0;
+	BOOL	mboBorderlessFullscreen = FALSE;
+	BOOL	mbIsLinkedToEngine = FALSE;
 
 	InterfaceRECT		m_DrawRect;
 	int		mnRenderSurfaceWidth = 900;
@@ -124,6 +134,8 @@ protected:
 	BOOL	mboTextureFilteringCurrentState = FALSE;
 	int		mnWindowWidth = 700;
 	int		mnWindowHeight = 600;
+	int		mnWindowLeft = 100;
+	int		mnWindowTop = 100;
 	float	mfInterfaceFPS = 0.0f;
 	BOOL	mboFullScreen = FALSE;
 	BOOL	mboCurrentlyFullscreen = FALSE;

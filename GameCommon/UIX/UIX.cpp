@@ -565,6 +565,7 @@ void		UIX::Initialise( int mode )
 	UIXListBox::RegisterDragControlHandler(UIX_LISTBOX);
 	UIXButton::RegisterDragControlHandler(UIX_BUTTON);
 	UIXCustomRender::RegisterDragControlHandler(UIX_CUSTOM_RENDER);
+	UIXTextBox::RegisterDragControlHandler(UIX_TEXTBOX);
 
 	InterfaceSetDrawCallback(OnInterfaceDraw );
 

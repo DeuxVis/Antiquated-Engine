@@ -1083,10 +1083,37 @@ int		nLoop = 0;
 // Strictly not allowed but i dont care.. lets assume the .cpp is included by the app too
 #include "../../../GameCommon/Util/AsyncFile.h"
 
+BOOL	TexturedOverlays::HasFullyLoaded( int nTextureHandle )
+{
+	if (maxInternalTextures[nTextureHandle].nLoadState == LOADSTATE_LOADED )
+	{
+		return( TRUE );
+	}
+	return( FALSE );
+}
+
+BOOL	TexturedOverlays::DidLoadFail( int nTextureHandle )
+{
+	if (maxInternalTextures[nTextureHandle].nLoadState == LOADSTATE_NOTFOUND )
+	{
+		return( TRUE );
+	}
+	return( FALSE );
+}
+
 void	TexturedOverlays::AsyncLoadCallback(const char* szFilename, BYTE* pbMem, int nMemSize, int nHandle )
 {
-	maxInternalTextures[nHandle].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureFromFileInMemDX(szFilename, pbMem, nMemSize, 1, 1, FALSE);
-	maxInternalTextures[nHandle].nLoadState = LOADSTATE_LOADED;
+	if ( pbMem )
+	{
+		maxInternalTextures[nHandle].pTexture = mpInterfaceInstance->mpInterfaceInternals->LoadTextureFromFileInMemDX(szFilename, pbMem, nMemSize, 1, 1, FALSE);
+		maxInternalTextures[nHandle].nLoadState = LOADSTATE_LOADED;
+	}
+	else
+	{
+		maxInternalTextures[nHandle].pTexture = NULL;
+		maxInternalTextures[nHandle].nLoadState = LOADSTATE_NOTFOUND;
+
+	}
 }
 
 void	TexturedOverlays::AsyncLoadCallbackStatic(const char* szFilename, BYTE* pbMem, int nMemSize, void* pUserObj)

@@ -154,7 +154,7 @@ extern int		SysFileWrite( unsigned char*, int, int, FILE* );
 extern int		SysFileSeek( FILE*, int, int mode );
 extern void		SysFileClose( FILE* );
 extern void		SysFileCloseAll( void );
-
+extern BOOL		SysFileDoesExist(const char* szFilename);
 extern int		SysFileGetNumOpenHandles( void );
 
 extern int		SysSaveDataLoad( byte* pbData, int nSize );
@@ -170,7 +170,7 @@ enum
 	SYSMESSBOX_YESNO = 0x4,
 };
 
-extern BOOL	SysMessageBox( char* acError, char* acTitle, int nFlags );
+extern BOOL	SysMessageBox( const char* acError, const char* acTitle, int nFlags );
 
 extern BOOL	SysGetOpenFilenameDialog( const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, char* szOutputFile );
 extern BOOL	SysGetSaveFilenameDialog( const char* szFileFilter, const char* szTitle, const char* szDefaultFolder, int nFlags, char* szOutputFile );

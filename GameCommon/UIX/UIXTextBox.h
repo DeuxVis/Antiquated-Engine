@@ -12,6 +12,7 @@ friend class UIX;
 friend class UIXSlider;
 public:
 	void	SetText( const char* szText, ... );
+	const std::string&		GetText() const { return mText; }
 
 	void	SetEndEditCallback( fnTextBoxEndEditCallback func ) { mfnEndEditCallback = func; }
 protected:
@@ -23,6 +24,7 @@ protected:
 	static void			RegisterControlHandlers();
 	virtual bool		OnSelected( int nButtonID, uint32 ulParam );
 	virtual void		EndEdit();
+	virtual int		GetSelectionPriorityLayer() { return(1); }
 
 private:
 	static int		TextBoxKeyboardMessageHandlerStatic( int nResponseCode, const char* szInputText, void* pUserObj );

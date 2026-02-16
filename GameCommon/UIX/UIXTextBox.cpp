@@ -4,6 +4,7 @@
 #include "StandardDef.h"
 #include "InterfaceEx.h"
 #include "../../../Antiquated/GameCommon/Platform/Platform.h"
+#include "../UI/UI.h"
 #include "UIXTextBox.h"
 
 void		UIXTextBox::RegisterControlHandlers()
@@ -105,12 +106,28 @@ uint32		ulOutlineBoxCol = 0x40404040;
 uint32		ulTextCol = 0xd0d0d0d0;
 char		acBuff[256];
 
+	SetDraggableRenderRect(drawRect);
+
 	if ( UIX::IsMouseHover( drawRect ) == TRUE )
 	{
 		ulOutlineBoxCol = 0x60808080;
+		UIHoverIDSet( UIX_TEXTBOX, 0, GetID() );
 
 		UIX::CheckForPress( this, drawRect, UIX_TEXTBOX, 0 );
 	}
+
+	// Render semi-trans drag item if we've got something in progress
+	if ( IsDragHoldActive() && DragHasMoved())
+	{
+	UIXRECT	xGrabOffset = GetDragOffset();
+	UIXRECT xNewRect = GetInitialDragRect();
+
+		xNewRect.x += xGrabOffset.x;
+		xNewRect.y += xGrabOffset.y;
+		pInterface->Rect( 2, xNewRect.x, xNewRect.y, xNewRect.w, xNewRect.h, 0x40303030 );
+		pInterface->Text( 2, xNewRect.x + 5, xNewRect.y + 2, 0x80a0a0a0, 0, mText.c_str() );	
+	}
+
 
 	pInterface->OutlineBox( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, ulOutlineBoxCol );
 

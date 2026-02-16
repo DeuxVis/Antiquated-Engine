@@ -247,3 +247,14 @@ void InterfaceInstance::TexturedRect( int nOverlayNum, int nX, int nY, int nWidt
 {
 	mpTexturedOverlays->AddRect( nOverlayNum, nX, nY, nWidth, nHeight, ulCol, fU, fV, fUWidth, fUHeight );
 }
+
+BOOL	InterfaceInstance::DidLoadFail( int nHandle )
+{
+	return mpTexturedOverlays->DidLoadFail( nHandle );
+}
+
+BOOL	InterfaceInstance::HasFullyLoaded( int nHandle )
+{
+	return mpTexturedOverlays->HasFullyLoaded( nHandle );
+}
+

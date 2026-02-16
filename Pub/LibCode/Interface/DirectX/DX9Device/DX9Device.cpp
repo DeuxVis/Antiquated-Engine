@@ -40,6 +40,9 @@ u64		mullInterfaceLastPresentTick = 0;
 
 BOOL	mboCurrentlyFullscreen = FALSE;
 
+// TODO - Really this needs to be in InterfaceInstance.. hack atm means we assume only 1 instance ever does things with it
+IDirect3DSurface9*		mspInterfaceRenderCanvas = NULL;
+IDirect3DSurface9*		mspInterfaceNormalRenderTarget = NULL;
 
 ENGINEMATERIAL mxStandardMat;
 
@@ -59,10 +62,20 @@ INTERFACE_API LPGRAPHICS	InterfaceGetD3D( void )
 
 void		OnSetWindowSize( BOOL boFullScreen, int nWidth, int nHeight )
 {
+	if ( mspInterfaceRenderCanvas ) 
+	{
+		mspInterfaceRenderCanvas->Release();
+		mspInterfaceRenderCanvas = NULL;
+	}
+
 }
 
 
 
+void			InterfaceSetRenderBufferSize(int nWidth, int nHeight)
+{
+	InterfaceInstanceMain()->SetRenderBufferSize(nWidth, nHeight);
+}
 
 
 /***************************************************************************
@@ -72,7 +85,6 @@ INTERFACE_API int InterfaceGetWidth( void )
 {
 	return( InterfaceInstanceMain()->GetWidth() );
 }
-
 /***************************************************************************
  * Function    : InterfaceGetHeight
  ***************************************************************************/
@@ -80,6 +92,8 @@ INTERFACE_API int InterfaceGetHeight( void )
 {
 	return( InterfaceInstanceMain()->GetHeight() );
 }
+
+
 INTERFACE_API int InterfaceGetCentreX( void )
 {
 	return( InterfaceInstanceMain()->GetCentreX() );
@@ -87,6 +101,13 @@ INTERFACE_API int InterfaceGetCentreX( void )
 INTERFACE_API int InterfaceGetCentreY( void )
 {
 	return( InterfaceInstanceMain()->GetCentreY() );
+}
+
+
+void	InterfaceInstance::SetRenderBufferSize(int nWidth, int nHeight)
+{
+	mnRenderSurfaceWidth = nWidth;
+	mnRenderSurfaceHeight = nHeight;
 }
 
 int InterfaceInstance::GetHeight( void )
@@ -357,8 +378,6 @@ D3DVIEWPORT9	viewData = { (DWORD)X, (DWORD)Y, (DWORD)W, (DWORD)H, 0.0f, 1.0f };
 }
 
 
-IDirect3DSurface9*		mspInterfaceRenderCanvas = NULL;
-IDirect3DSurface9*		mspInterfaceNormalRenderTarget = NULL;
 
 void	InterfaceInternalsDX::SetRenderCanvas()
 {
@@ -451,8 +470,20 @@ int adapterIndex = 0;
 		pD3Dpp->FullScreen_RefreshRateInHz = d3ddm.RefreshRate;
 #else
 		pD3Dpp->Windowed = TRUE;
-		pD3Dpp->BackBufferWidth  = d3ddm.Width;
-		pD3Dpp->BackBufferHeight = d3ddm.Height;
+		if ( mpInterfaceInstance->IsBorderlessFullscreenMode() == FALSE )
+		{
+		RECT	xRect;
+			GetClientRect( hWindow, &xRect );
+			int nWindowWidth = xRect.right - xRect.left;
+			int nWindowHeight = xRect.bottom - xRect.top;
+			pD3Dpp->BackBufferWidth  = nWindowWidth;
+			pD3Dpp->BackBufferHeight = nWindowHeight;	
+		}
+		else
+		{
+			pD3Dpp->BackBufferWidth  = d3ddm.Width;
+			pD3Dpp->BackBufferHeight = d3ddm.Height;
+		}
 #endif
 	}
 	else
@@ -685,7 +716,6 @@ void	 InterfaceInstance::CreateD3DInstanceIfNeeded()
 void	 InterfaceInstance::InitD3D( HWND hWindow, BOOL boMinPageSize, int nBackBufferMinW, int nBackBufferMinH )
 {
 LPGRAPHICSDEVICE	pNewGraphicsDevice;
-BOOL		bReInitEngine = FALSE;
 
 	mhWindow = hWindow;
 	if ( InterfaceIsVRMode() == TRUE )
@@ -727,8 +757,12 @@ BOOL		bReInitEngine = FALSE;
 //			mpInterfaceInternals->mpInterfaceD3DDevice->Reset();
 			uint32 ulRefCount = mpInterfaceInternals->mpInterfaceD3DDevice->Release();
 			mpInterfaceInternals->mpInterfaceD3DDevice = NULL;
-			EngineFree(FALSE);
-			EngineRemoveDXDevice();
+
+			if ( mbIsLinkedToEngine )
+			{
+				EngineFree(FALSE);
+				EngineRemoveDXDevice();
+			}
 		}
 
 		// Update the window settings & position
@@ -747,12 +781,16 @@ BOOL		bReInitEngine = FALSE;
 			{	
 				GetMonitorInfoByIndex(mnRequestedMonitorNum, mi);
 			}
-			SetWindowPos(hWindow, HWND_TOPMOST,  mi.rcMonitor.left, mi.rcMonitor.top,  mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-			
-			LONG style = GetWindowLong(hWindow, GWL_STYLE);
-			style &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
-			style |= WS_POPUP;
-			SetWindowLong(hWindow, GWL_STYLE, style);			
+
+			if ( mboBorderlessFullscreen )
+			{
+				SetWindowPos(hWindow, HWND_TOPMOST,  mi.rcMonitor.left, mi.rcMonitor.top,  mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+				
+				LONG style = GetWindowLong(hWindow, GWL_STYLE);
+				style &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU);
+				style |= WS_POPUP;
+				SetWindowLong(hWindow, GWL_STYLE, style);			
+			}
 
 			// 'Modern way'.. we use windowed but the window is fullscreen and borderless
 			d3dpp.Windowed = TRUE;
@@ -911,10 +949,14 @@ BOOL		bReInitEngine = FALSE;
 		}
 		SetDevice( pNewGraphicsDevice );
 
+		// If this interfaceInstance is linked to the (singleton) engine
 		if ( EngineGetDXDevice() == NULL )
 		{
-			EngineInitFromInterface();
-			EngineInitDX( pNewGraphicsDevice );
+			if ( mbIsLinkedToEngine ) 
+			{
+				EngineRestartDX( pNewGraphicsDevice );
+			}
+
 			if ( mfnPostDeviceResetCallback )
 			{
 				mfnPostDeviceResetCallback( this );
@@ -936,6 +978,7 @@ BOOL		bReInitEngine = FALSE;
 
 INTERFACE_API void				InterfaceInitDisplayDevice( BOOL boMinRenderPageSize, int nBackBufferMinW, int nBackBufferMinH )
 {
+	InterfaceInstanceMain()->SetBorderlessFullscreenMode(TRUE);
 	InterfaceInstanceMain()->InitD3D( mhwndInterfaceMain, boMinRenderPageSize, nBackBufferMinW, nBackBufferMinH );
 	mpLegacyInterfaceD3DDeviceSingleton = InterfaceInstanceMain()->mpInterfaceInternals->mpInterfaceD3DDevice;
 }
@@ -1096,7 +1139,7 @@ BOOL	boIsSmall = InterfaceIsSmall();
 			}
 			ShowWindow( mhWindow, SW_SHOW );
 			UpdateWindow( mhWindow );
-			SetCursor( LoadCursor(NULL, IDC_ARROW) );
+//			SetCursor( LoadCursor(NULL, IDC_ARROW) );
 
 			if ( mpInterfaceInternals->mpInterfaceD3DDevice != NULL )
 			{

@@ -80,6 +80,8 @@ extern LPGRAPHICSDEVICECONTEXT	mpEngineDeviceContext;
 IGRAPHICSFORMAT		EngineDXGetGraphicsFormat( eSurfaceFormat format );
 eSurfaceFormat		EngineDXGetSurfaceFormat( IGRAPHICSFORMAT format );
 
+extern void		EngineRestartDX( LPGRAPHICSDEVICE pDevice );
+
 
 void				EngineSetPixelShader( LPGRAPHICSPIXELSHADER, const char* szShaderName );
 void				EngineSetVertexShader( LPGRAPHICSVERTEXSHADER, const char* szShaderName );

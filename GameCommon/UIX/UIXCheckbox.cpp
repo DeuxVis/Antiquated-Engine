@@ -67,6 +67,19 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 			}
 		}
 		break;
+	case ICON_CHECKBOX_OUTLINED:
+		{
+		uint32	ulCol = 0xd0202020;
+
+			pInterface->OutlineBox( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0xC0505050 );
+			if ( mbIsChecked )
+			{
+			int		nIcon = mnOnIcon;
+				UIX::DrawIcon( pInterface, nIcon, UIXRECT(drawRect.x + 1, drawRect.y + 1, drawRect.w - 2, drawRect.h - 2), 0xD0D0D0D0 );
+				ulCol = 0xe0383840;
+			}	
+		}
+		break;
 	case ICON_CHECKBOX:
 		{
 		int		nIcon = mnOffIcon;
@@ -79,7 +92,7 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 			}
 			pInterface->Rect( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, ulCol );
 		
-			UIX::DrawIcon( pInterface, nIcon, UIXRECT(drawRect.x + 1, drawRect.y + 1, drawRect.w - 2, drawRect.h - 2), 0xE0A0A0A0 );
+			UIX::DrawIcon( pInterface, nIcon, UIXRECT(drawRect.x + 1, drawRect.y + 1, drawRect.w - 2, drawRect.h - 2), 0xD0D0D0D0 );
 		}
 		break;
 	case STANDARD_CHECKBOX:

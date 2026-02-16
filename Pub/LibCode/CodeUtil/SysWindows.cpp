@@ -507,7 +507,7 @@ void MenuEntrySetEnabled( void* pTargetTopParent, int nTarget, BOOL boNewState )
 //   should create a popup messagebox window.
 //   Returns FALSE if user pressed "NO" or "Cancel", TRUE otherwise.
 //--------------------------------------------------------
-BOOL	SysMessageBox( char* acError, char* acTitle, int nFlags )
+BOOL	SysMessageBox( const char* acError, const char* acTitle, int nFlags )
 {
 int		nRet = 0;
 UINT	unWinFlags = 0;

@@ -88,13 +88,14 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 	{
 		UIHoverIDSet( UIX_BUTTON, 0, GetID() );
 	}
+	// Receive dragged item
 	if ( CheckDragHoverRegion( UIXRECT( drawRect.x, drawRect.y, drawRect.w, drawRect.h ) ) )
 	{
 		pInterface->OutlineBox( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x808080c0 );	
 		UIX::HoverAcceptDragItem( this );
 	}
 
-	// Check we've moved at least a bit away from the click pos otherwise its not really a drag
+	// Render semi-trans drag item if we've got something in progress
 	if ( IsDragHoldActive() && DragHasMoved())
 	{
 	UIXRECT	xGrabOffset = GetDragOffset();

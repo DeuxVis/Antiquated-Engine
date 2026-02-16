@@ -107,6 +107,7 @@ typedef struct
 //------------------------------------------------------------------
 extern	void	EngineInit( void );
 extern  void	EngineInitFromInterface(void);
+
 extern	void	EngineUpdate( BOOL nNewFrame );
 extern  void	EngineFinaliseRender( void );
 extern  void	EngineRestart( void );

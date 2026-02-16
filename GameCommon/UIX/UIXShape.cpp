@@ -20,6 +20,12 @@ UIXRECT		UIXShape::OnRender( InterfaceInstance* pInterface, UIXRECT displayRect 
 {
 UIXRECT		drawRect = GetActualRenderRect( displayRect );
 
+	if ( CheckDragHoverRegion( drawRect ) )
+	{
+		pInterface->OutlineBox( 0, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x804060d0 );
+		UIX::HoverAcceptDragItem(this);	
+	}
+
 	switch( mMode )
 	{
 	case 0:

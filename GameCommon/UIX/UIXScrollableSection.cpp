@@ -101,26 +101,35 @@ int		UIXScrollbar::GetScrollPosition()
 
 void	UIXScrollbar::OnMouseWheel(float fOffset)
 {
-	mScrollPositionScreen += (int)(fOffset);
-	if (mScrollPositionScreen < 0) mScrollPositionScreen = 0;
-
-	int nBarH = (int)(mFullBarHeight * mfBarScale);
-	if (mScrollPositionScreen + nBarH > mFullBarHeight) mScrollPositionScreen = mFullBarHeight - nBarH;
-	float		fScrollMod = 1.0f;
-
-	if (mfHeightPerUnit > 0.0f)
+	if ( SysCheckKeyState( KEY_SHIFT) )
 	{
-		if ( mfHeightPerUnit < 0.1f )
-		{
-			fScrollMod = mfHeightPerUnit * 5.0f;
-		}
-		else
-		{
-			fScrollMod = mfHeightPerUnit;
-		}
-		mScrollPosition = (int)(mScrollPositionScreen / fScrollMod);
+		fOffset *= 5.0f;		
+	}
+		
+	if ( ( mfHeightPerUnit > 0.0f ) &&
+		 ( mfHeightPerUnit < 0.1f ) )
+	{
+		fOffset *= FClamp( 0.2f / mfHeightPerUnit, 1.0f, 10.0f );		 
 	}
 	
+	mScrollPosition += (int)(fOffset);
+
+	mScrollPositionScreen = mScrollPosition * mfHeightPerUnit;
+	if (mScrollPositionScreen < 0)
+	{
+		mScrollPositionScreen = 0;
+		mScrollPosition = 0;
+	}
+	else
+	{
+		int nBarH = (int)(mFullBarHeight * mfBarScale);
+		if (mScrollPositionScreen + nBarH > mFullBarHeight) 
+		{
+			mScrollPositionScreen = mFullBarHeight - nBarH;
+			mScrollPosition = (int)(mScrollPositionScreen / mfHeightPerUnit);
+		}
+	}
+
 }
 
 void	UIXScrollbar::StoreScrollState( UIXScrollbarRestoreState* pxOut )

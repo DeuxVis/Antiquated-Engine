@@ -9,7 +9,7 @@
 
 #define		MAX_TEX_OVERLAY_VERTICES			2048
 
-#define		MAX_DIFFERENT_TEXTURED_OVERLAYS		128
+#define		MAX_DIFFERENT_TEXTURED_OVERLAYS		240
 #define		MAX_RECTS							12000
 
 /*** This structure is used to specify a shape in the Textured Overlays module ***/
@@ -44,6 +44,7 @@ enum eLoadState
 	LOADSTATE_NOTLOADED = 0,
 	LOADSTATE_LOADING,
 	LOADSTATE_LOADED,
+	LOADSTATE_NOTFOUND, 
 };
 
 struct INTERNAL_TEXTURES
@@ -114,6 +115,8 @@ public:
 	int			GetTextureFromFileInMem( const char* szFilename, unsigned char* pbMem, int nMemSize, int nFlags );
 	int			GetTextureInternal( const char* szFilename, int nFlags, int nArchiveHandle, BOOL bAsync );
 	int			CreateBlankTexture( int nWidth, int nHeight, int Mode);
+	BOOL		DidLoadFail( int nTextureHandle );
+	BOOL		HasFullyLoaded( int nTextureHandle );
 	void		ReleaseTexture( int nTextureHandle );
 
 	BYTE*		LockTexture( int nTextureHandle, int* pnPitch, int* pnFormat, int nFlags );

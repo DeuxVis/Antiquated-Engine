@@ -85,6 +85,7 @@ enum UIX_CHECKBOX_MODE
 	STANDARD_CHECKBOX_WITH_LABEL,
 	POPUP_MENU_LIST,
 	ICON_CHECKBOX,
+	ICON_CHECKBOX_OUTLINED,
 	HILIGHT_CHECKBOX,
 	HILIGHT_CHECKBOX2,
 };
@@ -208,7 +209,7 @@ protected:
 	// - Use  UIHoverIDSet( <UIX_ID>, mIndex, mpListBox->GetID() );
 
 	// - type implementation should update 'SetDraggableRenderRect' (sets the viusal rect that the user can drag)
-	//			(OR : Trigger ActivateDragHold 
+	//			(OR : Trigger ActivateDragHold directly if its being fancy)
 	// - in the type's OnRender, render the transparent drag item if ( IsDragHoldActive() && DragHasMoved )
 	//
 	// DROP an item:  (what a type needs to do to an accept a dragged item)

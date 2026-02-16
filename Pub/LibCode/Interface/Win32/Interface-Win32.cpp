@@ -179,6 +179,22 @@ INTERFACE_API int InterfaceGetWindowHeight( void )
 	return( InterfaceInstanceMain()->GetWindowHeight() );
 }
 
+void	InterfaceInstance::SetWindowPosition(int nLeft, int nTop)
+{
+	mnWindowLeft = nLeft;
+	mnWindowTop = nTop;
+}
+
+int		InterfaceInstance::GetWindowX()
+{
+	return(mnWindowLeft);
+}
+
+int		InterfaceInstance::GetWindowY()
+{
+	return(mnWindowTop);
+}
+
 int		InterfaceInstance::GetWindowWidth()
 {
 	return( mnWindowWidth );
@@ -189,18 +205,6 @@ int		InterfaceInstance::GetWindowHeight()
 	return( mnWindowHeight );
 }
 
-
-/***************************************************************************
- * Function    : InterfaceSetWindowPosition
- * Params      : 
- * Returns     :
- * Description : 
- ***************************************************************************/
-INTERFACE_API void InterfaceSetWindowPosition( int nLeft, int nTop )
-{
-	mnWindowLeft = nLeft;
-	mnWindowTop = nTop;
-}
 
 void	InterfaceWin32SetInitialWindowSize( int sizeX, int sizeY )
 {

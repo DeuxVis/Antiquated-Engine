@@ -1635,6 +1635,13 @@ void	EngineInitDX( LPGRAPHICSDEVICE pDevice )
 
 
 
+void	EngineRestartDX( LPGRAPHICSDEVICE pDevice )
+{
+	mpEngineDevice = pDevice;
+	EngineInit();
+	EngineInitDX( pDevice );
+}
+
 void	EngineInitFromInterface( void )
 {
 	mpEngineDevice = InterfaceGetD3DDevice();

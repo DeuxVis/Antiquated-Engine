@@ -480,6 +480,18 @@ BYTE*	pcMem = NULL;
 }
 
 
+BOOL		SysFileDoesExist(const char* szFilename)
+{
+FILE* pFile = fopen( szFilename, "rb" );
+
+	if ( pFile )
+	{
+		fclose(pFile);
+		return(TRUE);
+	}
+	return(FALSE);
+}
+
 FILE*	SysFileOpen( const char* szFilename, const char* szOpenMode )
 {
 FILE* pFile = fopen( szFilename, szOpenMode );

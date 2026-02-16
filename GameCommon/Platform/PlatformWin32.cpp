@@ -691,6 +691,7 @@ LRESULT WINAPI WindowsMsgProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 				mbPlatformWin32IsResizingWindow = true;
 				mnPlatformWin32ResizeW = LOWORD(lParam);
 				mnPlatformWin32ResizeH = HIWORD(lParam);
+//				 InterfaceSetWindowSize( FALSE, mnPlatformWin32ResizeW,mnPlatformWin32ResizeH, FALSE );
 			}
 			break;
 		case SIZE_MINIMIZED:
@@ -813,6 +814,42 @@ float			PlatformGetFrameDelta( void )
 	return( mfFrameDelta );
 }
 
+void		PlatformUpdateCursor( void )
+{
+	if ( mbThisWindowIsFocused )
+	{
+	HCURSOR hCurrent = GetCursor();
+/*
+	HCURSOR hSizeNS = LoadCursor(NULL, IDC_SIZENS);
+	HCURSOR hSizeWE = LoadCursor(NULL, IDC_SIZEWE);
+	HCURSOR hSizeNWSE = LoadCursor(NULL, IDC_SIZENWSE);
+	HCURSOR hSizeNESW = LoadCursor(NULL, IDC_SIZENESW);
+	HCURSOR hSizeAll = LoadCursor(NULL, IDC_SIZEALL);
+
+		if (hCurrent != hSizeNS && hCurrent != hSizeWE &&
+			hCurrent != hSizeNWSE && hCurrent != hSizeNESW &&  hCurrent != hSizeAll)
+*/
+		{		
+			if ( mbActivateMouseOverCursor )
+			{
+				if ( mbHandCursorSet == FALSE )
+				{
+					SetCursor( mhPlatformWin32HandCursor );
+					mbHandCursorSet = TRUE;
+				}
+			}
+			else
+			{
+				SetCursor( mhPlatformWin32ArrowCursor );
+				mbHandCursorSet = FALSE;
+			}
+		}
+		mbActivateMouseOverCursor = FALSE;
+	}
+
+
+}
+
 BOOL		PlatformUpdateFrame( void )
 {
 u64	ullCurrentTick = SysGetMicrosecondTick();
@@ -838,23 +875,7 @@ float	fDelta = ( (float)(ullCurrentTick - mullPlatformLastTick ) ) * 0.000001f;
 			mbKeyboardCursorFlashOn = !mbKeyboardCursorFlashOn;
 		}
 
-		if ( mbActivateMouseOverCursor )
-		{
-			if ( mbHandCursorSet == FALSE )
-			{
-				SetCursor( mhPlatformWin32HandCursor );
-				mbHandCursorSet = TRUE;
-			}
-		}
-		else
-		{
-//			if ( mbHandCursorSet == TRUE )
-//			{
-				SetCursor( mhPlatformWin32ArrowCursor );
-				mbHandCursorSet = FALSE;
-//			}
-		}
-		mbActivateMouseOverCursor = FALSE;
+//		PlatformUpdateCursor();
 
 		if ( mnPendingTouchRelease > 0 )
 		{
