@@ -144,6 +144,7 @@ typedef	BOOL(*fnCustomDragHoldHandlerCallback)(UIXObject* pObj, uint32 ulParam, 
 class UIXObject
 {
 friend class UIX;
+friend class MilkPresetBrowser;
 public:
 	uint32			GetID() { return( mulID ); }
 
