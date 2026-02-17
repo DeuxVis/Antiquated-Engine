@@ -114,7 +114,7 @@ void	UIXScrollbar::OnMouseWheel(float fOffset)
 	
 	mScrollPosition += (int)(fOffset);
 
-	mScrollPositionScreen = mScrollPosition * mfHeightPerUnit;
+	mScrollPositionScreen = (int)( mScrollPosition * mfHeightPerUnit );
 	if (mScrollPositionScreen < 0)
 	{
 		mScrollPositionScreen = 0;

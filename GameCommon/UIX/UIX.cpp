@@ -263,6 +263,27 @@ void	UIXObject::SetDraggable(int nDragItemType, uint32 ulDragParam)
 	mDragItemParam = ulDragParam;
 }
 
+
+bool	UIXObject::DoesContainObjectID( uint32 ulUIXID ) const
+{
+	if ( ulUIXID == GetID() )
+	{
+		return true;
+	}
+
+	if ( mContainsList.size() > 0 )
+	{
+		for( auto contained : mContainsList )
+		{
+			if ( contained->DoesContainObjectID( ulUIXID ) )
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void	UIXObject::ActivateDragHold( UIXRECT rect, uint32 ulDragParam )
 {
 	mDragRectOriginal = rect;
@@ -424,6 +445,10 @@ void		UIX::ButtonPressHandler( int nButtonID, uint32 ulParam, uint32 ulIDParam )
 	}
 }
 	
+uint32	UIX::GetCurrentPressObjectID() 
+{ 
+	return( UIGetCurrentPressIDIndexParam() );
+}
 
 
 void	UIX::OnKeyUp(int keyCode)
@@ -512,6 +537,10 @@ BOOL		UIX::CheckForRightButtonPress( UIXObject* pxObject, UIXRECT rect, uint32 u
 	return( FALSE );
 }
 
+#ifdef _DEBUG
+#define DEBUG_COMPONENT_MAP
+#endif
+
 BOOL		UIX::CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, uint32 ulButtonParam )
 {
 	if ( msSelectionPriority >= msPressedSelectionPriority )
@@ -520,6 +549,13 @@ BOOL		UIX::CheckForPress( UIXObject* pxObject, UIXRECT rect, uint32 ulButtonID, 
 		{
 			if ( UIIsPressed( rect.x, rect.y, rect.w, rect.h ) == TRUE )
 			{
+#ifdef DEBUG_COMPONENT_MAP
+				auto it = msComponentIDMap.find( pxObject->GetID() );
+				if ( it == msComponentIDMap.end() )
+				{
+					SysDebugPrint( "Error - Pressed UIX component ID does not exist in the current componentIDMap. This shouldnt ever happen");
+				}
+#endif
 				UIPressIDSet( ulButtonID, ulButtonParam, pxObject->GetID() );
 				msPressedSelectionPriority = msSelectionPriority;
 			}
@@ -667,6 +703,7 @@ void		UIX::DeleteObject( UIXObject* pObject )
 	msPagesList.erase( std::remove(msPagesList.begin(), msPagesList.end(), pObject), msPagesList.end() );
 	msComponentIDMap[pObject->GetID()] = NULL;
 	msComponentIDMap.erase( pObject->GetID() );
+	// Shutdown clears up all the object's children
 	pObject->Shutdown();
 	delete pObject;
 }

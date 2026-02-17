@@ -243,6 +243,16 @@ void		UISetCurrentCursorPosition( int nX, int nY )
 }
 
 
+uint32	UIGetCurrentHoverIDIndexParam()
+{
+	return( mulUIButtonIDHoveredID );
+}
+
+uint32	UIGetCurrentPressIDIndexParam()
+{
+	return(mulUIButtonIDPressedIDParam);
+}
+
 void		UIHoverIDSet( int nButtonID, uint32 ulParam, uint32 ulID )
 {
 	mnUIButtonIDHovered = nButtonID;

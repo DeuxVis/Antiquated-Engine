@@ -309,7 +309,7 @@ uint32		ulCol = 0xf0505070;
 				ulCol = 0xf0a08050;
 			}
 			pInterface->Triangle( 1, mRenderRect.x + nMinBarPos - 6, mRenderRect.y + 6, mRenderRect.x + nMinBarPos, mRenderRect.y + 6, mRenderRect.x + nMinBarPos, mRenderRect.y, ulCol, ulCol, ulCol );
-			pInterface->Rect( 0, mRenderRect.x + nMinBarPos - 6, mRenderRect.y + 6, 6, mRenderRect.h - 6, ulCol );
+			pInterface->Rect( 1, mRenderRect.x + nMinBarPos - 6, mRenderRect.y + 6, 6, mRenderRect.h - 6, ulCol );
 			// INDICATOR (MAX)
 			ulCol = 0xf0505070;
 			if ( UIX::IsMouseHover( mRenderRect.x + nMaxBarPos - 1, mRenderRect.y, 8, mRenderRect.h ) == TRUE )
@@ -317,12 +317,15 @@ uint32		ulCol = 0xf0505070;
 				UIHoverIDSet( UIX_SLIDER_BAR_MAXRANGE, 0, GetID() );
 				ulCol = 0xf0a08050;
 			}
-			pInterface->Rect( 0, mRenderRect.x + nMaxBarPos, mRenderRect.y + 6, 6, mRenderRect.h - 6, ulCol );
+			pInterface->Rect( 1, mRenderRect.x + nMaxBarPos, mRenderRect.y + 6, 6, mRenderRect.h - 6, ulCol );
 			pInterface->Triangle( 1, mRenderRect.x + nMaxBarPos, mRenderRect.y + 6, mRenderRect.x + nMaxBarPos + 6, mRenderRect.y + 6, mRenderRect.x + nMaxBarPos, mRenderRect.y, ulCol, ulCol, ulCol );
 
 			// Current value indicator		
-			ulCol = 0xc0b0b0b0;
-			pInterface->Rect( 0, mRenderRect.x + nCurrentBarPos - 1, mRenderRect.y + 4, 2, mRenderRect.h - 6, ulCol );
+			if ( mbShowCurrentValueIndicator )
+			{
+				ulCol = 0xc0b0b0b0;
+				pInterface->Rect( 0, mRenderRect.x + nCurrentBarPos - 1, mRenderRect.y + 4, 2, mRenderRect.h - 6, ulCol );
+			}
 
 			// between bar
 			pInterface->Rect( 0, mRenderRect.x + nMinBarPos + 2, mRenderRect.y + ( mRenderRect.h / 2), (nMaxBarPos - nMinBarPos) - 2, (mRenderRect.h/2), 0xA0404040 );

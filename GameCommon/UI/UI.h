@@ -112,5 +112,8 @@ extern void		UISetCurrentCursorPosition( int nX, int nY );
 
 InterfaceInstance*		UIInterfaceInstance();
 
+extern uint32	UIGetCurrentHoverIDIndexParam();
+extern uint32	UIGetCurrentPressIDIndexParam();
+
 
 #endif

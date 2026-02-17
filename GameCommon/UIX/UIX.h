@@ -146,7 +146,7 @@ class UIXObject
 friend class UIX;
 friend class MilkPresetBrowser;
 public:
-	uint32			GetID() { return( mulID ); }
+	uint32			GetID() const { return( mulID ); }
 
 	//------------------------------------------ User params
 	void*				GetUserObject() { return mpUserObject; }
@@ -166,6 +166,7 @@ public:
 	
 	bool				HasSelectionCallback() { return( mfnSelectedCallback != NULL ); }
 	bool				HasChildren() const { return( mContainsList.size() > 0 ); }
+	bool				DoesContainObjectID( uint32 ulUIXID ) const;
 	UIXObject*			GetParent() const { return(mpParent); }
 	virtual int			GetScrollPosition() { return( 0 ); }
 
@@ -342,7 +343,8 @@ public:
 	static void							LoadIcon( InterfaceInstance* pInterface, int iconNum, const char* szFilename );
 	static void							LoadIconSheet( InterfaceInstance* pInterface, int sheetNum, const char* szFilename );
 
-		static uint32						GetNextObjectID();
+	static uint32						GetNextObjectID();
+	static uint32						GetCurrentPressObjectID();
 protected:
 	static void							SetActivePageRegion(UIXRECT rect) { mxActivePageRegion = rect; }
 
