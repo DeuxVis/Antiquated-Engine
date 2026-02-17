@@ -22,7 +22,16 @@ float	UIXSlider::OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bF
 				// Expand the handled range if our new value is higher
 				if ( mfMaxVal > mfInitialMaxVal )
 				{
-					mfInitialMaxVal = mfMaxVal;
+					if ( mbAllowRangeExpand )
+					{
+						mfInitialMaxVal = mfMaxVal;
+					}
+					else
+					{
+						mfMaxVal = mfInitialMaxVal;
+						mfMinVal = min( mfMinVal, mfMaxVal );
+					}
+					
 				}
 			}
 			else 
@@ -33,7 +42,15 @@ float	UIXSlider::OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bF
 		// Expand the handled range if our new value is higher
 		if ( mfMinVal < mfInitialMinVal )
 		{
-			mfInitialMinVal = mfMinVal;
+			if ( mbAllowRangeExpand )
+			{
+				mfInitialMinVal = mfMinVal;
+			}
+			else
+			{
+				mfMinVal = mfInitialMinVal;
+				mfMaxVal = max( mfMinVal, mfMaxVal );
+			}
 		}
 		return mfMinVal;
 	}
@@ -50,7 +67,15 @@ float	UIXSlider::OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bF
 				// Expand the handled range if our new value is higher
 				if ( mfMinVal < mfInitialMinVal )
 				{
-					mfInitialMinVal = mfMinVal;
+					if ( mbAllowRangeExpand )
+					{
+						mfInitialMinVal = mfMinVal;
+					}
+					else
+					{
+						mfMinVal = mfInitialMinVal;
+						mfMaxVal = max( mfMinVal, mfMaxVal );
+					}
 				}
 			}
 			else
@@ -61,7 +86,15 @@ float	UIXSlider::OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bF
 		// Expand the handled range if our new value is higher
 		if ( mfMaxVal > mfInitialMaxVal )
 		{
-			mfInitialMaxVal = mfMaxVal;
+			if ( mbAllowRangeExpand )
+			{
+				mfInitialMaxVal = mfMaxVal;
+			}
+			else
+			{
+				mfMaxVal = mfInitialMaxVal;
+				mfMinVal = min( mfMinVal, mfMaxVal );
+			}
 		}
 		return mfMaxVal;	
 	}

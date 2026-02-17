@@ -13,6 +13,7 @@ public:
 
 	void	RegisterValueUpdateHandler( fnValueUpdateCallback func ) { mValueUpdateFunc = func; }
 	void	SetRangeLimit( float min, float max ) { mfInitialMinVal = min; mfInitialMaxVal = max; }
+	void	AllowRangeExpand( BOOL bFlag ) { mbAllowRangeExpand = bFlag; }
 	void	ShowCurrentValueIndicator( BOOL bFlag ) { mbShowCurrentValueIndicator = bFlag; }
 
 	virtual float		OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bByUserEditFlag );		// Triggered by (e.g) child text boxes when a new value is entered there directly
@@ -43,6 +44,7 @@ private:
 	float				mfMinStep = 0.1f;
 	uint32				mulUserParam = 0;
 	BOOL				mbIsHeld = FALSE;
+	BOOL				mbAllowRangeExpand = TRUE;
 	BOOL				mbShowCurrentValueIndicator = TRUE;
 	std::string			mText;
 
