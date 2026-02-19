@@ -11,7 +11,8 @@ bool pcmBufDrained = false; // Buffer drained by visualization thread and holds 
 signed int pcmLen = 0; // Actual number of samples the buffer holds. Can be less than SAMPLE_SIZE_LPB
 signed int pcmPos = 0; // Position to write new data
 
-void ResetAudioBuf() {
+void ResetAudioBuf() 
+{
     std::unique_lock<std::mutex> lock(pcmLpbMutex);
     memset(pcmLeftLpb, 0, SAMPLE_SIZE_LPB);
     memset(pcmRightLpb, 0, SAMPLE_SIZE_LPB);
@@ -19,7 +20,8 @@ void ResetAudioBuf() {
     pcmLen = 0;
 }
 
-bool GetAudioBuf(unsigned char *pWaveL, unsigned char *pWaveR, int SamplesCount) {
+bool GetAudioBuf(unsigned char *pWaveL, unsigned char *pWaveR, int SamplesCount) 
+{
     std::unique_lock<std::mutex> lock(pcmLpbMutex);
     if ((pcmLen < SamplesCount) || (pcmBufDrained)) {
         // Buffer underrun. Insufficient new samples in circular buffer (pcmLeftLpb, pcmRightLpb)
@@ -39,7 +41,8 @@ bool GetAudioBuf(unsigned char *pWaveL, unsigned char *pWaveR, int SamplesCount)
     }
 }
 
-int8_t FltToInt(float flt) {
+int8_t FltToInt(float flt) 
+{
     if (flt >= 1.0f) {
         return +127; // 0x7f
     }
@@ -57,7 +60,8 @@ union u_type
     uint8_t Bytes[4];
 };
 
-int8_t GetChannelSample(const BYTE *pData, int BlockOffset, int ChannelOffset, const bool bInt16) {
+int8_t GetChannelSample(const BYTE *pData, int BlockOffset, int ChannelOffset, const bool bInt16) 
+{
     u_type sample;
 
     sample.IntVar = 0;
@@ -86,7 +90,8 @@ int8_t GetChannelSample(const BYTE *pData, int BlockOffset, int ChannelOffset, c
 //   pwfx->nBlockAlign;        /* ANY block size of data */
 //   pwfx->wBitsPerSample;     /* 16 or 32 number of bits per sample of mono data */
 
-void SetAudioBuf(const BYTE *pData, const UINT32 nNumFramesToRead, const WAVEFORMATEX *pwfx, const bool bInt16) {
+void SetAudioBuf(const BYTE *pData, const UINT32 nNumFramesToRead, const WAVEFORMATEX *pwfx, const bool bInt16)
+{
     int BlockOffset;
 
     int8_t LeftSample8;
@@ -102,41 +107,55 @@ void SetAudioBuf(const BYTE *pData, const UINT32 nNumFramesToRead, const WAVEFOR
 
     int start = 0;
     int len = 0;
-    if (nNumFramesToRead >= SAMPLE_SIZE_LPB) {
+
+	float	fInputSampleStride = 1.0f;
+
+	if ( pwfx->nSamplesPerSec > 48000 )
+	{
+		fInputSampleStride = pwfx->nSamplesPerSec / 48000;
+	}
+
+	// If we've got more frames than we've got space for, read the last SAMPLE_SIZE_LPB's worth
+    if (nNumFramesToRead >= SAMPLE_SIZE_LPB) 
+	{
         n = 0;
-        start = nNumFramesToRead - SAMPLE_SIZE_LPB;
         len = SAMPLE_SIZE_LPB;
     }
-    else {
+    else 
+	{
         n = SAMPLE_SIZE_LPB - nNumFramesToRead;
-        start = 0;
         len = nNumFramesToRead;
     }
 
-    for (int i = start; i < len; i++, n++) {
-        BlockOffset = i * pwfx->nBlockAlign;
+	float	fInputBlock = 0.0f;
+
+	// Read buffer
+    for ( int i = 0; i < len; i++ ) 
+	{
+		BlockOffset = (int)( fInputBlock ) * pwfx->nBlockAlign;
+		fInputBlock += fInputSampleStride;
 
         // Left channel (number 0)
         LeftSample8 = 0; // Init with silence
-        if (pwfx->nChannels >= 1) {
+        if (pwfx->nChannels >= 1) 
+		{
             LeftSample8 = GetChannelSample(pData, BlockOffset, 0 * (pwfx->wBitsPerSample / 8), bInt16);
         }
 
         // Right channel (number 1)
         RightSample8 = LeftSample8; // Init with left channel value just in case of Mono, 1 channel count
-        if (pwfx->nChannels >= 2) {
+        if (pwfx->nChannels >= 2) 
+		{
             RightSample8 = GetChannelSample(pData, BlockOffset, 1 * (pwfx->wBitsPerSample / 8), bInt16);
         }
-
-        // TODO: add support for 96000 Hz and 192000 Hz sample rates
-
-        // Ignoring data in all other audio channels (Quadraphonic 4.0, Surround 4.0, Surround 5.1, Surround 7.1, ...)
 
         // Saving audio data for visualizer
         // 8-bit signed integer in Two's Complement Representation stored in unsigned char array
         // int8_t[-128 .. + 127] stored into uint8_t[0 .. 255]
         pcmLeftLpb[(pcmPos + n) % SAMPLE_SIZE_LPB] = LeftSample8;
         pcmRightLpb[(pcmPos + n) % SAMPLE_SIZE_LPB] = RightSample8;
+
+		n++;
     }
 
     pcmBufDrained = false;

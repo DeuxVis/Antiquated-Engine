@@ -140,6 +140,14 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 			mpRangeMaxTextBox = UIX::AddTextBox( this, textboxRect, 0, acVal );
 		} 
 		break;
+	case SLIDERMODE_VALUE:
+		{
+			UIXRECT		textboxRect = UIXRECT(0, 0, 60, GetLocalPositionRect().h - 2);
+
+			sprintf(acVal, "%.2f", mfCurrentVal);
+			mpValueTextBox = UIX::AddTextBox(this, textboxRect, 0, acVal);
+		}
+		break;
 	case SLIDERMODE_PLUSMINUS_VALUE:
 		{
 			UIXRECT		textboxRect = UIXRECT(0, 0, 60, GetLocalPositionRect().h - 2);
@@ -475,8 +483,48 @@ uint32		ulCol = 0xf0505070;
 			pInterface->Rect(1, mRenderRect.x + nBarMaxW, mRenderRect.y + mRenderRect.h - 3, 1, 3, 0xa0909090);
 		}
 		break;
-//	case SCALER10:
 	case SLIDERMODE_VALUE:
+		{
+		UIXRECT		drawRect = renderRect;
+		char		acVal[128];
+	
+			drawRect.w = 60;
+			drawRect.y += 1;
+			drawRect.h -= 2;
+
+			sprintf(acVal, "%.3f", mfCurrentVal );
+			mpValueTextBox->SetText(acVal);
+			mpValueTextBox->OnRender(pInterface, drawRect);
+
+			mRenderRect.x += drawRect.w + 5;
+			mRenderRect.w -= drawRect.w + 5;
+
+			drawRect.x += drawRect.w + 5;
+			drawRect.w = mRenderRect.w;
+
+			int		nBarMaxW = drawRect.w;
+			int		nBarW = (int)(((mfCurrentVal-mfMinVal) * nBarMaxW) / (mfMaxVal-mfMinVal));
+			if ( nBarW > nBarMaxW ) nBarW = nBarMaxW;
+			if ( nBarW < 0 ) nBarW = 0;
+
+			// Background
+			pInterface->Rect( 0, drawRect.x, drawRect.y, nBarMaxW, drawRect.h, 0xf0080808 );
+				
+			if ( UIX::IsMouseHover( drawRect ) == TRUE )
+			{
+				UIHoverIDSet( UIX_SLIDER_BAR, 0, GetID() );
+			}
+			// Notches
+			pInterface->Rect( 1, drawRect.x, drawRect.y + drawRect.h - 5, 1, 5, 0xa0909090 );
+			pInterface->Rect( 1, drawRect.x + (nBarMaxW/2), drawRect.y + drawRect.h - 3, 1, 3, 0xa0909090 );
+			pInterface->Rect( 1, drawRect.x + nBarMaxW, drawRect.y + drawRect.h - 5, 1, 5, 0xa0909090 );
+			// Bar
+			pInterface->Rect( 0, drawRect.x, drawRect.y, nBarW, drawRect.h, 0xf0202020 );
+			// Value/Grab bar
+			pInterface->Rect( 0, drawRect.x + nBarW - 2, drawRect.y, 4, drawRect.h, 0xf0505080 );
+		}
+		break;
+//	case SCALER10:
 	default:
 		{
 		int		nBarMaxW = mRenderRect.w;

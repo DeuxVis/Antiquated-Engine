@@ -211,7 +211,9 @@ HRESULT LoopbackCapture(
 
     bool bErrorInAudioData = false;
 
-    for (UINT32 nPasses = 0; !bDone; nPasses++) {
+	// --  Main Audio capture loop ---------------------------------------------------
+    for (UINT32 nPasses = 0; !bDone; nPasses++) 
+	{
         // drain data while it is available
         UINT32 nNextPacketSize;
         for (
@@ -234,11 +236,10 @@ HRESULT LoopbackCapture(
 
             bErrorInAudioData = false;
 
-            if (FAILED(hr)) {
+            if (FAILED(hr)) 
+			{
                 bErrorInAudioData = true;
-#ifdef AUDIO_DEBUG_PRINTS
                 SysDebugPrint( "IAudioCaptureClient::GetBuffer failed on pass %u after %u frames: hr = 0x%08x", nPasses, *pnFrames, hr);
-#endif
                 return hr;
             }
 
@@ -247,21 +248,23 @@ HRESULT LoopbackCapture(
                 LOG(L"%s", L"Probably spurious glitch reported on first packet");
             } else if (0 != dwFlags) {
                 bErrorInAudioData = true;
-#ifdef AUDIO_DEBUG_PRINTS
+#ifdef AUDIO_DEBUG_WARNING_PRINTS
                 SysDebugPrint( "IAudioCaptureClient::GetBuffer set flags to 0x%08x on pass %u after %u frames", dwFlags, nPasses, *pnFrames);
 #endif
                 //return E_UNEXPECTED;
             }
 
-            if (0 == nNumFramesToRead) {
+            if (0 == nNumFramesToRead)
+			{
                 bErrorInAudioData = true;
-#ifdef AUDIO_DEBUG_PRINTS
+#ifdef AUDIO_DEBUG_WARNING_PRINTS
                 SysDebugPrint( "IAudioCaptureClient::GetBuffer said to read 0 frames on pass %u after %u frames", nPasses, *pnFrames);
 #endif
                 //return E_UNEXPECTED;
             }
 
-            if (bErrorInAudioData) {
+            if (bErrorInAudioData) 
+			{
                 // Glitch in audio detected so we reset audio buffer and avoid writing to the output .wav file
                 ResetAudioBuf();
             }
@@ -270,7 +273,8 @@ HRESULT LoopbackCapture(
                 // Saving audio data for visualizer
                 SetAudioBuf(pData, nNumFramesToRead, pwfx, bInt16);
                 
-                if (NULL != hFile) {
+                if (NULL != hFile) 
+				{
                     // Writing the buffer captured to the output .wav file
                     LONG lBytesToWrite = nNumFramesToRead * nBlockAlign;
 #pragma prefast(suppress: __WARNING_INCORRECT_ANNOTATION, "IAudioCaptureClient::GetBuffer SAL annotation implies a 1-byte buffer")
@@ -284,41 +288,35 @@ HRESULT LoopbackCapture(
             }
 
             hr = pAudioCaptureClient->ReleaseBuffer(nNumFramesToRead);
-            if (FAILED(hr)) {
-#ifdef AUDIO_DEBUG_PRINTS
-                SysDebugPrint( "IAudioCaptureClient::ReleaseBuffer failed on pass %u after %u frames: hr = 0x%08x", nPasses, *pnFrames, hr);
-#endif
+            if (FAILED(hr)) 
+			{
+                SysDebugPrint( "IAudioCaptureClient::ReleaseBuffer failed on pass %u after %u frames: hr = 0x%08x. Stopping capture.", nPasses, *pnFrames, hr);
                 return hr;
             }
 
             bFirstPacket = false;
         }
 
-        if (FAILED(hr)) {
-#ifdef AUDIO_DEBUG_PRINTS
-            SysDebugPrint( "IAudioCaptureClient::GetNextPacketSize failed on pass %u after %u frames: hr = 0x%08x", nPasses, *pnFrames, hr);
-#endif
+        if (FAILED(hr)) 
+		{
+		    SysDebugPrint( "IAudioCaptureClient::GetNextPacketSize failed on pass %u after %u frames: hr = 0x%08x. Stopping capture.", nPasses, *pnFrames, hr);
             return hr;
         }
 
-        dwWaitResult = WaitForMultipleObjects(
-            ARRAYSIZE(waitArray), waitArray,
-            FALSE, INFINITE
-        );
+		// Wait for timer or exit
+        dwWaitResult = WaitForMultipleObjects( ARRAYSIZE(waitArray), waitArray, FALSE, INFINITE );
 
-        if (WAIT_OBJECT_0 == dwWaitResult) {
+        if (WAIT_OBJECT_0 == dwWaitResult) 
+		{
             SysDebugPrint("Received stop event after %u passes and %u frames", nPasses, *pnFrames);
             bDone = true;
             continue; // exits loop
         }
-
-//        if (WAIT_OBJECT_0 + 1 != dwWaitResult) {
-//            ERR(L"Unexpected WaitForMultipleObjects return value %u on pass %u after %u frames", dwWaitResult, nPasses, *pnFrames);
-//            return E_UNEXPECTED;
-//        }
     } // capture loop
-
-    if (NULL != hFile) {
+   
+	// Close up file if we were recording
+	if (NULL != hFile) 
+	{
         hr = FinishWaveFile(hFile, &ckData, &ckRIFF);
         if (FAILED(hr)) {
             // FinishWaveFile does it's own logging
