@@ -1,6 +1,7 @@
 
 #include "../LibCode/Engine/DirectX/EngineDX.h"
 #include <map>
+#include <vector>
 #include "StandardDef.h"
 #include "Engine.h"
 
@@ -52,6 +53,8 @@ public:
 	eSpriteGroupRenderFlags	mRenderFlags;
 	Sprite*				mpSpriteList;
 	SpriteGroup*		mpNext;
+private:
+	void		ApplyRenderFlags();
 };
 
 SpriteGroup*		mspSpriteGroups = NULL;
@@ -65,6 +68,52 @@ VECT		maxCamFacingSpriteOffsets[6];
 VECT		maxFlatSpriteOffsets[6];
 VECT		maxXAxisSpriteOffsets[6];
 VECT		maxYAxisSpriteOffsets[6];
+
+std::vector<Sprite*>		msSprite3dFreeList;
+
+int		mSpriteBufferSize = 0;
+
+void	 Sprites3dBufferExpand( int nExpandAmount )
+{
+int		nCurrentSize = msSprite3dFreeList.capacity();
+
+	mSpriteBufferSize += nExpandAmount;
+	msSprite3dFreeList.reserve(nCurrentSize + nExpandAmount);
+	for( int loop = 0; loop < nExpandAmount; loop++ )	
+	{
+		msSprite3dFreeList.push_back( new Sprite );
+	}
+}
+
+Sprite* Sprites3dGetFreeSprite()
+{
+	Sprite* pSprite = NULL;
+	if (msSprite3dFreeList.size() == 0 )
+	{
+		Sprites3dBufferExpand(16384);
+	}
+
+	if (msSprite3dFreeList.size() > 0)
+	{
+		pSprite = msSprite3dFreeList.back();
+		msSprite3dFreeList.pop_back();
+	}
+	return(pSprite);
+}
+
+void Sprites3dReleaseSprite( Sprite* pSprite )
+{
+	msSprite3dFreeList.push_back( pSprite );
+}
+
+void	Sprites3dBufferDeleteAll()
+{
+	for (Sprite* pSprite : msSprite3dFreeList)
+	{
+		delete pSprite;
+	}
+	msSprite3dFreeList.clear();
+}
 
 
 void	Sprite::RenderRotSoftEdges( MultiVertexBuffers* pxDrawBuffer, float fGridScale, eSpriteGroupRenderFlags nRenderFlags )
@@ -448,6 +497,57 @@ VECT*		pxSpriteOffsets = maxCamFacingSpriteOffsets;
 }
 
 //-----------------------------------------------------------------------------
+void	SpriteGroup::ApplyRenderFlags(  )
+{
+	if ( mRenderFlags & kSpriteRender_Subtractive )
+	{
+		if ( mRenderFlags & kSpriteRender_ColourBlend )
+		{
+			if ( mRenderFlags & kSpriteRender_IncAlpha)
+			{
+				EngineSetBlendMode( BLEND_MODE_COLOUR_SUBTRACTIVE_ALPHA );				
+			}
+			else
+			{
+				EngineSetBlendMode( BLEND_MODE_COLOUR_SUBTRACTIVE );		
+			}
+		}
+		else
+		{
+			EngineSetBlendMode( BLEND_MODE_ALPHA_SUBTRACTIVE );
+		}
+	}
+	else if ( mRenderFlags & kSpriteRender_Additive )
+	{
+		if ( mRenderFlags & kSpriteRender_ColourBlend )
+		{
+			EngineSetBlendMode( BLEND_MODE_COLOUR_ADDITIVE );		
+		}
+		else
+		{
+			EngineSetBlendMode( BLEND_MODE_SRCALPHA_ADDITIVE );
+		}
+	}
+	else if ( mRenderFlags & kSpriteRender_ColourBlend )
+	{
+		if ( mRenderFlags & kSpriteRender_IncAlpha)
+		{
+			EngineSetBlendMode( BLEND_MODE_COLOUR_BOTHALPHA );		
+		}
+		else
+		{
+			EngineSetBlendMode( BLEND_MODE_COLOUR_BLEND );
+		}
+	}
+	else if ( mRenderFlags & kSpriteRender_SingleColTexAlpha )
+	{
+		EngineSetBlendMode( BLEND_MODE_COLOUR_INVALPHA );
+	}
+	else
+	{
+		EngineSetBlendMode( BLEND_MODE_ALPHABLEND );
+	}
+}
 
 void	SpriteGroup::Render( void )
 {
@@ -461,54 +561,8 @@ Sprite*		pNext;
 		EngineSetColourMode( 0, COLOUR_MODE_TEXTURE_MODULATE );
 		EngineSetTexture( 0, mhTexture );
 
-		if ( mRenderFlags & kSpriteRender_Subtractive )
-		{
-			if ( mRenderFlags & kSpriteRender_ColourBlend )
-			{
-				if ( mRenderFlags & kSpriteRender_IncAlpha)
-				{
-					EngineSetBlendMode( BLEND_MODE_COLOUR_SUBTRACTIVE_ALPHA );				
-				}
-				else
-				{
-					EngineSetBlendMode( BLEND_MODE_COLOUR_SUBTRACTIVE );		
-				}
-			}
-			else
-			{
-				EngineSetBlendMode( BLEND_MODE_ALPHA_SUBTRACTIVE );
-			}
-		}
-		else if ( mRenderFlags & kSpriteRender_Additive )
-		{
-			if ( mRenderFlags & kSpriteRender_ColourBlend )
-			{
-				EngineSetBlendMode( BLEND_MODE_COLOUR_ADDITIVE );		
-			}
-			else
-			{
-				EngineSetBlendMode( BLEND_MODE_SRCALPHA_ADDITIVE );
-			}
-		}
-		else if ( mRenderFlags & kSpriteRender_ColourBlend )
-		{
-			if ( mRenderFlags & kSpriteRender_IncAlpha)
-			{
-				EngineSetBlendMode( BLEND_MODE_COLOUR_BOTHALPHA );		
-			}
-			else
-			{
-				EngineSetBlendMode( BLEND_MODE_COLOUR_BLEND );
-			}
-		}
-		else if ( mRenderFlags & kSpriteRender_SingleColTexAlpha )
-		{
-			EngineSetBlendMode( BLEND_MODE_COLOUR_INVALPHA );
-		}
-		else
-		{
-			EngineSetBlendMode( BLEND_MODE_ALPHABLEND );
-		}
+		// Set blend mode
+		ApplyRenderFlags();
 	
 		mxSprites3dBuffers.Lock();
 
@@ -532,7 +586,8 @@ Sprite*		pNext;
 			{
 				pSprites->Render( &mxSprites3dBuffers, mfGridScale, mRenderFlags );
 			}
-			delete pSprites;
+			// Might be wiser to pre-allocate sprites and reuse them rather than delete and re-new every frame, but this is simpler for now
+			Sprites3dReleaseSprite( pSprites );
 			pSprites = pNext;
 		}
 	
@@ -544,7 +599,7 @@ Sprite*		pNext;
 		while( pSprites )
 		{
 			pNext = pSprites->mpNext;
-			delete pSprites;
+			Sprites3dReleaseSprite( pSprites );
 			pSprites = pNext;
 		}			
 	}
@@ -554,6 +609,8 @@ Sprite*		pNext;
 
 
 //-----------------------------------------------------------------------------
+
+
 void Sprites3DInitialiseGraphicsDeviceResources( void )
 {
 	mxSprites3dBuffers.Init( NUM_SPRITE3D_VERTEX_BUFFERS, SPRITE3D_VERTEX_BUFFER_SIZE, "Sprites3d" );
@@ -569,6 +626,7 @@ void Sprites3DReleaseGraphicsDeviceResources( void )
 void Sprites3DInitialise( void )
 {
 	Sprites3DInitialiseGraphicsDeviceResources();
+	Sprites3dBufferExpand( 16384 );
 }
 
 
@@ -586,7 +644,7 @@ SpriteGroup*	pNext;
 	mspSpriteGroups = NULL;
 
 	Sprites3DReleaseGraphicsDeviceResources();
-
+	Sprites3dBufferDeleteAll();
 }
 
 SpriteGroup*	 Sprites3DFindGroup( SPRITE_GROUP hGroupNum )
@@ -666,7 +724,7 @@ SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
 
 	if ( pSpriteGroup )
 	{
-	Sprite*		pSprite = new Sprite;
+	Sprite*		pSprite = Sprites3dGetFreeSprite();
 
 		pSprite->mpNext = pSpriteGroup->mpSpriteList;
 		pSpriteGroup->mpSpriteList = pSprite;
@@ -686,7 +744,7 @@ SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
 
 	if ( pSpriteGroup )
 	{
-	Sprite*		pSprite = new Sprite;
+	Sprite*		pSprite = Sprites3dGetFreeSprite();
 
 		pSprite->mpNext = pSpriteGroup->mpSpriteList;
 		pSpriteGroup->mpSpriteList = pSprite;
@@ -705,7 +763,7 @@ SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
 
 	if ( pSpriteGroup )
 	{
-	Sprite*		pSprite = new Sprite;
+	Sprite*		pSprite = Sprites3dGetFreeSprite();
 
 		pSprite->mpNext = pSpriteGroup->mpSpriteList;
 		pSpriteGroup->mpSpriteList = pSprite;
@@ -725,7 +783,7 @@ SpriteGroup* pSpriteGroup = Sprites3DFindGroup( hGroup );
 
 	if ( pSpriteGroup )
 	{
-	Sprite*		pSprite = new Sprite;
+	Sprite*		pSprite = Sprites3dGetFreeSprite();
 
 		pSprite->mpNext = pSpriteGroup->mpSpriteList;
 		pSpriteGroup->mpSpriteList = pSprite;
