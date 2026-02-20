@@ -38,6 +38,7 @@ public:
 	void	SetRotSpeed( float fRotSpeed ) { mfRotSpeed = fRotSpeed; }
 	void	SetCol( uint32 ulCol ) { mulCol = ulCol; }
 
+	void	SetFadeInTime( float fTimeSecs ) { mfFadeInTime = fTimeSecs; }
 	void	SetSpriteScale( float fScale ) { mfSpriteScale = fScale; }
 	void	SetSpriteAspect( float fAspectRatio ) { mfSpriteAspect = fAspectRatio; }
 	void	SetSpriteFrameNum( int nFrameNum ) { mnSpriteFrameNum = nFrameNum; }
@@ -71,6 +72,7 @@ private:
 	int			mType;
 	uint32		mulCol;
 	float		mfLongevity;
+	float		mfFadeInTime = 0.0f;
 	float		mfSpriteScale;
 	float		mfSpriteAspect = 1.0f;
 	float		mfRot = 0.0f;

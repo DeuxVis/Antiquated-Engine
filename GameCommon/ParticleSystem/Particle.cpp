@@ -104,8 +104,13 @@ void	Particle::DefaultRender( void )
 				}
 
 				fAlpha = 1.0f;
-		
-				if ( mfTimeAlive > fHalfLife  )
+
+				if ( ( mfFadeInTime > 0.0f ) &&
+					 ( mfTimeAlive < mfFadeInTime ) )
+				{
+					fAlpha = mfTimeAlive / mfFadeInTime;				
+				}
+				else if ( mfTimeAlive > fHalfLife  )
 				{	
 					fAlpha = 1.0f - ( ( mfTimeAlive - fHalfLife) / fHalfLife );
 				}

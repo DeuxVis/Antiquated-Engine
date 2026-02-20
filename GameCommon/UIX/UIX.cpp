@@ -62,13 +62,23 @@ UIXObject::~UIXObject()
 
 void	UIXObject::SelectObject( int nButtonID, uint32 ulParam )
 {
-	// HACK: If OnSelected returns false it indicates it may have deleted the object we were using
-	//  so we don't do any further callbacks now. This is unpleasant - needs refactoring
-	if ( OnSelected( nButtonID, ulParam ) )
+	if ( nButtonID == UIX_RIGHT_CLICK_SELECT )
 	{
-		if ( mfnSelectedCallback )
+		if ( mfnRightClickSelectedCallback )
 		{
-			mfnSelectedCallback( this, mulSelectParam );
+			mfnRightClickSelectedCallback( this, mulRightClickSelectParam );
+		}	
+	}
+	else
+	{
+		// HACK: If OnSelected returns false it indicates it may have deleted the object we were using
+		//  so we don't do any further callbacks now. This is unpleasant - needs refactoring
+		if ( OnSelected( nButtonID, ulParam ) )
+		{
+			if ( mfnSelectedCallback )
+			{
+				mfnSelectedCallback( this, mulSelectParam );
+			}
 		}
 	}
 }
@@ -586,6 +596,8 @@ void		UIX::Initialise( int mode )
 	UIRegisterButtonPressHandler( UIX_MENU_ITEM, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_POPUP_MENU_ITEM, ButtonPressHandler );
 	UIRegisterButtonPressHandler( UIX_TAB_SELECT, ButtonPressHandler );
+	UIRegisterButtonPressHandler( UIX_RIGHT_CLICK_SELECT, ButtonPressHandler );
+	
 			
 	UIRegisterHoldHandler( UIX_SLIDER_BAR, SliderHoldHandler );
 	UIRegisterHoldHandler( UIX_SLIDER_BAR_MINRANGE, SliderHoldHandler );

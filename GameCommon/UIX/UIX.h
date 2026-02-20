@@ -47,6 +47,7 @@ enum
 	UIX_BUTTON,
 	UIX_POPUP_MENU_ITEM,
 	UIX_CUSTOM_RENDER,
+	UIX_RIGHT_CLICK_SELECT,
 };
 
 enum eUIXBUTTON_MODE
@@ -165,10 +166,13 @@ public:
 	virtual float		OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bByUserEditFlag ) { return( fNewValue ); }
 	
 	bool				HasSelectionCallback() { return( mfnSelectedCallback != NULL ); }
+	bool				HasRightClickSelectionCallback() { return( mfnRightClickSelectedCallback != NULL ); }
 	bool				HasChildren() const { return( mContainsList.size() > 0 ); }
 	bool				DoesContainObjectID( uint32 ulUIXID ) const;
 	UIXObject*			GetParent() const { return(mpParent); }
 	virtual int			GetScrollPosition() { return( 0 ); }
+
+	void				SetRightClickSelectedCallback(fnSelectedCallback  callbackFunc, uint32 ulSelectParam) { mfnRightClickSelectedCallback = callbackFunc; mulRightClickSelectParam = ulSelectParam; }
 
 	// For custom drag activation
 	void				ActivateDragHold(UIXRECT rect, uint32 ulDragParam);
@@ -203,7 +207,6 @@ protected:
 	virtual int		GetSelectionPriorityLayer() { return(0); }
 
 	void		SetSelectedCallback(fnSelectedCallback callbackFunc, uint32 ulSelectParam) { mfnSelectedCallback = callbackFunc; mulSelectParam = ulSelectParam; }
-
 	//---------DRAG N DROP-------- Things for the uix object type to implement to support drag n drop
 	// ******************************
 	// DRAG an item:
@@ -264,7 +267,9 @@ private:
 	UIXObject*		mpParent;
 	fnSelectedCallback	mfnSelectedCallback = NULL;
 	uint32				mulSelectParam = 0;
-
+	fnSelectedCallback	mfnRightClickSelectedCallback = NULL;
+	uint32				mulRightClickSelectParam = 0;
+	
 	//--------------------  Drag n drop stuff
 	// todo - this stuff could probably be standardised into some form of standard draggable object
 

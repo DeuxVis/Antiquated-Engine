@@ -7,6 +7,7 @@
 #include "EngineDX.h"
 #include "../../../Include/DirectX/d3dx9shader.h"
 
+#include <map>
 #include <StandardDef.h>
 #include <Rendering.h>
 #include <Interface.h>
@@ -109,38 +110,19 @@ typedef struct
 */
 
 
+std::map<int, EngineVertBuffContainer*>		mVertBufferMap;
+std::map<int, EngineIndexBuffContainer*>	mIndexBufferMap;
 
 
 EngineVertBuffContainer*		EngineVertexBufferGetContainer( int hVertBuffer )
 {
-EngineVertBuffContainer*	pVertBuff = m_spEngineVertBuffList;
-		
-	// Could do with optimising this - shouldnt have to walk a list every time
-	while ( pVertBuff )
-	{
-		if( pVertBuff->m_nHandle == hVertBuffer )
-		{
-			return( pVertBuff );
-		}
-		pVertBuff = pVertBuff->mpxNext;
-	}
-	return( NULL );
+	return( mVertBufferMap[hVertBuffer] );
 }
 
 
 EngineIndexBuffContainer*		EngineIndexBufferGetContainer( int hIndexBuffer )
 {
-EngineIndexBuffContainer*	pIndexBuff = m_spEngineIndexBuffList;
-		
-	while ( pIndexBuff )
-	{
-		if( pIndexBuff->m_nHandle == hIndexBuffer )
-		{
-			return( pIndexBuff );
-		}
-		pIndexBuff = pIndexBuff->mpxNext;
-	}
-	return( NULL );
+	return( mIndexBufferMap[hIndexBuffer] );
 }
 
 
@@ -163,6 +145,7 @@ EngineIndexBuffContainer*		pIndexBuffContainer = new EngineIndexBuffContainer;
 		pIndexBuffContainer->m_nHandle = newHandle;
 		pIndexBuffContainer->mpxNext = m_spEngineIndexBuffList;
 		m_spEngineIndexBuffList = pIndexBuffContainer;
+		mIndexBufferMap[newHandle] = m_spEngineIndexBuffList;
 		return( newHandle );
 	}
 	return( NOTFOUND );
@@ -241,6 +224,9 @@ void			EngineIndexBufferFree( INDEX_BUFFER_HANDLE hIndexBuffer )
 			}
 		}
 
+		mIndexBufferMap[hIndexBuffer] = NULL;
+		mIndexBufferMap.erase(hIndexBuffer);
+
 		// Now remove indexbuffercontainer from list
 		EngineIndexBuffContainer*		pContainers = m_spEngineIndexBuffList;
 		EngineIndexBuffContainer*		pLast = NULL;
@@ -307,6 +293,7 @@ EngineVertBuffContainer*		pVertBuffContainer = new EngineVertBuffContainer;
 	    {
 			pVertBuffContainer->nBufferSize = nMaxVertices;
 			msnNumberOfVertexBuffersCreated++;
+			mVertBufferMap[newHandle] = pVertBuffContainer;
 			return( newHandle );
 		}
 	}
@@ -804,6 +791,8 @@ void		EngineVertexBufferFree( VERTEX_BUFFER_HANDLE nHandle )
 				}
 				delete pVertBuffContainer;
 				msnNumberOfVertexBuffersCreated--;
+				mVertBufferMap[nHandle] = NULL;
+				mVertBufferMap.erase(nHandle);
 				return;
 			}
 			else

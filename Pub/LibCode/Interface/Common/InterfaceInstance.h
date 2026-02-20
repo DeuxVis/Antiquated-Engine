@@ -132,8 +132,8 @@ protected:
 	int		mnRenderSurfaceWidth = 900;
 	int		mnRenderSurfaceHeight = 700;  
 	BOOL	mboTextureFilteringCurrentState = FALSE;
-	int		mnWindowWidth = 700;
-	int		mnWindowHeight = 600;
+	int		mnWindowWidth = 960;
+	int		mnWindowHeight = 540;
 	int		mnWindowLeft = 100;
 	int		mnWindowTop = 100;
 	float	mfInterfaceFPS = 0.0f;

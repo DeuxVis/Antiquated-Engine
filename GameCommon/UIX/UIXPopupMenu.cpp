@@ -149,6 +149,11 @@ int			nHeightUsed = lineRect.h;
 				ulTextCol = 0xe0e0e0e0;
 
 				UIX::CheckForPress( this, selectRect, UIX_POPUP_MENU_ITEM, 0 );
+
+				if ( HasRightClickSelectionCallback() )
+				{
+					UIX::CheckForRightButtonPress(this, selectRect, UIX_RIGHT_CLICK_SELECT, 0);
+				}
 			}
 		}
 		else if ( HasChildren() )

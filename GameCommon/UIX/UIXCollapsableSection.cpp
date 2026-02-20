@@ -70,6 +70,11 @@ BOOL	bMouseIsOverSectionHeader = FALSE;
 	{
 		UIHoverIDSet( UIX_COLLAPSABLE_SECTION_HEADER, 0, GetID() );
 		bMouseIsOverSectionHeader = TRUE;
+		
+		if ( HasRightClickSelectionCallback() )
+		{
+			UIX::CheckForRightButtonPress(this, UIXRECT(X, Y, nHeaderW, headerH), UIX_RIGHT_CLICK_SELECT, 0);
+		}	
 	}
 
 //	UIButtonRegion( UIX_COLLAPSABLE_SECTION_HEADER, X, Y, W, headerH, GetID() );
