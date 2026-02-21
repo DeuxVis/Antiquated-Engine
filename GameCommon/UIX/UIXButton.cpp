@@ -124,6 +124,10 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 			{
 				UIX::CheckForRightButtonPress( this, drawRect, mulRightPressButtonID, mulRightPressButtonParam );	
 			}
+			if ( HasRightClickSelectionCallback() )
+			{
+				UIX::CheckForRightButtonPress(this, drawRect, UIX_RIGHT_CLICK_SELECT, 0);
+			}	
 		}
 		break;
 	case UIXBUTTON_IMAGE_PATH:
@@ -151,6 +155,10 @@ UIXRECT		drawRect = GetActualRenderRect( displayRect );
 				pInterface->Rect( 1, drawRect.x, drawRect.y, drawRect.w, drawRect.h, 0x20FFFFFF );				
 			}
 		}
+		if ( HasRightClickSelectionCallback() )
+		{
+			UIX::CheckForRightButtonPress(this, drawRect, UIX_RIGHT_CLICK_SELECT, 0);
+		}	
 		break;
 	case UIXBUTTON_IMAGE:
 		if ( mfnDynamicButtonImageHandler != NULL )

@@ -38,6 +38,7 @@ int							UIX::msPressedSelectionPriority = 0;
 int							UIX::msMouseWheelHoverPriority = 0;
 int							UIX::mshUIXIconOverlays[MAX_NUM_UIX_ICONS] = { NOTFOUND };
 int							UIX::mshUIXIconsList[MAX_NUM_UIX_ICONS] = { NOTFOUND };
+std::string					UIX::msDragText;
 
 
 uint32						UIX::msDragSourceParam = 0;
@@ -736,12 +737,19 @@ void			UIX::DrawIcon( InterfaceInstance* pInterface, int iconNum, UIXRECT rect, 
 		 ( iconNum < MAX_NUM_UIX_ICONS ) )
 	{
 	int		nIconPageNum = iconNum / 36;
+	iconNum %= 36;
+	float	fU = ((iconNum%6) * 19.0f) / 128.0f;
+	float	fV = ((iconNum/6) * 19.0f) / 128.0f;
+	float	fUW = 19.0f / 128.0f;
+	float	fVH = 19.0f / 128.0f;
 	
-		iconNum %= 36;
-		float	fU = ((iconNum%6) * 19.0f) / 128.0f;
-		float	fV = ((iconNum/6) * 19.0f) / 128.0f;
-		float	fUW = 19.0f / 128.0f;
-		float	fVH = 19.0f / 128.0f;
+		if ( nIconPageNum > 0 )
+		{
+			fU = 0.0f;
+			fV = 0.0f;
+			fUW = 1.0f;
+			fVH = 1.0f;
+		}
 
 		if ( mshUIXIconOverlays[nIconPageNum] == NOTFOUND )
 		{
@@ -930,11 +938,11 @@ UIXListBox*		pNewListbox = new UIXListBox( pxContainer, msulNextObjectID++, rect
 	return( pNewListbox );
 }
 
-UIXSlider*			UIX::AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitial, float fMinStep, const char* szText )
+UIXSlider*			UIX::AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitial, float fMinStep, const char* szText, BOOL bShowTextBoxes )
 {
 UIXSlider*		pNewSlider = new UIXSlider( pxContainer, msulNextObjectID++, rect );
 
-	pNewSlider->Initialise( mode, ulUserParam, fMin, fMax, fInitial, fMinStep, szText );
+	pNewSlider->Initialise( mode, ulUserParam, fMin, fMax, fInitial, fMinStep, szText, bShowTextBoxes );
 	pxContainer->mContainsList.push_back( pNewSlider );
 	return( pNewSlider );
 }

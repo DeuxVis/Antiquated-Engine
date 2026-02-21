@@ -105,7 +105,7 @@ float	UIXSlider::OnValueChange( UIXObject* pxSourceObj, float fNewValue, BOOL bF
 	return( fNewValue );
 }
 
-void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitialVal, float fMinStep, const char* szText )
+void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin, float fMax, float fInitialVal, float fMinStep, const char* szText, BOOL bShowTextBoxes )
 {
 	mfMinVal = fMin;
 	mfMaxVal = fMax;
@@ -116,6 +116,7 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 	mfMinStep = fMinStep;
 	mMode = mode;
 	mulUserParam = ulUserParam;
+	mbShowValueTextBoxes = bShowTextBoxes;
 	if ( szText )
 	{
 		mText = szText;
@@ -127,6 +128,7 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 	{
 	case SLIDERMODE_VALUE_WITH_CONSTRAINTS:
 	case SLIDERMODE_VALUERANGE:
+		if ( mbShowValueTextBoxes )
 		{
 		int		nTextSectionW = 120;
 		int		nTextBoxW = (nTextSectionW / 2) - 8;
@@ -141,6 +143,7 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 		} 
 		break;
 	case SLIDERMODE_VALUE:
+		if ( mbShowValueTextBoxes )
 		{
 			UIXRECT		textboxRect = UIXRECT(0, 0, 60, GetLocalPositionRect().h - 2);
 
@@ -149,6 +152,7 @@ void	UIXSlider::Initialise( UIX_SLIDER_MODE mode, uint32 ulUserParam, float fMin
 		}
 		break;
 	case SLIDERMODE_PLUSMINUS_VALUE:
+		if ( mbShowValueTextBoxes )
 		{
 			UIXRECT		textboxRect = UIXRECT(0, 0, 60, GetLocalPositionRect().h - 2);
 
@@ -257,13 +261,20 @@ uint32		ulCol = 0xf0505070;
 			drawRect.y += 1;
 			drawRect.h -= 2;
 
-			sprintf( acVal, "%.3f", mfMinVal );
-			mpRangeMinTextBox->SetText( acVal );
-			mpRangeMinTextBox->OnRender( pInterface, drawRect );
-			pInterface->Text( 1, drawRect.x + nTextBoxW + 4, drawRect.y + 4, ulTextCol, 3, "-" );
-			sprintf( acVal, "%.3f", mfMaxVal );
-			mpRangeMaxTextBox->SetText( acVal );
-			mpRangeMaxTextBox->OnRender( pInterface, drawRect );
+			if ( mpRangeMinTextBox )
+			{
+				sprintf( acVal, "%.3f", mfMinVal );
+				mpRangeMinTextBox->SetText( acVal );
+				mpRangeMinTextBox->OnRender( pInterface, drawRect );
+				pInterface->Text( 1, drawRect.x + nTextBoxW + 4, drawRect.y + 4, ulTextCol, 3, "-" );
+			}
+
+			if ( mpRangeMaxTextBox )
+			{
+				sprintf( acVal, "%.3f", mfMaxVal );
+				mpRangeMaxTextBox->SetText( acVal );
+				mpRangeMaxTextBox->OnRender( pInterface, drawRect );
+			}
 
 			int		nMinBarPos = (int)(((mfMinVal-mfInitialMinVal) * nBarMaxW) / (mfInitialMaxVal-mfInitialMinVal));
 			int		nMaxBarPos = (int)(((mfMaxVal-mfInitialMinVal) * nBarMaxW) / (mfInitialMaxVal-mfInitialMinVal));
@@ -325,13 +336,21 @@ uint32		ulCol = 0xf0505070;
 			drawRect.y += 1;
 			drawRect.h -= 2;
 
-			sprintf( acVal, "%.3f", mfMinVal );
-			mpRangeMinTextBox->SetText( acVal );
-			mpRangeMinTextBox->OnRender( pInterface, drawRect );
-			pInterface->Text( 1, drawRect.x + nTextBoxW + 4, drawRect.y + 4, ulTextCol, 3, "-" );
-			sprintf( acVal, "%.3f", mfMaxVal );
-			mpRangeMaxTextBox->SetText( acVal );
-			mpRangeMaxTextBox->OnRender( pInterface, drawRect );
+			if ( mpRangeMinTextBox )
+			{
+				sprintf( acVal, "%.3f", mfMinVal );
+				mpRangeMinTextBox->SetText( acVal );
+				mpRangeMinTextBox->OnRender( pInterface, drawRect );
+
+				pInterface->Text( 1, drawRect.x + nTextBoxW + 4, drawRect.y + 4, ulTextCol, 3, "-" );
+			}
+
+			if ( mpRangeMaxTextBox )
+			{
+				sprintf( acVal, "%.3f", mfMaxVal );
+				mpRangeMaxTextBox->SetText( acVal );
+				mpRangeMaxTextBox->OnRender( pInterface, drawRect );
+			}
 
 			int		nBarMaxW = renderRect.w - nTextAreaW;
 			int		nMinBarPos = (int)(((mfMinVal-mfInitialMinVal) * nBarMaxW) / (mfInitialMaxVal-mfInitialMinVal));
@@ -449,9 +468,12 @@ uint32		ulCol = 0xf0505070;
 			drawRect.y += 1;
 			drawRect.h -= 2;
 
-			sprintf(acVal, "%.3f", mfCurrentVal );
-			mpValueTextBox->SetText(acVal);
-			mpValueTextBox->OnRender(pInterface, drawRect);
+			if ( mpValueTextBox )
+			{
+				sprintf(acVal, "%.3f", mfCurrentVal );
+				mpValueTextBox->SetText(acVal);
+				mpValueTextBox->OnRender(pInterface, drawRect);
+			}
 			
 			mRenderRect.x += 60;
 			mRenderRect.w -= 60;
@@ -488,19 +510,21 @@ uint32		ulCol = 0xf0505070;
 		UIXRECT		drawRect = renderRect;
 		char		acVal[128];
 	
-			drawRect.w = 60;
 			drawRect.y += 1;
 			drawRect.h -= 2;
 
-			sprintf(acVal, "%.3f", mfCurrentVal );
-			mpValueTextBox->SetText(acVal);
-			mpValueTextBox->OnRender(pInterface, drawRect);
+			if ( mpValueTextBox )
+			{
+				drawRect.w = 60;
+				sprintf(acVal, "%.3f", mfCurrentVal );
+				mpValueTextBox->SetText(acVal);
+				mpValueTextBox->OnRender(pInterface, drawRect);
 
-			mRenderRect.x += drawRect.w + 5;
-			mRenderRect.w -= drawRect.w + 5;
-
-			drawRect.x += drawRect.w + 5;
-			drawRect.w = mRenderRect.w;
+				mRenderRect.x += drawRect.w + 5;
+				mRenderRect.w -= drawRect.w + 5;
+				drawRect.x += drawRect.w + 5;
+				drawRect.w = mRenderRect.w;
+			}
 
 			int		nBarMaxW = drawRect.w;
 			int		nBarW = (int)(((mfCurrentVal-mfMinVal) * nBarMaxW) / (mfMaxVal-mfMinVal));

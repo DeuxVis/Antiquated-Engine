@@ -20,7 +20,7 @@ public:
 protected:
 	UIXSlider( UIXObject* pxParent, uint32 uID, UIXRECT rect ) : UIXObject( pxParent, uID, rect ) {}
 
-	void	Initialise( UIX_SLIDER_MODE mode,uint32 ulUserParam, float fMin, float fMax, float fInitialVal, float fMinStep, const char* szText );
+	void	Initialise( UIX_SLIDER_MODE mode,uint32 ulUserParam, float fMin, float fMax, float fInitialVal, float fMinStep, const char* szText, BOOL bShowValueTextBoxes );
 	
 	void	OnHeldUpdate( BOOL bIsHeld, BOOL bFirstPress );
 	void	OnMinRangeHeldUpdate( BOOL bIsHeld, BOOL bFirstPress );
@@ -45,6 +45,7 @@ private:
 	uint32				mulUserParam = 0;
 	BOOL				mbIsHeld = FALSE;
 	BOOL				mbAllowRangeExpand = TRUE;
+	BOOL				mbShowValueTextBoxes = TRUE;
 	BOOL				mbShowCurrentValueIndicator = TRUE;
 	std::string			mText;
 

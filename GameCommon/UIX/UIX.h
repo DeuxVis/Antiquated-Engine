@@ -25,7 +25,7 @@ class UIXMenu;
 class UIXPopupMenu;
 class UIXTabBar;
 
-#define		MAX_NUM_UIX_ICONS		32
+#define		MAX_NUM_UIX_ICONS		40
 
 enum 
 {
@@ -216,6 +216,7 @@ protected:
 	// - type implementation should update 'SetDraggableRenderRect' (sets the viusal rect that the user can drag)
 	//			(OR : Trigger ActivateDragHold directly if its being fancy)
 	// - in the type's OnRender, render the transparent drag item if ( IsDragHoldActive() && DragHasMoved )
+	// It can also use SetDragText (when hovered) to pass text to the receiver
 	//
 	// DROP an item:  (what a type needs to do to an accept a dragged item)
 	// 	
@@ -309,7 +310,7 @@ public:
 	static UIXButton*					AddButton( UIXObject* pxContainer, UIXRECT rect, eUIXBUTTON_MODE mode, const char* szTitle, uint32 ulButtonID, uint32 ulButtonParam, BOOL IsBlocking = TRUE, uint32 ulCol = 0xD0404040, int iconNum = 0 );
 	static UIXTextBox*					AddTextBox( UIXObject* pxContainer, UIXRECT rect, int mode, const char* szDefaultText );
 	static UIXListBox*					AddListBox( UIXObject* pxContainer, UIXRECT rect, int mode = 0, BOOL bContentsDraggable = FALSE, int dragItemType = 0 );
-	static UIXSlider*					AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode = SLIDERMODE_VALUE, uint32 ulUserParam = 0, float fMin = 0.0f, float fMax = 1.0f, float fInitial = 0.0f, float fMinStep = 0.1f, const char* szText = NULL );
+	static UIXSlider*					AddSlider( UIXObject* pxContainer, UIXRECT rect, UIX_SLIDER_MODE mode = SLIDERMODE_VALUE, uint32 ulUserParam = 0, float fMin = 0.0f, float fMax = 1.0f, float fInitial = 0.0f, float fMinStep = 0.1f, const char* szText = NULL, BOOL bShowTextBoxes = TRUE );
 	static UIXDropdown*					AddDropdown( UIXObject* pxContainer, UIXRECT rect );
 	static UIXText*						AddText( UIXObject* pxContainer, UIXRECT rect, uint32 ulCol = 0xc0c0c0c0, int font = 0, UIX_TEXT_FLAGS fontFlags = NONE,  const char* szTitle = NULL, ... );
 	static UIXShape*					AddShape( UIXObject* pxContainer, UIXRECT rect, int mode = 0, BOOL bBlocks = FALSE, uint32 ulCol1 = 0xC0C0C0C0, uint32 ulCol2 = 0xC0C0C0C0, uint32 ulButtonID = 0, uint32 ulButtonParam = 0 );
@@ -325,6 +326,8 @@ public:
 
 	static void							SetDragItemType( int type, UIXObject* pxFromObject, uint32 param ) { msDragItemType = type; mspDragSource = pxFromObject; msDragSourceParam = param; }
 	static int							GetDragItemType() { return msDragItemType; }
+	static void							SetDragText( const char* szText ) { msDragText = szText; }
+	static const char*					GetDragText() { return msDragText.c_str(); }
 	static uint32						GetDragItemSourceParam() { return msDragSourceParam; }
 	static UIXObject*					GetDragDestinationHover() { return mspDragDestinationHover; }
 	static void							HoverAcceptDragItem( UIXObject* pxObject ) { mspDragDestinationHover = pxObject; }
@@ -373,6 +376,7 @@ private:
 	static int							msMouseWheelHoverPriority;
 	static int					mshUIXIconsList[MAX_NUM_UIX_ICONS];
 	static int					mshUIXIconOverlays[MAX_NUM_UIX_ICONS];
+	static std::string					msDragText;
 };
 
 
