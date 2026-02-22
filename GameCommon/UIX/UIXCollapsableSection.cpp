@@ -84,6 +84,7 @@ BOOL	bMouseIsOverSectionHeader = FALSE;
 		pInterface->Rect( 0, X, Y + headerH, nHeaderW, 2, 0xd08080c0 );	
 		UIX::HoverAcceptDragItem( this );
 	}
+	// TODO - (Optionally) Use the child content height to allow the drag region to cover the whole of the expanded collapsable seciton
 
 	pInterface->Text( 1, X + 20 + nHeaderOffsetX, Y + 4, ulTextCol, 3, mTitle.c_str() );
 

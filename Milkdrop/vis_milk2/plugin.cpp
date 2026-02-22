@@ -1769,7 +1769,7 @@ int CPlugin::AllocateMyDX9Stuff()
 //TODO REIMPLEMENT		    dumpmsg(buf);
 //TODO REIMPLEMENT		    MessageBoxW(GetPluginWindow(), buf, wasabiApiLangString(IDS_MILKDROP_ERROR,title,sizeof(title)), MB_OK|MB_SETFOREGROUND|MB_TOPMOST );
 		    return false;
-				}
+		}
 
 				// Load the FALLBACK shaders...
 				if (!RecompilePShader(m_szDefaultWarpPShaderText, &m_fallbackShaders_ps.warp, SHADER_WARP, true, 2))
@@ -1792,6 +1792,7 @@ int CPlugin::AllocateMyDX9Stuff()
 //TODO REIMPLEMENT						swprintf(buf, wasabiApiLangString(IDS_FAILED_TO_COMPILE_PIXEL_SHADERS_HARDWARE_MIS_REPORT),szSM,PSVersion);
 //TODO REIMPLEMENT					dumpmsg(buf);
 //TODO REIMPLEMENT					MessageBoxW(GetPluginWindow(), buf, wasabiApiLangString(IDS_MILKDROP_ERROR,title,64), MB_OK|MB_SETFOREGROUND|MB_TOPMOST );
+					SysDebugPrint( "Milk Error: Failed to create default PShader" );
 					return false;
 				}
 				if (!RecompileVShader(m_szDefaultWarpVShaderText, &m_fallbackShaders_vs.warp, SHADER_WARP, true))

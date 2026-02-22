@@ -232,8 +232,6 @@ int			baseOccupyHeight;
 			xChildDisplayRect.h -= xRect.h;
 		}
 
-		OnPostChildrenRender( pInterface );
-
 		int presetChildBlockSize = GetLocalPositionRect().h;
 
 		if ( bIncludeChildOccupyHeight )
@@ -263,6 +261,7 @@ int			baseOccupyHeight;
 			xUsedRect.h = baseOccupyHeight;
 			mChildContentsHeight = 0;
 		}
+		OnPostChildrenRender( pInterface );
 	}
 	UIX::msSelectionPriority -= GetSelectionPriorityLayer();
 	return( xUsedRect );
