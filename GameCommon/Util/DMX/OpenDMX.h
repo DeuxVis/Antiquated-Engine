@@ -7,6 +7,10 @@
 //FTDI library
 #include "FTD2XX.H"
 
+//#define INCLUDE_FTD2XX
+
+#ifdef INCLUDE_FTD2XX
+
 //class OpenDMX based on C# code
 class OpenDMX
 {
@@ -48,5 +52,8 @@ private:
 	unsigned long purge_tx; 
 	bool verbose; //controls output. set to true for debugging
 };
+
+
+#endif // #ifdef INCLUDE_FTD2XX
 
 #endif

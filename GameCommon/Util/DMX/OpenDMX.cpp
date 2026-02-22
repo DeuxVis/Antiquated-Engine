@@ -3,6 +3,7 @@
 #include "StandardDef.h"
 #include <iostream>
 
+
 //----------------------------------------------------------------------------------------------------
 // Originally forked from https://github.com/chloelle/DMX_CPP  but basically completely rewritten now
 // 
@@ -14,6 +15,7 @@
 // - Use setDMXValue to set channel values and writeData to send them to the device.
 // - Call Shutdown when finished to close the device and stop the reader thread.
 //----------------------------------------------------------------------------------------------------
+#ifdef INCLUDE_FTD2XX
 
 OpenDMX*	mspSingleton = NULL;
 bool		msbOpenDMXKillThread = false;
@@ -335,3 +337,6 @@ void OpenDMX::printErrorCode( int res )
 	case 18: SysDebugPrint( "FT_OTHER_ERROR" ); break; 
 	}
 }
+
+
+#endif // #ifdef INCLUDE_FTD2XX
