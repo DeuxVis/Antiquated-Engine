@@ -112,7 +112,7 @@ void SetAudioBuf(const BYTE *pData, const UINT32 nNumFramesToRead, const WAVEFOR
 
 	if ( pwfx->nSamplesPerSec > 48000 )
 	{
-		fInputSampleStride = pwfx->nSamplesPerSec / 48000;
+		fInputSampleStride = ((float)pwfx->nSamplesPerSec) / 48000;
 	}
 
 	// If we've got more frames than we've got space for, read the last SAMPLE_SIZE_LPB's worth
