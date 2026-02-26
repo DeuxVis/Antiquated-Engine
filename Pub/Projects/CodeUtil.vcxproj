@@ -113,6 +113,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\LibCode\CodeUtil\Archive.cpp" />
+    <ClCompile Include="..\LibCode\CodeUtil\AsyncFile.cpp" />
     <ClCompile Include="..\LibCode\CodeUtil\StringFunctions.cpp" />
     <ClCompile Include="..\LibCode\CodeUtil\SysCommon.cpp" />
     <ClCompile Include="..\LibCode\CodeUtil\SysProfiling.cpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="..\Include\CodeUtil.h" />
     <ClInclude Include="..\Include\StandardDef.h" />
     <ClInclude Include="..\Include\System.h" />
+    <ClInclude Include="..\LibCode\CodeUtil\AsyncFile.h" />
     <ClInclude Include="..\LibCode\CodeUtil\SysProfiling.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

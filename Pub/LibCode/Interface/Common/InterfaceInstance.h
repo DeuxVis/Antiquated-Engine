@@ -116,7 +116,7 @@ protected:
 	void		SetDevice( void* pDevice );		// oldschool
 	void		CreateD3DInstanceIfNeeded();
 
-	void	 UpdateWindowStyle( HWND hWindow, BOOL boFullScreen );
+	void		UpdateWindowStyle( HWND hWindow, BOOL boFullScreen );
 
 	fnInterfaceCallback	mfnPreDeviceResetCallback = NULL;
 	fnInterfaceCallback	mfnPostDeviceResetCallback = NULL;

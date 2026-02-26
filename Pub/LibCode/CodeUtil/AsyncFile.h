@@ -1,6 +1,7 @@
 #ifndef ANTIQUATED_ASYNC_FILE_H
 #define ANTIQUATED_ASYNC_FILE_H
 
+#ifdef __cplusplus
 
 typedef	void(*fnAsyncFileCallback)( const char* szFilename, BYTE* pbMem, int nMemSize, void* pUserObj );
 
@@ -47,5 +48,8 @@ extern BOOL	SysSelectFolderDialogAsync( const char* szTitle, const char* szRootF
 
 extern void	AsyncCallbacksUpdate();
 extern void AsyncSysShutdown();
+
+#endif // #ifdef __cplusplus
+
 
 #endif

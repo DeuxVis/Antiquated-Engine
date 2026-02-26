@@ -462,4 +462,7 @@ extern void	DebugPrint( int, const char*, ... );
  } RGBQUAD;
  #endif        // ndef WIN32
 
+
+#include "../LibCode/CodeUtil/AsyncFile.h"
+
 #endif

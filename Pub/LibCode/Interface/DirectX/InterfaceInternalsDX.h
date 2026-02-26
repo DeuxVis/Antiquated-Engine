@@ -76,6 +76,7 @@ public:
 	void		SetViewport( int X, int Y, int W, int H );
 	void		SetRenderCanvas();
 	void		CopyRenderCanvasToBackBuffer( int X, int Y, int W, int H );
+	void		SetStandardMaterial( void );
 
 };
 

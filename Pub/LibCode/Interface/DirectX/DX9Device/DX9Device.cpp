@@ -312,7 +312,10 @@ INTERFACE_API void InterfaceSetStandardMaterial( void )
 	mxStandardMat.Emissive.b = 0.0f;
 	mxStandardMat.Emissive.a = 1.0f;
 
-	EngineSetMaterial(&mxStandardMat);
+	 // TODO  ?
+	//	ModelMaterialShaderSetMaterialProperties( (MATERIAL_COLOUR*)&pxMaterial->Diffuse, (MATERIAL_COLOUR*)&pxMaterial->Ambient, (MATERIAL_COLOUR*)&pxMaterial->Specular, (MATERIAL_COLOUR*)&pxMaterial->Emissive, pxMaterial->Power );
+
+	mpLegacyInterfaceD3DDeviceSingleton->SetMaterial((GRAPHICSMATERIAL*)&mxStandardMat);
 }
 
 void InterfaceEnableTextureFiltering( BOOL bFlag )
@@ -404,6 +407,38 @@ void	InterfaceInternalsDX::SetRenderCanvas()
 
 
 
+INTERFACE_API void InterfaceInternalsDX::SetStandardMaterial( void )
+{
+	// Set the RGBA for diffuse reflection.
+	mxStandardMat.Diffuse.r = 1.0f;
+	mxStandardMat.Diffuse.g = 1.0f;
+	mxStandardMat.Diffuse.b = 1.0f;
+	mxStandardMat.Diffuse.a = 1.0f;
+	
+	// Set the RGBA for ambient reflection.
+	mxStandardMat.Ambient.r = 1.0f;
+	mxStandardMat.Ambient.g = 1.0f;
+	mxStandardMat.Ambient.b = 1.0f;
+	mxStandardMat.Ambient.a = 1.0f;
+	
+	// Set the color and sharpness of specular highlights.
+	mxStandardMat.Specular.r = 0.0f;
+	mxStandardMat.Specular.g = 0.0f;
+	mxStandardMat.Specular.b = 0.0f;
+	mxStandardMat.Specular.a = 1.0f;
+	mxStandardMat.Power = 0.0f;
+	
+	// Set the RGBA for emissive color.
+	mxStandardMat.Emissive.r = 0.0f;
+	mxStandardMat.Emissive.g = 0.0f;
+	mxStandardMat.Emissive.b = 0.0f;
+	mxStandardMat.Emissive.a = 1.0f;
+
+	 // TODO  ?
+	//	ModelMaterialShaderSetMaterialProperties( (MATERIAL_COLOUR*)&pxMaterial->Diffuse, (MATERIAL_COLOUR*)&pxMaterial->Ambient, (MATERIAL_COLOUR*)&pxMaterial->Specular, (MATERIAL_COLOUR*)&pxMaterial->Emissive, pxMaterial->Power );
+
+	mpInterfaceD3DDevice->SetMaterial((GRAPHICSMATERIAL*)&mxStandardMat);
+}
 
 void	InterfaceInternalsDX::CopyRenderCanvasToBackBuffer( int X, int Y, int W, int H )
 {
@@ -710,6 +745,8 @@ void	 InterfaceInstance::CreateD3DInstanceIfNeeded()
 	}
 }
 
+
+
 /***************************************************************************
  * Function    : InterfaceInstance::InitD3D
  ***************************************************************************/
@@ -962,7 +999,7 @@ LPGRAPHICSDEVICE	pNewGraphicsDevice;
 				mfnPostDeviceResetCallback( this );
 			}
 		}
-		InterfaceSetStandardMaterial();
+		mpInterfaceInternals->SetStandardMaterial();
 	}
 
 #ifdef TUD9
