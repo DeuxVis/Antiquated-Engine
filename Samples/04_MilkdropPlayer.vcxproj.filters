@@ -2,5 +2,155 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="04_MilkdropPlayer\main.cpp" />
+    <ClCompile Include="..\Milkdrop\audio\audiobuf.cpp">
+      <Filter>Milkdrop\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\audio\guid.cpp">
+      <Filter>Milkdrop\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\audio\log.cpp">
+      <Filter>Milkdrop\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\audio\loopback-capture.cpp">
+      <Filter>Milkdrop\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\audio\prefs.cpp">
+      <Filter>Milkdrop\audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\vis_milk2\dxcontext.cpp">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\vis_milk2\fft.cpp">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\vis_milk2\milkdropfs.cpp">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\vis_milk2\plugin.cpp">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\vis_milk2\pluginshell.cpp">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\vis_milk2\state.cpp">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\vis_milk2\support.cpp">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\vis_milk2\texmgr.cpp">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\vis_milk2\utility.cpp">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-caltab.c">
+      <Filter>Milkdrop\ns-eel2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-cfunc.c">
+      <Filter>Milkdrop\ns-eel2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-compiler.c">
+      <Filter>Milkdrop\ns-eel2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-eval.c">
+      <Filter>Milkdrop\ns-eel2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-lextab.c">
+      <Filter>Milkdrop\ns-eel2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-ram.c">
+      <Filter>Milkdrop\ns-eel2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-yylex.c">
+      <Filter>Milkdrop\ns-eel2</Filter>
+    </ClCompile>
+    <ClCompile Include="04_MilkdropPlayer\MilkPlayer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="GameCommon">
+      <UniqueIdentifier>{f410401f-bd7a-423d-891e-136558c82d10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Milkdrop">
+      <UniqueIdentifier>{cc936cca-a567-41e6-8968-8fbefe410088}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Milkdrop\audio">
+      <UniqueIdentifier>{a8a8ae75-ff38-4049-8da2-a7ba4b55b0ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Milkdrop\ns-eel2">
+      <UniqueIdentifier>{531954d5-01f1-47b2-9998-36e342218936}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Milkdrop\vis_milk2">
+      <UniqueIdentifier>{3cb2e4e0-a34c-4e78-819d-f9bc1beef402}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Milkdrop\audio\audiobuf.h">
+      <Filter>Milkdrop\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\audio\cleanup.h">
+      <Filter>Milkdrop\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\audio\common.h">
+      <Filter>Milkdrop\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\audio\log.h">
+      <Filter>Milkdrop\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\audio\loopback-capture.h">
+      <Filter>Milkdrop\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\audio\prefs.h">
+      <Filter>Milkdrop\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\audio\soundinfo.h">
+      <Filter>Milkdrop\audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\AutoCharFn.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\AutoWide.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\defines.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\dxcontext.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\fft.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\md_defines.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\plugin.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\pluginshell.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\state.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\support.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\texmgr.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\vis_milk2\utility.h">
+      <Filter>Milkdrop\vis_milk2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\ns-eel2\ns-eel.h">
+      <Filter>Milkdrop\ns-eel2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\ns-eel2\ns-eel-addfuncs.h">
+      <Filter>Milkdrop\ns-eel2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Milkdrop\ns-eel2\ns-eel-int.h">
+      <Filter>Milkdrop\ns-eel2</Filter>
+    </ClInclude>
+    <ClInclude Include="04_MilkdropPlayer\MilkPlayer.h" />
   </ItemGroup>
 </Project>

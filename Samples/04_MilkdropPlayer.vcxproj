@@ -72,12 +72,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>..\Exe\</OutDir>
+    <IncludePath>$(DXSDK_DIR)Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>../Pub/Include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -132,7 +133,54 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Milkdrop\audio\audiobuf.cpp" />
+    <ClCompile Include="..\Milkdrop\audio\guid.cpp" />
+    <ClCompile Include="..\Milkdrop\audio\log.cpp" />
+    <ClCompile Include="..\Milkdrop\audio\loopback-capture.cpp" />
+    <ClCompile Include="..\Milkdrop\audio\prefs.cpp" />
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-caltab.c" />
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-cfunc.c" />
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-compiler.c" />
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-eval.c" />
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-lextab.c" />
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-ram.c" />
+    <ClCompile Include="..\Milkdrop\ns-eel2\nseel-yylex.c" />
+    <ClCompile Include="..\Milkdrop\vis_milk2\dxcontext.cpp" />
+    <ClCompile Include="..\Milkdrop\vis_milk2\fft.cpp" />
+    <ClCompile Include="..\Milkdrop\vis_milk2\milkdropfs.cpp" />
+    <ClCompile Include="..\Milkdrop\vis_milk2\plugin.cpp" />
+    <ClCompile Include="..\Milkdrop\vis_milk2\pluginshell.cpp" />
+    <ClCompile Include="..\Milkdrop\vis_milk2\state.cpp" />
+    <ClCompile Include="..\Milkdrop\vis_milk2\support.cpp" />
+    <ClCompile Include="..\Milkdrop\vis_milk2\texmgr.cpp" />
+    <ClCompile Include="..\Milkdrop\vis_milk2\utility.cpp" />
     <ClCompile Include="04_MilkdropPlayer\main.cpp" />
+    <ClCompile Include="04_MilkdropPlayer\MilkPlayer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Milkdrop\audio\audiobuf.h" />
+    <ClInclude Include="..\Milkdrop\audio\cleanup.h" />
+    <ClInclude Include="..\Milkdrop\audio\common.h" />
+    <ClInclude Include="..\Milkdrop\audio\log.h" />
+    <ClInclude Include="..\Milkdrop\audio\loopback-capture.h" />
+    <ClInclude Include="..\Milkdrop\audio\prefs.h" />
+    <ClInclude Include="..\Milkdrop\audio\soundinfo.h" />
+    <ClInclude Include="..\Milkdrop\ns-eel2\ns-eel-addfuncs.h" />
+    <ClInclude Include="..\Milkdrop\ns-eel2\ns-eel-int.h" />
+    <ClInclude Include="..\Milkdrop\ns-eel2\ns-eel.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\AutoCharFn.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\AutoWide.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\defines.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\dxcontext.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\fft.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\md_defines.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\plugin.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\pluginshell.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\state.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\support.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\texmgr.h" />
+    <ClInclude Include="..\Milkdrop\vis_milk2\utility.h" />
+    <ClInclude Include="04_MilkdropPlayer\MilkPlayer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
