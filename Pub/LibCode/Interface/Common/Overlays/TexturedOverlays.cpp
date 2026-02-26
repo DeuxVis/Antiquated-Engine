@@ -1080,8 +1080,6 @@ int		nLoop = 0;
 	return( NOTFOUND );
 }
 
-// Strictly not allowed but i dont care.. lets assume the .cpp is included by the app too
-#include "../../../GameCommon/Util/AsyncFile.h"
 
 BOOL	TexturedOverlays::HasFullyLoaded( int nTextureHandle )
 {
