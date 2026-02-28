@@ -128,6 +128,8 @@ BOOL		UIOnPress( int X, int Y )
 
 BOOL		UIOnReleaseRightButton( int X, int Y )
 {
+BOOL		bRet = FALSE;
+
 	if ( mnUIRightButtonIDPressed != NOTFOUND )
 	{
 		if ( msButtonHandlerList[mnUIRightButtonIDPressed] )
@@ -136,9 +138,12 @@ BOOL		UIOnReleaseRightButton( int X, int Y )
 		}
 		mnUIRightButtonIDPressed = NOTFOUND;
 		mulUIRightButtonIDPressedParam = 0;
-		return( TRUE );
+		bRet = TRUE;
 	}
-	return( FALSE );
+
+	mwUIRightPressX = 0;
+	mwUIRightPressY = 0;
+	return( bRet );
 }
 
 BOOL		UIOnRelease( int X, int Y )

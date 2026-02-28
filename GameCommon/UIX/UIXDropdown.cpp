@@ -45,6 +45,34 @@ void	UIXDropdown::ToggleExpanded()
 
 }
 
+void	UIXDropdown::OnFocusedKeyUp( int keyCode )
+{
+	switch( keyCode )
+	{
+	case KEY_UP_ARROW:
+		if ( mnSelectedIndex > 0 )
+		{
+			SetSelectedElementIndex( mnSelectedIndex - 1 );
+		}
+		else
+		{
+			SetSelectedElementIndex( (int)mDropdownEntries.size() - 1 );
+		}
+		break;
+	case KEY_DOWN_ARROW:
+		if ( mnSelectedIndex < (int)mDropdownEntries.size() - 1 )
+		{
+			SetSelectedElementIndex( mnSelectedIndex + 1 );
+		}
+		else
+		{
+			SetSelectedElementIndex( 0 );
+		}
+		break;
+	}
+
+}
+
 bool	UIXDropdown::OnSelected( int nButtonID, uint32 ulParam)
 {
 	switch( nButtonID )
@@ -76,7 +104,14 @@ UIXRECT		UIXDropdown::OnRender( InterfaceInstance* pInterface, UIXRECT rect )
 UIXRECT		renderRect = GetActualRenderRect( rect );
 UIXRECT		occupyRect = rect;
 
-pInterface->Rect( 1, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0xa0202020 );
+	if ( IsFocusedObject() )
+	{
+		pInterface->Rect( 1, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0xb0303038 );
+	}
+	else
+	{
+		pInterface->Rect( 1, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0xa0202020 );
+	}
 	pInterface->OutlineBox( 1, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0xa0606060 );
 	pInterface->Triangle( 1, renderRect.x + renderRect.w - 9, renderRect.y + 3, renderRect.x + renderRect.w - 3, renderRect.y + 3, renderRect.x + renderRect.w - 6, renderRect.y + 9, 0xA0A0A0A0, 0xA0A0A0A0, 0xA0A0A0A0 );
 
@@ -89,6 +124,8 @@ pInterface->Rect( 1, renderRect.x, renderRect.y, renderRect.w, renderRect.h, 0xa
 //		 ( UIX::GetModalObject() == this ) ) 
 //	{
 		UIX::CheckForPress( this, renderRect, UIX_DROPDOWN_HEADER, 0 );
+		UIX::CheckForRightButtonPress(this, renderRect, UIX_RIGHT_CLICK_SELECT, 0);
+
 //	}
 
 

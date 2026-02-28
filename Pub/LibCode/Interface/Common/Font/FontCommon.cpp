@@ -1742,6 +1742,8 @@ int		nWidth, nHeight;
 float	fSize;
 int		nCount;
 BYTE	cChar;
+	
+	if ( mpFontDefs[nFont] == NULL ) return 0;
 
 	mfCurrentFontGlobalScale = fTextScale;
 	switch( nAlign )

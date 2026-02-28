@@ -59,6 +59,7 @@ extern void		GetCurrentDateTimeString( char* szBufferOut );
 extern void		EnsureFilenameHasExtension(char* acFilename, const char* acExtension);
 extern BOOL		SysFilenameHasExtension( const char* szFilename, const char* szExtension );
 extern void		SysExtractFilenameFromPath( const char* szPath, char* szFilenameOut );
+extern void		SysExtractPathFromFilename( const char* szFilename, char* szPathOut );
 
 
 //------------------------------------------------------------------

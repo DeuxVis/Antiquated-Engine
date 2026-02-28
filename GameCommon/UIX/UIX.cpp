@@ -31,6 +31,8 @@ UIXObject*					UIX::mspDragDestinationHover = NULL;
 UIXObject*					UIX::mspDragSource = NULL;	
 UIXObject*					UIX::mspModalObject = NULL;
 UIXObject*					UIX::mspMousewheelHoverObject = NULL;
+UIXObject*					UIX::mspFocusedSelectionObject = NULL;
+
 UIXObject*					UIX::mspTextEditFocusObject = NULL;
 UIXRECT						UIX::mxActivePageRegion;
 int							UIX::msSelectionPriority = 0;
@@ -69,6 +71,17 @@ void	UIXObject::SelectObject( int nButtonID, uint32 ulParam )
 		{
 			mfnRightClickSelectedCallback( this, mulRightClickSelectParam );
 		}	
+		else
+		{
+			if ( UIX::mspFocusedSelectionObject == this )
+			{
+				UIX::mspFocusedSelectionObject = NULL;
+			}
+			else
+			{
+				UIX::mspFocusedSelectionObject = this;
+			}
+		}
 	}
 	else
 	{
@@ -312,6 +325,11 @@ int		nMouseX, nMouseY;
 	return(UIXRECT(nMouseX - mDragRectMouseOriginal.x, nMouseY - mDragRectMouseOriginal.y, 0, 0) );
 }
 
+BOOL		UIXObject::IsFocusedObject()
+{
+	return (UIX::GetFocusedObject() == this); 
+}
+
 BOOL		UIXObject::DragHasMoved()
 {
 	int	nMouseX, nMouseY;
@@ -463,6 +481,11 @@ uint32	UIX::GetCurrentPressObjectID()
 
 void	UIX::OnKeyUp(int keyCode)
 {
+	if ( mspFocusedSelectionObject )
+	{
+		mspFocusedSelectionObject->OnFocusedKeyUp( keyCode );
+	}
+
 	switch (keyCode)
 	{
 	case KEY_ESCAPE:
@@ -711,6 +734,7 @@ void		UIX::DeleteObject( UIXObject* pObject )
 	if ( mspDragDestinationHover == pObject ) mspDragDestinationHover = NULL;
 	if ( mspTextEditFocusObject == pObject ) mspTextEditFocusObject = NULL;
 	if ( mspMousewheelHoverObject == pObject ) mspMousewheelHoverObject = NULL;
+	if ( mspFocusedSelectionObject == pObject ) mspFocusedSelectionObject = NULL;
 
 	msPagesList.erase( std::remove(msPagesList.begin(), msPagesList.end(), pObject), msPagesList.end() );
 	msComponentIDMap[pObject->GetID()] = NULL;

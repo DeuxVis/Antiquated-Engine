@@ -190,6 +190,7 @@ protected:
 	virtual void		OnCloseAllMenus() {}
 	virtual void		EndEdit() {}
 	virtual void		OnEscape() {}
+	virtual void		OnFocusedKeyUp( int keyCode ) {}
 
 	void		Update( float delta );
 	UIXRECT		Render( InterfaceInstance* pInterface, UIXRECT rect );
@@ -238,6 +239,7 @@ protected:
 	// Core implementations for drag n drop--------------
 	BOOL				IsDraggable() { return(mDragItemType != 0); }
 	BOOL				IsDragHoldActive() { return(mbIsBeingDragged); }
+	BOOL			    IsFocusedObject();
 	BOOL				DragHasMoved();
 	UIXRECT				GetDragOffset();
 	UIXRECT				GetInitialDragRect() const { return(mDragRectOriginal); }
@@ -338,6 +340,7 @@ public:
 	static void							SetTextEditFocus( UIXObject* pObject );
 	static UIXObject*					GetTextEditFocus() { return( mspTextEditFocusObject ); }
 
+	static UIXObject*					GetFocusedObject() { return( mspFocusedSelectionObject ); }
 	static BOOL							IsOffscreen( int x, int y );
 	static BOOL							IsInActivePageRegion( int x, int y );
 	static BOOL							IsRectInActivePageRegion( UIXRECT rect );
@@ -368,6 +371,7 @@ private:
 	static UIXObject*					mspDragSource;
 	static UIXObject*					mspMousewheelHoverObject;
 	static UIXObject*					mspTextEditFocusObject;
+	static UIXObject*					mspFocusedSelectionObject;
 	static uint32						msDragSourceParam ;
 	static UIXObject*					mspModalObject;
 	static UIXRECT						mxActivePageRegion;

@@ -59,6 +59,7 @@ protected:
 
 	virtual void		OnUpdate( float fDelta );
 	virtual bool		OnSelected( int nButtonID, uint32 ulParam);
+	virtual void		OnFocusedKeyUp( int keyCode );
 
 	void			ToggleExpanded(); 
 	

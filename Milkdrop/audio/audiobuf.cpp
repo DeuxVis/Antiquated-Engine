@@ -86,11 +86,11 @@ int8_t GetChannelSample(const BYTE *pData, int BlockOffset, int ChannelOffset, c
 //   32-bit float (4 bytes) PCM
 // Supported audio formats:
 //   pwfx->nChannels;          /* ANY number of channels (i.e. mono, stereo...) */
-//   pwfx->nSamplesPerSec;     /* 44100 or 48000 sample rate */
+//   pwfx->nSamplesPerSec;     
 //   pwfx->nBlockAlign;        /* ANY block size of data */
 //   pwfx->wBitsPerSample;     /* 16 or 32 number of bits per sample of mono data */
 
-void SetAudioBuf(const BYTE *pData, const UINT32 nNumFramesToRead, const WAVEFORMATEX *pwfx, const bool bInt16)
+void SetAudioBuf(const BYTE *pData, const UINT32 nNumFramesToRead, const WAVEFORMATEX *pwfx, const bool bInt16, int nBufferSize)
 {
     int BlockOffset;
 
@@ -120,12 +120,18 @@ void SetAudioBuf(const BYTE *pData, const UINT32 nNumFramesToRead, const WAVEFOR
 	{
         n = 0;
         len = SAMPLE_SIZE_LPB;
+
+		if ( (len * fInputSampleStride) > nNumFramesToRead )
+		{
+			len = (int)( nNumFramesToRead / fInputSampleStride );
+		}
     }
     else 
 	{
         n = SAMPLE_SIZE_LPB - nNumFramesToRead;
         len = nNumFramesToRead;
     }
+
 
 	float	fInputBlock = 0.0f;
 

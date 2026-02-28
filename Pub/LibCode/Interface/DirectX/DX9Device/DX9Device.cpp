@@ -930,8 +930,8 @@ LPGRAPHICSDEVICE	pNewGraphicsDevice;
 		else
 		{	
 			// Clear the backbuffer and the zbuffer
-			pNewGraphicsDevice->Clear( 0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL,0, 1.0f, 0 );
-			pNewGraphicsDevice->Present( NULL, NULL, NULL, NULL );
+//			pNewGraphicsDevice->Clear( 0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL,0, 1.0f, 0 );
+//			pNewGraphicsDevice->Present( NULL, NULL, NULL, NULL );
 		
 			InterfaceSetZBufferLockable( TRUE );
 			hr = pNewGraphicsDevice->Reset( &d3dpp );

@@ -983,9 +983,9 @@ int		i;
 	m_n16BitGamma	= 2;
 	m_bAutoGamma    = true;
 	//m_nFpsLimit			= -1;
-	m_bEnableRating			= true;
+	m_bEnableRating			= false;
     //m_bInstaScan            = false;
-	m_bSongTitleAnims		= true;
+	m_bSongTitleAnims		= false;
 	m_fSongTitleAnimDuration = 1.7f;
 	m_fTimeBetweenRandomSongTitles = -1.0f;
 	m_fTimeBetweenRandomCustomMsgs = -1.0f;
@@ -1546,7 +1546,7 @@ int CPlugin::AllocateMyDX9Stuff()
     //   destroying & recreating the plugin window and DirectX object, and then
     //   calls AllocateMyDX9Stuff afterwards, to get your plugin running again.
 
-    wchar_t buf[32768], title[64];
+    wchar_t buf[32768];
 
     m_nFramesSinceResize = 0;
 
@@ -1774,7 +1774,7 @@ int CPlugin::AllocateMyDX9Stuff()
 				// Load the FALLBACK shaders...
 				if (!RecompilePShader(m_szDefaultWarpPShaderText, &m_fallbackShaders_ps.warp, SHADER_WARP, true, 2))
 				{
-					wchar_t szSM[64];
+//					wchar_t szSM[64];
 					switch(m_nMaxPSVersion_DX9)
 					{
 					case MD2_PS_2_0:
@@ -2417,7 +2417,7 @@ bool CPlugin::AddNoiseTex(const wchar_t* szTexName, int size, int zoom_factor)
     //           2 = smoothed (interp)
     //           4/8/16... = cubic interp.
 
-    wchar_t buf[2048], title[64];
+//    wchar_t buf[2048];//title[64];
 
     // Synthesize noise texture(s)
     LPDIRECT3DTEXTURE9 pNoiseTex = NULL;
@@ -3171,16 +3171,33 @@ void CShaderParams::CacheParams(LPD3DXCONSTANTTABLE pCT, bool bHardErrors)
 
                     //load the texture
                     wchar_t szFilename[MAX_PATH];
+					char	acPresetPath[512];
+					char	acCurrentPresetFile[512];
+					wcstombs(acCurrentPresetFile, g_pCurrentPlugin->m_szCurrentPresetFile, sizeof(acCurrentPresetFile));
+					SysExtractPathFromFilename( acCurrentPresetFile, acPresetPath );
+
                     for (int z=0; z<sizeof(texture_exts)/sizeof(texture_exts[0]); z++)
                     {
-                        swprintf(szFilename, L"%stextures\\%s.%s", g_pCurrentPlugin->m_szMilkdrop2Path, szRootName, texture_exts[z].c_str());
+                        swprintf(szFilename, L"%sData\\textures\\%s.%s", g_pCurrentPlugin->m_szMilkdrop2Path, szRootName, texture_exts[z].c_str());
                         if (GetFileAttributesW(szFilename) == 0xFFFFFFFF)
-                        {
-                            // try again, but in presets dir
-                            swprintf(szFilename, L"%s%s.%s", g_pCurrentPlugin->m_szPresetDir, szRootName, texture_exts[z].c_str());
+                        {						
+	                    wchar_t szPresetPath[MAX_PATH];
+							// Try again but in current dir
+							mbstowcs( szPresetPath, acPresetPath, 256 );
+
+                            swprintf(szFilename, L"%s\\%s.%s", szPresetPath, szRootName, texture_exts[z].c_str());
+
                             if (GetFileAttributesW(szFilename) == 0xFFFFFFFF)
-                              continue;
+							{
+	                            // try again, but in presets dir
+		                        swprintf(szFilename, L"%s%s.%s", g_pCurrentPlugin->m_szPresetDir, szRootName, texture_exts[z].c_str());
+			                    if (GetFileAttributesW(szFilename) == 0xFFFFFFFF)
+								{
+		                              continue;
+								}
+							}
                         }
+
                         D3DXIMAGE_INFO desc;
 
                         // keep trying to load it - if it fails due to memory, evict something and try again.
@@ -3534,7 +3551,7 @@ bool CPlugin::LoadShaderFromMemory( const char* szOrigShaderText, const char* sz
     }
 
     LPD3DXBUFFER pShaderByteCode;
-    wchar_t title[64];
+//    wchar_t title[64];
 
     *ppShader = NULL;
     *ppConstTable = NULL;
@@ -4518,9 +4535,6 @@ void CPlugin::LoadPreset(const wchar_t *szPresetFilename, float fBlendTime)
     {
         const wchar_t *p = wcsrchr(szPresetFilename, L'\\');
         p = (p) ? p+1 : szPresetFilename;
-//TODO REIMPLEMENT        wchar_t buf[1024];
-//TODO REIMPLEMENT		swprintf(buf, wasabiApiLangString(IDS_ERROR_PRESET_NOT_FOUND_X), p);
-//TODO REIMPLEMENT        AddError(buf, 6.0f, ERR_PRESET, true);
         return;
     }
 

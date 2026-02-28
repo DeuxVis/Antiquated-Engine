@@ -270,13 +270,14 @@ HRESULT LoopbackCapture(
             }
             else
             {
+            LONG lBytesToWrite = nNumFramesToRead * nBlockAlign;
+
                 // Saving audio data for visualizer
-                SetAudioBuf(pData, nNumFramesToRead, pwfx, bInt16);
+                SetAudioBuf(pData, nNumFramesToRead, pwfx, bInt16, lBytesToWrite);
                 
                 if (NULL != hFile) 
 				{
                     // Writing the buffer captured to the output .wav file
-                    LONG lBytesToWrite = nNumFramesToRead * nBlockAlign;
 #pragma prefast(suppress: __WARNING_INCORRECT_ANNOTATION, "IAudioCaptureClient::GetBuffer SAL annotation implies a 1-byte buffer")
                     LONG lBytesWritten = mmioWrite(hFile, reinterpret_cast<PCHAR>(pData), lBytesToWrite);
                     if (lBytesToWrite != lBytesWritten) {

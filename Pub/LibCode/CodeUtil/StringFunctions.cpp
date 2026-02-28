@@ -81,6 +81,31 @@ const char*	FindChar( const char* pcRunner, char cChar )
 	return( NULL );
 }
 
+void		SysExtractPathFromFilename( const char* szFilename, char* szPathOut )
+{
+int		pathLen = (int)strlen(szFilename);
+const char* pcRunner = szFilename + pathLen;
+
+	szPathOut[0] = 0;
+	while( pcRunner != szFilename )
+	{
+		pcRunner--;
+		if ( ( *pcRunner == '\\') ||
+			 ( *pcRunner == '/') )
+		{
+			break;
+		}
+	}
+
+	if ( pcRunner != szFilename)
+	{
+		strncpy(szPathOut, szFilename, (pcRunner - szFilename));
+		szPathOut[(int)(pcRunner - szFilename)] = 0;
+	}
+}
+
+
+
 void		SysExtractFilenameFromPath( const char* szPath, char* szFilenameOut )
 {
 int		pathLen = (int)strlen(szPath);
