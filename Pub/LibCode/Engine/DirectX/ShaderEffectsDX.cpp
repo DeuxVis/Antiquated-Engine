@@ -13,6 +13,30 @@ std::map<int, ID3DXEffect*>		mpEffectsMap;
 int		msnNextEffectHandle = 100;
 
 
+ID3DXEffect*		EngineShaderEffectCreateEffectFromFileInMem( const char* szFilename, BYTE* pbMem, int nMemSize )
+{
+	DWORD		dwShaderFlags = 0;
+	ID3DXEffect* pEffect = NULL;
+	LPD3DXBUFFER pCompilationErrors = NULL;
+
+	D3DXCreateEffect( mpEngineDevice, pbMem, nMemSize, NULL, NULL, dwShaderFlags, NULL, &pEffect, &pCompilationErrors );
+	if ( pEffect == NULL )
+	{
+		if (pCompilationErrors)
+        {
+            // Print the error string to debug output
+            const char* errorStr = (const char*)pCompilationErrors->GetBufferPointer();
+			if ( errorStr )
+			{
+	            SysDebugPrint("Shader compilation error in %s:", szFilename );
+				SysDebugPrint("%s", errorStr );
+			}
+            pCompilationErrors->Release();
+        }
+ 	}
+	return( pEffect );
+}
+
 ID3DXEffect*		EngineShaderEffectCreateEffect( const char* szFilename)
 {
 	DWORD		dwShaderFlags = 0;
@@ -36,6 +60,21 @@ ID3DXEffect*		EngineShaderEffectCreateEffect( const char* szFilename)
  	}
 	return( pEffect );
 }
+
+
+int		EngineShaderEffectLoadFromFileInMem(const char* szFilename, BYTE* pbMem, int nMemSize )
+{
+ID3DXEffect* pEffect = EngineShaderEffectCreateEffectFromFileInMem( szFilename, pbMem, nMemSize );
+
+	if ( pEffect)
+	{
+	int		nHandle = msnNextEffectHandle++;
+		mpEffectsMap[nHandle] = pEffect;
+		return( nHandle );
+	}
+	return( NOTFOUND );
+}
+
 
 int		EngineShaderEffectLoad(const char* szFilename)
 {

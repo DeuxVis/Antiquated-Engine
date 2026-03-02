@@ -636,6 +636,20 @@ char*		pcRunner = szURLOut + nNameLen - 1;
 	}
 }
 
+void	SysRemoveFileExtension(char* szFilename, const char* szExtension)
+{
+	// Removes the extension from szFilename if it matches the specified extension (extension should not include the dot)
+	int 	nNameLen = strlen(szFilename);
+	int		nExtLen = strlen(szExtension);
+
+	if ((nNameLen > nExtLen + 1) &&
+		(szFilename[nNameLen - nExtLen - 1] == '.') &&
+		(stricmp(szFilename + (nNameLen - nExtLen), szExtension) == 0))
+	{
+		szFilename[nNameLen - nExtLen - 1] = 0;
+	}
+}
+
 const char*	SysGetFileExtension( const char* szFilename )
 {
 int		nNameLen = strlen( szFilename );
@@ -868,7 +882,7 @@ __int64		u64CurrentTick;
 		u64CurrentTick = (u64CurrentTick * 1000000) / u64ticksPerSecond;
 		return( (u64)( u64CurrentTick ) );
 	}
-	return( 0 );
+	return( GetTickCount64() * 10000 );
 }
 
 //-------------------------------------------------------

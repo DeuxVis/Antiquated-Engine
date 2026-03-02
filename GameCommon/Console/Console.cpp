@@ -131,7 +131,22 @@ uint32	ulCol;
 		{
 			nWidth = pInterface->GetStringWidth(pcNextConsoleLine, mnConsoleFont );
 			ulCol = GetColWithModifiedAlpha( m_aConsoleBuffer[ nLineNum ].uCol, fAlpha );
-			if ( nWidth > nWidthOfBox )
+			if ( nWidth > (nWidthOfBox * 2) )
+			{
+			const char*	pcEndOfFirstLine;
+				nCurrentY -= 24;
+				pcEndOfFirstLine = pInterface->TextLimitWidth( 1, nX, nCurrentY, nWidthOfBox, ulCol, mnConsoleFont, pcNextConsoleLine );
+				nCurrentY += 12;
+				pcEndOfFirstLine = pInterface->TextLimitWidth( 1, nX, nCurrentY, nWidthOfBox, ulCol, mnConsoleFont, pcEndOfFirstLine );
+				nCurrentY += 12;
+				if ( pcEndOfFirstLine )
+				{
+					pcEndOfFirstLine = pInterface->TextLimitWidth( 1, nX, nCurrentY, nWidthOfBox, ulCol, mnConsoleFont, pcEndOfFirstLine );
+				}
+				nCurrentY -= 36;
+				nNumLinesToDisplay -= 2;
+			}
+			else if ( nWidth > nWidthOfBox )
 			{
 			const char*	pcEndOfFirstLine;
 				nCurrentY -= 12;

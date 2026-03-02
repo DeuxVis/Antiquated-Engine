@@ -164,6 +164,7 @@ typedef	void(*fnDrawFunc)( int pass, void* pParamObject );
 
 
 extern int		EngineShaderEffectLoad(const char* szFilename);
+extern int		EngineShaderEffectLoadFromFileInMem(const char* szFilename, BYTE* pbMem, int nMemSize );
 extern void		EngineShaderEffectApply( int handle, fnDrawFunc drawFunc, void* pParamObject );
 extern void		EngineShaderEffectClear( int handle );
 extern void		EngineShaderEffectReload(int handle, const char* szEffectFilename );
