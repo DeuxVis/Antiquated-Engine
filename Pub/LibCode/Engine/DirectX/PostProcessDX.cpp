@@ -45,7 +45,7 @@ float	mfFullBlurAmount = 0.0f;
 int					mhPostProcessGrabScreenTexture = NOTFOUND;
 float	msfPostProcessDefaultBloomValue = 0.5f;
 
-int	EnginePostProcessGenerateQuad( int width, int height, uint32 ulCol )
+int	EngineCreateVertexBufferQuad( int width, int height, uint32 ulCol, const char* szTrackingName )
 {
 int			nVertexBufferHandle;
 ENGINEBUFFERVERTEX		vertices[6];
@@ -107,7 +107,7 @@ int			nLoop;
 	pxVertexBuffer->tv = 1.0f;
 	pxVertexBuffer++;
 
-	nVertexBufferHandle = EngineCreateVertexBuffer( 6, 0, "Postprocess Rect" );
+	nVertexBufferHandle = EngineCreateVertexBuffer( 6, 0, szTrackingName );
 	EngineVertexBufferLock( nVertexBufferHandle, TRUE );
 
 	for ( nLoop = 0; nLoop < 6; nLoop++ )
@@ -118,6 +118,15 @@ int			nLoop;
 	EngineVertexBufferUnlock( nVertexBufferHandle );
 
 	return( nVertexBufferHandle );
+
+
+}
+
+
+int	EnginePostProcessGenerateQuad( int width, int height, uint32 ulCol )
+{
+	return( EngineCreateVertexBufferQuad(width, height, ulCol, "Postprocess Rect" ) );
+
 }
 
 
@@ -162,7 +171,7 @@ void		EnginePostProcessGrabScreen( int hDestTexture )
 	mhPostProcessGrabScreenTexture = hDestTexture;
 }
 
-void	EnginePostProcessSetOthorgonalView( int width, int height )
+void	EngineSetOrthogonalCameraView( int width, int height )
 {
 ENGINEMATRIX Ortho2D;	
 ENGINEMATRIX xMatrix;
@@ -187,7 +196,7 @@ void		EnginePostProcessDoBloomPass( void )
 {
 	// *** This stage copies the renderTarget the game has being rendering to into a smaller buffer with a high-pass filter on it (to pick out just the brightest bits)
 	// Render the back frame to the blur target with a highpass threshold applied
-	EnginePostProcessSetOthorgonalView( mnSmallTargetW, mnSmallTargetH );
+	EngineSetOrthogonalCameraView( mnSmallTargetW, mnSmallTargetH );
 	EngineSetRenderTargetTexture( mhPostProcessSmallRenderTarget, 0, TRUE );       // Render target is now smallRender
 	EngineSetTextureNoDebugOverride( 0, mhPostProcessRenderTarget );
 	EngineSetPixelShader(mpHighPassPixelShader, "HighPass" );
@@ -208,7 +217,7 @@ void		EnginePostProcessDoBloomPass( void )
 		{
 			EngineShaderConstantsSetFloat( mpBlurFullPSConstantTable, "fBlurRange", mfFullBlurAmount );
 		}
-		EnginePostProcessSetOthorgonalView( InterfaceGetWidth(), InterfaceGetHeight() );
+		EngineSetOrthogonalCameraView( InterfaceGetWidth(), InterfaceGetHeight() );
 		EngineSetPixelShader( mpBlurFullPixelShader, NULL );
 		EngineSetTextureNoDebugOverride( 0, mhPostProcessRenderTarget );
 		EngineVertexBufferRender( mhPostProcessOutputVertexBuffer, TRIANGLE_LIST );
@@ -217,7 +226,7 @@ void		EnginePostProcessDoBloomPass( void )
 	else if ( !mboPostProcessShowDebugBlurPassOutput )
 	{
 		// *** This renders the post-process render target onto the backbuffer
-		EnginePostProcessSetOthorgonalView( InterfaceGetWidth(), InterfaceGetHeight() );
+		EngineSetOrthogonalCameraView( InterfaceGetWidth(), InterfaceGetHeight() );
 		EngineSetPixelShader( NULL, NULL );
 		EngineSetTextureNoDebugOverride( 0, mhPostProcessRenderTarget );
 		if ( EngineVertexBufferRender( mhPostProcessOutputVertexBuffer, TRIANGLE_LIST ) == FALSE )
@@ -230,14 +239,14 @@ void		EnginePostProcessDoBloomPass( void )
 
 	// Complete the blur process (Horizontal blur)
 	// *** This stage performs a horizontal blur on the filter target
-	EnginePostProcessSetOthorgonalView( mnSmallTargetW, mnSmallTargetH );
+	EngineSetOrthogonalCameraView( mnSmallTargetW, mnSmallTargetH );
 	EngineSetRenderTargetTexture( mhPostProcessSmallRenderTarget, 0, TRUE );
 	EngineSetTextureNoDebugOverride( 0, mhPostProcessSmallBlurRenderTarget );
 	EngineSetPixelShader(mpBlurHPixelShader, "BlurH" );
 	EngineVertexBufferRender( mhPostProcessSmallQuadVertexBuffer, TRIANGLE_LIST );
 	EngineRestoreRenderTarget();
 
-	EnginePostProcessSetOthorgonalView( InterfaceGetWidth(), InterfaceGetHeight() );
+	EngineSetOrthogonalCameraView( InterfaceGetWidth(), InterfaceGetHeight() );
 	EngineSetPixelShader(mpBasicPixelShader, "Basic");
 	if ( mboPostProcessShowDebugBlurPassOutput )
 	{
@@ -341,7 +350,7 @@ void	EnginePostProcessEndSceneTestMode( void )
 	EngineEnableBlend( FALSE );
 	EngineEnableFog( 0 );
 	EngineEnableTextureAddressClamp( 1 );
-	EnginePostProcessSetOthorgonalView( InterfaceGetWidth(), InterfaceGetHeight() );
+	EngineSetOrthogonalCameraView( InterfaceGetWidth(), InterfaceGetHeight() );
 	EngineSetPixelShader( NULL, NULL );
 	EngineSetTextureNoDebugOverride( 0, mhPostProcessRenderTarget );
 	if ( EngineVertexBufferRender( mhPostProcessOutputVertexBuffer, TRIANGLE_LIST ) == FALSE )
@@ -385,7 +394,7 @@ void		EnginePostProcessEndScene( void )
 			EngineEnableBlend( FALSE );
 			EngineEnableFog( 0 );
 
-			EnginePostProcessSetOthorgonalView( InterfaceGetWidth(), InterfaceGetHeight() );
+			EngineSetOrthogonalCameraView( InterfaceGetWidth(), InterfaceGetHeight() );
 			EngineSetPixelShader(NULL, NULL);
 			EngineSetTextureNoDebugOverride( 0, mhPostProcessRenderTarget );
 			EngineVertexBufferRender( mhPostProcessOutputVertexBuffer, TRIANGLE_LIST );
@@ -420,7 +429,7 @@ void		EnginePostProcessEndScene( void )
 			else
 			{
 				// ** This stage copies the game output directly onto the main back buffer
-				EnginePostProcessSetOthorgonalView( InterfaceGetWidth(), InterfaceGetHeight() );
+				EngineSetOrthogonalCameraView( InterfaceGetWidth(), InterfaceGetHeight() );
 				EngineSetPixelShader(mpBasicPixelShader, "Basic");
 				EngineSetTextureNoDebugOverride( 0, mhPostProcessRenderTarget );
 				if ( EngineVertexBufferRender( mhPostProcessOutputVertexBuffer, TRIANGLE_LIST ) == FALSE )
@@ -434,7 +443,7 @@ void		EnginePostProcessEndScene( void )
 			if ( mhPostProcessGrabScreenTexture != NOTFOUND )
 			{
 				EngineRestoreRenderTarget();  // Render target is now back buffer
-				EnginePostProcessSetOthorgonalView( InterfaceGetWidth(), InterfaceGetHeight() );
+				EngineSetOrthogonalCameraView( InterfaceGetWidth(), InterfaceGetHeight() );
 				EngineSetPixelShader(mpBasicPixelShader, "Basic");
 				EngineEnableBlend( FALSE );
 				EngineSetTextureNoDebugOverride( 0, mhPostProcessGrabScreenTexture );

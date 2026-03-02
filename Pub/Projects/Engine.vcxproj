@@ -511,6 +511,7 @@
     <ClInclude Include="..\LibCode\Engine\DirectX\PostProcessDX.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug OpenGL|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\LibCode\Engine\DirectX\ShaderEffectsDX.h" />
     <ClInclude Include="..\LibCode\Engine\DirectX\ShaderLoaderDX.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug OpenGL|Win32'">true</ExcludedFromBuild>
     </ClInclude>
@@ -642,6 +643,7 @@
     <ClCompile Include="..\LibCode\Engine\DirectX\PostProcessDX.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug OpenGL|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\LibCode\Engine\DirectX\ShaderEffectsDX.cpp" />
     <ClCompile Include="..\LibCode\Engine\DirectX\ShaderLoaderDX.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug OpenGL|Win32'">true</ExcludedFromBuild>
     </ClCompile>

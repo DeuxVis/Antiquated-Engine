@@ -554,39 +554,66 @@ int		SysFileSeek( FILE* pFile, int offset, int mode )
 
 
 //-----------------------------------------------------------------
+//-----------------------------------------------------------------
 void		SysDebugPrint( const char* format,  ... )
 {
 #ifdef _DEBUG
-char            acString[512]; 
+char            acString[2048]; 
 va_list         marker; 
 
     va_start( marker, format );    
-	vsprintf( acString, format, marker ); 
-	if ( mpfnDebugPrintHandler )
-	{
-		mpfnDebugPrintHandler( acString );
-	}
-	else
-	{
-	SYS_LOCALTIME	xTime;
+	vsprintf_s( acString, format, marker ); 
 
-		SysGetLocalTime( &xTime );
-		printf( "[%d-%d]%02d:%02d:%02d [DBG] ", xTime.wDay, xTime.wMonth, xTime.wHour, xTime.wMinute, xTime.wSecond );
-		printf( acString );
-		printf( "\n" );
+	// TODO -  We should seek out any \n in acString, separate the lines out and pass each individually to the debugPrintHandler (which only accepts single line outputs)
+	char* lineStart = acString;
+	char* lineEnd = strchr(lineStart, '\n');
+
+	while (lineEnd != NULL)
+	{
+		*lineEnd = '\0'; // Replace '\n' with null terminator to isolate the line
+		if (mpfnDebugPrintHandler)
+		{
+			mpfnDebugPrintHandler(lineStart);
+		}
+		else
+		{
+			SYS_LOCALTIME	xTime;
+			SysGetLocalTime(&xTime);
+			printf("[%d-%d]%02d:%02d:%02d [DBG] ", xTime.wDay, xTime.wMonth, xTime.wHour, xTime.wMinute, xTime.wSecond);
+			printf("%s\n", lineStart);
+		}
+		lineStart = lineEnd + 1; // Move to the next line
+		lineEnd = strchr(lineStart, '\n');
+	}
+
+	// Print the remaining part of the string if any
+	if (*lineStart != '\0')
+	{
+		if (mpfnDebugPrintHandler)
+		{
+			mpfnDebugPrintHandler(lineStart);
+		}
+		else
+		{
+			SYS_LOCALTIME	xTime;
+			SysGetLocalTime(&xTime);
+			printf("[%d-%d]%02d:%02d:%02d [DBG] ", xTime.wDay, xTime.wMonth, xTime.wHour, xTime.wMinute, xTime.wSecond);
+			printf("%s\n", lineStart);
+		}
 	}
 #else
-	if ( mpfnDebugPrintHandler )
+	if (mpfnDebugPrintHandler)
 	{
 	char            acString[512]; 
 	va_list         marker; 
 
-	    va_start( marker, format );    
+     va_start( marker, format );    
 		vsprintf( acString, format, marker ); 
-		mpfnDebugPrintHandler( acString );
+		mpfnDebugPrintHandler(acString);
 	}
 #endif
 }
+
 void		SysRegisterDebugPrintHandler( fnDebugPrintHandler pDebugPrintHandler )
 {
 	mpfnDebugPrintHandler = pDebugPrintHandler;

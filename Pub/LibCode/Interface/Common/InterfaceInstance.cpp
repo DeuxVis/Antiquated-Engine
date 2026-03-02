@@ -105,7 +105,13 @@ uint32*		pArgs;
 	vsprintf( acString, text, marker );
 	if ( ulCol == 0 ) ulCol = 0xd0d0d0d0;			// Default col is an offwhite 
 
-	return( mpFontSystem->TextLimitWidth( nLayer, nX, nY, acString, ulCol, nFont, nMaxWidth ) );
+	const char*		pcTextReached = mpFontSystem->TextLimitWidth( nLayer, nX, nY, acString, ulCol, nFont, nMaxWidth );
+
+	if ( pcTextReached )
+	{
+		return( text + (pcTextReached-acString) );
+	}
+	return( NULL );
 }
 
 void	InterfaceInstance::Text( int nLayer, int nX, int nY, uint32 ulCol, int nFont, const char* text, ... )

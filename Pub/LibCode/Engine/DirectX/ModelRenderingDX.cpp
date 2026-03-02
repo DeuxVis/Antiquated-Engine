@@ -944,6 +944,14 @@ ENGINEMATRIX	matRotZ;
 }
 
 
+void	EngineApplyMaterialRenderStates()
+{
+	mpEngineDevice->SetRenderState(	D3DRS_AMBIENTMATERIALSOURCE, D3DMCS_MATERIAL );
+	mpEngineDevice->SetRenderState(	D3DRS_EMISSIVEMATERIALSOURCE, D3DMCS_MATERIAL );
+	mpEngineDevice->SetRenderState(	D3DRS_DIFFUSEMATERIALSOURCE, D3DMCS_MATERIAL );
+}
+
+
 /***************************************************************************
  * Function    : RenderDXMesh
  * Params      :

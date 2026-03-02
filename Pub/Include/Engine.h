@@ -155,6 +155,22 @@ extern BOOL		EngineGetMaterialBlendOverride( void );
 
 extern uint32	EngineGetColValue( int R, int G, int B, int A );
 extern void		EngineSetMipBias( float );
+
+//-----------------------------------------------------------------------------
+//  .fx / Shader interface
+//-----------------------------------------------------------------------------
+
+typedef	void(*fnDrawFunc)( int pass, void* pParamObject );
+
+
+extern int		EngineShaderEffectLoad(const char* szFilename);
+extern void		EngineShaderEffectApply( int handle, fnDrawFunc drawFunc, void* pParamObject );
+extern void		EngineShaderEffectClear( int handle );
+extern void		EngineShaderEffectReload(int handle, const char* szEffectFilename );
+extern void		EngineShaderEffectSetConstantFloat(int handle, const char* szContanstName, float fVal);
+// TOOD - matrices, vectors, textures etc..
+extern void		EngineShaderEffectFree( int handle );
+
 //-----------------------------------------------------------------------------
 //  Scene shadows
 //-----------------------------------------------------------------------------
@@ -263,7 +279,7 @@ extern void		EngineCameraUpdate( void );
 extern void		EngineCameraSetMatrix( ENGINEMATRIX* pMat );
 extern void		EngineCameraGetMatrix( ENGINEMATRIX* pMat );
 
-
+extern void		EngineSetOrthogonalCameraView(int nWidth, int nHeight);
 extern void		EngineSetWorldMatrix( const ENGINEMATRIX* pMat );
 extern void		EngineSetViewMatrix( const ENGINEMATRIX* pMat );
 extern void		EngineSetProjectionMatrix( const ENGINEMATRIX* pMat );
@@ -379,6 +395,8 @@ typedef enum
 
 
 extern VERTEX_BUFFER_HANDLE		EngineCreateVertexBuffer( int nMaxVertices, int nFlags, const char* szTrackingName );
+extern VERTEX_BUFFER_HANDLE		EngineCreateVertexBufferQuad( int width, int height, uint32 ulCol, const char* szTrackingName );
+
 extern BOOL		EngineVertexBufferRender( VERTEX_BUFFER_HANDLE, ENGINEPRIMITIVE_TYPE nPrimType );
 extern void		EngineVertexBufferReset( VERTEX_BUFFER_HANDLE );
 extern void		EngineVertexBufferFree( VERTEX_BUFFER_HANDLE );
@@ -451,6 +469,8 @@ extern void		EngineGetMaterial( ENGINEMATERIAL* );
 extern void		EngineSetStandardMaterial( void );
 extern void		EngineSetStandardMaterialWithSpecular( float fPower, float fSpecularBrightness );
 extern void		EngineSetStandardMaterialWithAlpha( float fAlphaVal );
+extern void		EngineApplyMaterialRenderStates();		// This makes the engine use the material rather than the vertex colours (why not both?)
+
 
 //--------------------------------------------------------
 //---------- Mesh LOD Generation

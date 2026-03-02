@@ -260,7 +260,8 @@ private:
 	std::map<std::string, int>		mUserParamExList;
 	std::map<int, fnDragReceiveCallback>		mDragMap;
 	std::map<int, uint32>						mDragMapParams;
-	
+	std::string		mTooltipText;
+
 	uint32			mulID;
 	UIXRECT			mDisplayRect;
 	void*			mpUserObject = NULL;

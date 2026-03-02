@@ -2230,6 +2230,7 @@ void CPlugin::DrawCustomWaves()
                     float t = (pState->m_wave[i].bSpectrum) ? (max_samples - pState->m_wave[i].sep)/(float)nSamples : 1;
                     float mix1 = powf(pState->m_wave[i].smoothing*0.98f, 0.5f);  // lower exponent -> more default smoothing
                     float mix2 = 1-mix1;
+					if ( j0 < 0 ) j0 = 0;
                     // SMOOTHING:
                     tempdata[0][0] = pdata1[j0];
                     tempdata[1][0] = pdata2[j1];

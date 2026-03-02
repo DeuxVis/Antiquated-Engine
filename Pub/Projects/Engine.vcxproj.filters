@@ -574,6 +574,9 @@
     <ClInclude Include="..\LibCode\Engine\DirectX\CascadeShadowMapDX.h">
       <Filter>DirectX</Filter>
     </ClInclude>
+    <ClInclude Include="..\LibCode\Engine\DirectX\ShaderEffectsDX.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\LibCode\Engine\CollisionMaths\dist_pointline.cpp">
@@ -693,6 +696,9 @@
       <Filter>RenderScene</Filter>
     </ClCompile>
     <ClCompile Include="..\LibCode\Engine\DirectX\CascadeShadowMapDX.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LibCode\Engine\DirectX\ShaderEffectsDX.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
   </ItemGroup>

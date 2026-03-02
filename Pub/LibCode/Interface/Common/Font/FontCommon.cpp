@@ -749,7 +749,7 @@ int		nPreBackstepPos;
 	{
 		if ( ulCol != 0 )
 		{
-			InterfaceText( nLayer, nX, nY, szString, ulCol, nFont );
+			Text( nLayer, nX, nY, szString, ulCol, nFont );
 		}
 		return( NULL );
 	}
@@ -770,7 +770,7 @@ int		nPreBackstepPos;
 		/// Nothing will fit.. abort!!
 		if ( ulCol != 0 )
 		{
-			InterfaceText( nLayer, nX, nY, acBuff, ulCol, nFont );
+			Text( nLayer, nX, nY, acBuff, ulCol, nFont );
 		}
 		nLoop = strlen( szString );
 	}
@@ -780,7 +780,7 @@ int		nPreBackstepPos;
 		acBuff[nLoop] = 0;
 		if ( ulCol != 0 )
 		{
-			InterfaceText( nLayer, nX, nY, acBuff, ulCol, nFont );
+			Text( nLayer, nX, nY, acBuff, ulCol, nFont );
 		}
 	}
 	return( szString + nLoop );

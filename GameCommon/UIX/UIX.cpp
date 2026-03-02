@@ -186,11 +186,18 @@ UIXRECT		xRect;
 UIXRECT		xMaxRect;
 bool		bIncludeChildOccupyHeight = IncludeChildrenInOccupyCalc();
 int			baseOccupyHeight;
+UIXRECT		actualRenderRect = GetActualRenderRect( displayRect );
 
 	xUsedRect.y = 0;
 	xUsedRect.h = 0;
 
 	mLastRenderDisplayRect = displayRect;
+
+	if ( UIX::IsMouseHover( actualRenderRect ) == TRUE )
+	{
+		// TODO - If mouseHover long enough, show tooltip text if we have one
+
+	}
 
 	UIX::msSelectionPriority += GetSelectionPriorityLayer();
 
